@@ -100,7 +100,7 @@ def predict():
         else:
             df_nst = pd.DataFrame(data=[], columns=["DateTime"])
         # Send push notification to users
-        #os.system('cd /var/www/rails-apps/smellpgh/staging/current/ ; bundle exec rake firebase_push_notification:send["/topics/SmellReports","Smell Prediction (beta testing)","There may be a smell event in Pittsburgh today - be sure to submit a smell report if you notice it. Tap to learn more!","smell_prediction"] RAILS_ENV=staging >> /home/yenchiah/smell-pittsburgh-analysis-production/py/analysis/data_production/push.log 2>&1')
+        #os.system('cd /var/www/rails-apps/smellpgh/staging/current/ ; bundle exec rake firebase_push_notification:send["/topics/SmellReports","Smell Prediction (beta testing)","There may be a smell event in Pittsburgh today - be sure to submit a smell report if you notice it. Tap to learn more!","smell_prediction"] RAILS_ENV=staging >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/push.log 2>&1')
         log("A push notification was sent to users", logger)
         df_nst = df_nst.append({"DateTime": end_dt}, ignore_index=True)
         df_nst.to_csv(nst_p, index=False)
