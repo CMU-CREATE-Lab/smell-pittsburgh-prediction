@@ -1,0 +1,7 @@
+*.pyc
+*~
+.idea/
+.DS_Store
+**/data*/
+screenlog*
+*.log
