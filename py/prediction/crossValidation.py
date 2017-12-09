@@ -52,7 +52,7 @@ def crossValidation(
 
     # Check if using day time only
     daytime_idx = None
-    hd_start = 6
+    hd_start = 8
     hd_end = 18
     if only_day_time:
         df_hd = df_X["HourOfDay"]
