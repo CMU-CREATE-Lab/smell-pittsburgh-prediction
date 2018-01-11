@@ -39,7 +39,7 @@ def train():
     df_esdr, df_smell = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
 
     # Compute features
-    df_X, df_Y = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=8, b_hr=12, thr=80,
+    df_X, df_Y = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=7, b_hr=14, thr=50,
         add_inter=True, add_roll=True, add_diff=True, logger=logger, out_p_mean=p+"mean.csv", out_p_std=p+"std.csv")
 
     # Select features
@@ -60,7 +60,7 @@ def predict():
     log("--------------------------------  Predict  -------------------------------", logger)
 
     # Get data for previous b_hr hours
-    b_hr = 12
+    b_hr = 14
     end_dt = datetime.now()
     start_dt = end_dt - timedelta(hours=b_hr+1)
     log("Get data from " + str(start_dt) + " to " + str(end_dt), logger)
@@ -71,7 +71,7 @@ def predict():
         return
     
     # Compute features
-    df_X, _ = computeFeatures(df_esdr=df_esdr, f_hr=8, b_hr=12, thr=80,
+    df_X, _ = computeFeatures(df_esdr=df_esdr, f_hr=7, b_hr=14, thr=50,
         add_inter=True, add_roll=True, add_diff=True, logger=logger, in_p_mean=p+"mean.csv", in_p_std=p+"std.csv")
     if len(df_X) != 1:
         log("ERROR: Length of X is not 1", logger)
