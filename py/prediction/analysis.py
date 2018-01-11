@@ -32,7 +32,7 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2017, 12, 7, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 1, 11, 0))
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -41,7 +41,7 @@ def main(argv):
         #computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
         #    is_regr=is_regr, f_hr=4, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
         computeFeatures(in_p=[p+"esdr.csv", p+"smell.csv"], out_p=[p+"X.csv", p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=12, thr=80, add_inter=True, add_roll=True, add_diff=True)
+            is_regr=is_regr, f_hr=6, b_hr=12, thr=60, add_inter=True, add_roll=True, add_diff=True)
 
     # Plot features
     if plot_features:
