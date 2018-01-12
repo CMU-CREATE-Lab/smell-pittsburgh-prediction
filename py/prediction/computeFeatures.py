@@ -108,29 +108,29 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     df_all = []
 
     # Add interaction of variables
-    if add_inter:
-        df_inte = pd.DataFrame()
-        L = len(df.columns)
-        for i in range(0, L):
-            for j in range(0, L):
-                if j > i:
-                    c1 = df.columns[i]
-                    c2 = df.columns[j]
-                    c = "interaction..." + c1 + "...and..." + c2
-                    df_inte[c] = df[c1] * df[c2]
-        df_all.append(df_inte)
+    #if add_inter:
+    #    df_inte = pd.DataFrame()
+    #    L = len(df.columns)
+    #    for i in range(0, L):
+    #        for j in range(0, L):
+    #            if j > i:
+    #                c1 = df.columns[i]
+    #                c2 = df.columns[j]
+    #                c = "interaction..." + c1 + "...and..." + c2
+    #                df_inte[c] = df[c1] * df[c2]
+    #    df_all.append(df_inte)
 
     # Extract time series features
     df_diff = df.diff()
     for b_hr in range(1, b_hr + 1):
         # Add the previous readings
         df_previous = df.shift(b_hr)
-        df_previous.columns += "...previous." + str(b_hr) + ".hour"
+        df_previous.columns += ".previous." + str(b_hr) + ".hour"
         df_all.append(df_previous)
         if add_roll:
             # Add differential feature
             df_previous_diff = df_diff.shift(b_hr - 1).copy(deep=True)
-            df_previous_diff.columns += "...diff.of.previous." + str(b_hr-1) + ".and." + str(b_hr) + ".hour"
+            df_previous_diff.columns += ".diff.of.previous." + str(b_hr-1) + ".and." + str(b_hr) + ".hour"
             df_all.append(df_previous_diff)
         if add_diff:
             # Perform rolling mean and max (data is already resampled by hour)
@@ -138,8 +138,8 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
             df_roll = df.rolling(b_hr, min_periods=1)
             df_roll_max = df_roll.max()
             df_roll_mean = df_roll.mean()
-            df_roll_max.columns += "...max.of.last." + str(b_hr) + ".hours"
-            df_roll_mean.columns += "...mean.of.last." + str(b_hr) + ".hours"
+            df_roll_max.columns += ".max.of.last." + str(b_hr) + ".hours"
+            df_roll_mean.columns += ".mean.of.last." + str(b_hr) + ".hours"
             df_all.append(df_roll_max)
             df_all.append(df_roll_mean)
     
@@ -148,6 +148,19 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     df_feat = df
     for d in df_all:
         df_feat = df_feat.join(d)
+    
+    # Add interaction of variables
+    if add_inter:
+        df_inte = pd.DataFrame()
+        L = len(df_feat.columns)
+        for i in range(0, L):
+            for j in range(0, L):
+                if j > i:
+                    c1 = df_feat.columns[i]
+                    c2 = df_feat.columns[j]
+                    c = "interaction..." + c1 + "...and..." + c2
+                    df_inte[c] = df_feat[c1] * df_feat[c2]
+        df_feat = df_feat.join(df_inte)
     
     # Delete the first b_hr rows
     df_feat = df_feat.iloc[b_hr:]

@@ -25,8 +25,8 @@ def crossValidation(
     only_day_time=False, # only use daytime data for training or not
     sequence_length=8, # length of data points (hours) to look back (only work for CRNN)
     num_folds=66, # number of folds for validation
-    skip_folds=45, # skip first n folds (not enough data for training) 36, 45
-    augment_data=True, # augment data or not
+    skip_folds=48, # skip first n folds (not enough data for training) 48
+    augment_data=False, # augment data or not
     select_feat=True, # select features or not
     logger=None):
 
@@ -82,13 +82,13 @@ def crossValidation(
     # Validation folds
     # Notice that this is time-series prediction, we cannot use traditional cross-validation folds
     if only_day_time:
-        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=3000)
+        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=4000)
     else:
-        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=6000)
+        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=8000)
 
     # For pretraining the autoencoder, we always want to use all data
     if "ANCNN" in method:
-        tscv_pretrain = TimeSeriesSplit(n_splits=num_folds, max_train_size=6000)
+        tscv_pretrain = TimeSeriesSplit(n_splits=num_folds, max_train_size=8000)
         tscv_pretrain_split = list(tscv_pretrain.split(X_pretrain))
 
     # Perform cross validation
@@ -267,8 +267,10 @@ def crossValidation(
             mse = metric["test"]["mse"]
             Y_true = test_all["Y"]
             Y_pred = test_all["Y_pred"]
-            predictionPlot(method, r2, mse, Y_true, Y_pred, out_p)
-            residualPlot(method, r2, mse, Y_true, Y_pred, out_p)
+            r2_dt = metric_dt["test"]["r2"]
+            mse_dt = metric_dt["test"]["mse"]
+            predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
+            residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
             timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te)
         else:
             out_p = out_p_root + "result/classification/"
@@ -357,6 +359,8 @@ def prPlot(method, Y_true, Y_score, out_p):
 
 def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
     # Time vs Prediction (or True)
+    Y_true = np.sum(Y_true, axis=1)
+    Y_pred = np.sum(Y_pred, axis=1)
     fig = plt.figure(figsize=(200, 8), dpi=150)
     plt.plot(range(0, len(Y_true)), Y_true, "-o", alpha=0.8, markersize=3, color=(0,0,1), lw=1)
     plt.plot(range(0, len(Y_pred)), Y_pred, "-o", alpha=0.8, markersize=3, color=(1,0,0), lw=1)
@@ -365,7 +369,7 @@ def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
             plt.axvspan(i-0.5, i+0.5, facecolor="0.2", alpha=0.5)
     plt.xlabel("Time")
     plt.ylabel("Smell value (blue=true, red=pred)")
-    plt.title("Method=" + method + ", r2=" + str(r2) + ", mse=" + str(mse), fontsize=18)
+    plt.title("Method=" + method, fontsize=18)
     Y = list(Y_true) + list(Y_pred)
     plt.xlim(-1, len(Y_true)+1)
     plt.ylim(np.amin(Y)-0.5, np.amax(Y)+0.5)
@@ -373,7 +377,7 @@ def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_time_true_pred.png")
 
-def residualPlot(method, r2, mse, Y_true, Y_pred, out_p):
+def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     # Histogram of Residual
     fig = plt.figure(figsize=(8, 8), dpi=150)
     res = Y_true - Y_pred
@@ -385,6 +389,17 @@ def residualPlot(method, r2, mse, Y_true, Y_pred, out_p):
     plt.grid(True)
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_res_hist.png")
+    # Histogram of Residual (daytime)
+    fig = plt.figure(figsize=(8, 8), dpi=150)
+    res_dt = res[dt_idx]
+    plt.hist(res_dt, bins=100)
+    plt.xlabel("Residual")
+    plt.ylabel("Frequency")
+    plt.title("[Daytime] Method=" + method + ", r2=" + str(r2_dt) + ", mse=" + str(mse_dt), fontsize=18)
+    plt.xlim(np.amin(res_dt)-1, np.amax(res_dt)+1)
+    plt.grid(True)
+    plt.tight_layout()
+    fig.savefig(out_p + method + "_regr_res_hist_dt.png")
     # True vs Residual
     fig = plt.figure(figsize=(8, 8), dpi=150)
     plt.plot(Y_true, res, "o", alpha=0.8, markersize=5, color=(0,0,1))
@@ -396,8 +411,20 @@ def residualPlot(method, r2, mse, Y_true, Y_pred, out_p):
     plt.grid(True)
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_res_true.png")
+    # True vs Residual (daytime)
+    fig = plt.figure(figsize=(8, 8), dpi=150)
+    Y_true_dt = Y_true[dt_idx]
+    plt.plot(Y_true_dt, res_dt, "o", alpha=0.8, markersize=5, color=(0,0,1))
+    plt.xlabel("True smell value")
+    plt.ylabel("Residual")
+    plt.title("[Daytime] Method=" + method + ", r2=" + str(r2_dt) + ", mse=" + str(mse_dt), fontsize=18)
+    plt.xlim(np.amin(Y_true_dt)-0.5, np.amax(Y_true_dt)+0.5)
+    plt.ylim(np.amin(res_dt)-0.5, np.amax(res_dt)+0.5)
+    plt.grid(True)
+    plt.tight_layout()
+    fig.savefig(out_p + method + "_regr_res_true_dt.png")
 
-def predictionPlot(method, r2, mse, Y_true, Y_pred, out_p):
+def predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     # True vs Prediction
     fig = plt.figure(figsize=(8, 8), dpi=150)
     plt.plot(Y_true, Y_pred, "o", alpha=0.8, markersize=5, color=(0,0,1))
@@ -409,3 +436,16 @@ def predictionPlot(method, r2, mse, Y_true, Y_pred, out_p):
     plt.grid(True)
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_r2.png")
+    # True vs Prediction (daytime)
+    fig = plt.figure(figsize=(8, 8), dpi=150)
+    Y_true_dt = Y_true[dt_idx]
+    Y_pred_dt = Y_pred[dt_idx]
+    plt.plot(Y_true_dt, Y_pred_dt, "o", alpha=0.8, markersize=5, color=(0,0,1))
+    plt.xlabel("True smell value")
+    plt.ylabel("Predicted smell value")
+    plt.title("[Daytime] Method=" + method + ", r2=" + str(r2_dt) + ", mse=" + str(mse_dt), fontsize=18)
+    plt.xlim(np.amin(Y_true_dt)-0.5, np.amax(Y_true_dt)+0.5)
+    plt.ylim(np.amin(Y_pred_dt)-0.5, np.amax(Y_pred_dt)+0.5)
+    plt.grid(True)
+    plt.tight_layout()
+    fig.savefig(out_p + method + "_regr_r2_dt.png")

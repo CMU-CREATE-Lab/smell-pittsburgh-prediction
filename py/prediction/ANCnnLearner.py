@@ -26,7 +26,7 @@ class ANCnnLearner(object):
             lr_schedule_gamma_pre=0.5, # the decaying factor for learning rate (pre-train)
             batch_size=64, # size for each batch
             num_epochs=40, # number of epochs
-            init_lr=0.0001, # initial learning rate
+            init_lr=0.0002, # initial learning rate
             l2_regu_weight_decay=0.0001, # loss function regularization
             lr_schedule_step_size=10, # number of epochs for decaying learning rate
             lr_schedule_gamma=0.5, # the decaying factor for learning rate
@@ -238,6 +238,8 @@ class ANCnnLearner(object):
             scheduler.step() # adjust learning rate
             # Loop through all batches
             for x, y in zip(X, Y):
+                print x.shape
+                print y.shape
                 x = torch.FloatTensor(x)
                 if self.is_regr:
                     y = torch.FloatTensor(y)
@@ -470,8 +472,8 @@ class ANCNN(nn.Module):
 
         # Fully Connected
         hidden_fc = 256
-        hidden2_fc = 128
-        hidden3_fc = 64
+        hidden2_fc = 256
+        hidden3_fc = 256
         input_fc = self.fullyConnectedLayerInputSize()
         self.fc = FC(input_fc, output_size, hidden_fc, hidden2_fc, hidden3_fc)
 
