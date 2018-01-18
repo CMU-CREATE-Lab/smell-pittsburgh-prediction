@@ -438,6 +438,29 @@ def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     plt.grid(True)
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_res_true_dt.png")
+    # Pred vs Residual
+    fig = plt.figure(figsize=(8, 8), dpi=150)
+    plt.plot(Y_pred, res, "o", alpha=0.8, markersize=5, color=(0,0,1))
+    plt.xlabel("Predicted smell value")
+    plt.ylabel("Residual")
+    plt.title("Method=" + method + ", r2=" + str(r2) + ", mse=" + str(mse), fontsize=18)
+    plt.xlim(np.amin(Y_pred)-0.5, np.amax(Y_pred)+0.5)
+    plt.ylim(np.amin(res)-0.5, np.amax(res)+0.5)
+    plt.grid(True)
+    plt.tight_layout()
+    fig.savefig(out_p + method + "_regr_res_pred.png")
+    # Pred vs Residual (daytime)
+    fig = plt.figure(figsize=(8, 8), dpi=150)
+    Y_pred_dt = Y_pred[dt_idx]
+    plt.plot(Y_pred_dt, res_dt, "o", alpha=0.8, markersize=5, color=(0,0,1))
+    plt.xlabel("Predicted smell value")
+    plt.ylabel("Residual")
+    plt.title("[Daytime] Method=" + method + ", r2=" + str(r2_dt) + ", mse=" + str(mse_dt), fontsize=18)
+    plt.xlim(np.amin(Y_pred_dt)-0.5, np.amax(Y_pred_dt)+0.5)
+    plt.ylim(np.amin(res_dt)-0.5, np.amax(res_dt)+0.5)
+    plt.grid(True)
+    plt.tight_layout()
+    fig.savefig(out_p + method + "_regr_res_pred_dt.png")
 
 def predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     # True vs Prediction

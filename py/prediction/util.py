@@ -220,6 +220,37 @@ def computeTimeSeriesBatches(X, Y, sequence_length, index_filter=None):
     data_Y = np.array(data_Y)
     return data_X, data_Y
 
+# Compute a custom metric for evaluating the regression function
+# For each smoke event, the prediction only need to hit the event at some time point
+# (for an event from 9am to 11am, good enough if there are at least one predicted event within it)
+# Denote T the 1D signal of the true data
+# Denote P the 1D signal of the predicted data
+# 1. Detect the time intervals in T and P that has values larger than a threshold "thr"
+# 2. Merge intervals that are with "h" hours away from each other
+#    ... e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5]
+# 3. Compute the precision, recall, and f-score for each interval ...
+#    ... true positive: for each t in T, if it overlaps with a least one p in P
+#    ... false positive: for each p in P, if there is no t in T that overlaps with it
+#    ... false negative: for each t in T, if there is no p in P that overlaps with it
+def evalEventDetection(Y_true, Y_pred, thr=40, h=1):
+    # Copy
+    Y_true, Y_pred = deepcopy(Y_true), deepcopy(Y_pred)
+
+    # Convert Y_true and Y_pred into binary based on thr
+    Y_true, Y_pred = Y_true>=thr, Y_pred>=thr
+
+    # Convert Y_true and Y_pred into intervals
+    Y_true_iv, Y_pred_iv = [], []
+
+    return False    
+
+# Convert a binary array with False and True to intervals
+# input = [False, True, True, False, True, False]
+# output = [[1,2], [4,4]]
+def binary2Interval(Y):
+    
+    return False    
+
 # Compute the evaluation result of regression or classification Y=F(X)
 # INPUTS:
 # - Y_true: the true values of Y

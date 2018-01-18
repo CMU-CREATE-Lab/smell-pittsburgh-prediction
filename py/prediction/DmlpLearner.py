@@ -14,7 +14,7 @@ from torch.nn.utils import clip_grad_norm
 class DmlpLearner(object):
     def __init__(self,
             test=None, # the testing set for evaluating performance after each epoch
-            batch_size=128, # size for each batch
+            batch_size=64, # size for each batch
             num_epochs=30, # number of epochs (for classification)
             #num_epochs=30, # number of epochs (for regression)
             init_lr=0.001, # initial learning rate (for classification)
@@ -228,7 +228,7 @@ class DMLP(nn.Module):
        
         # Fully Connected
         hidden_size = 128
-        hidden_size_2 = 128
+        hidden_size_2 = 64
         self.fc = nn.Sequential(
             nn.SELU(),
             nn.Linear(input_size, hidden_size, bias=False),

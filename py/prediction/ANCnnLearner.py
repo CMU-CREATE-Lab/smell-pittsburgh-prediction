@@ -418,12 +418,14 @@ class CnnEncoder(nn.Module):
 
 # Convolution Neural Network (decoder)
 class CnnDecoder(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size, hidden_size_2):
+    def __init__(self, input_size, output_size, hidden_size, hidden_size_2, hidden_size_3):
         super(CnnDecoder, self).__init__()
         
         self.conv = nn.Sequential(
             nn.SELU(),
-            nn.ConvTranspose2d(output_size, hidden_size_2, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
+            nn.ConvTranspose2d(output_size, hidden_size_3, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
+            nn.SELU(),
+            nn.ConvTranspose2d(hidden_size_3, hidden_size_2, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
             nn.SELU(),
             nn.ConvTranspose2d(hidden_size_2, hidden_size, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
             nn.SELU(),
@@ -459,13 +461,13 @@ class ANCNN(nn.Module):
 
         # CNN Encoder (Feature Extraction)
         hidden_cnn = 84
-        hidden2_cnn = 84
-        hidden3_cnn = 168
-        output_cnn = 168
+        hidden2_cnn = 168
+        hidden3_cnn = 336
+        output_cnn = 672
         self.encoder = CnnEncoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn, hidden3_cnn)
        
         # CNN Decoder
-        self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
+        self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn, hidden3_cnn)
 
         # Fully Connected
         hidden_fc = 128
