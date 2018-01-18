@@ -15,6 +15,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.multioutput import MultiOutputRegressor 
+from sklearn.linear_model import Lasso
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -62,11 +63,14 @@ def trainModel(
         elif method == "EN":
             model = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000)
             model = MultiOutputRegressor(model, n_jobs=-1)
+        elif method == "LA":
+            model = Lasso(alpha=0.1, max_iter=1000)
+            model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "GP":
             model = GaussianProcessRegressor(n_restarts_optimizer=10)
             model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "MLP":
-            model = MLPRegressor(hidden_layer_sizes=512)
+            model = MLPRegressor(hidden_layer_sizes=128)
         elif method == "KN":
             model = KNeighborsRegressor(n_neighbors=10, weights="uniform")
         elif method == "DMLP":
@@ -88,7 +92,7 @@ def trainModel(
         elif method == "GP":
             model = GaussianProcessClassifier(max_iter_predict=1000)
         elif method == "MLP":
-            model = MLPClassifier(hidden_layer_sizes=512)
+            model = MLPClassifier(hidden_layer_sizes=128)
         elif method == "KN":
             model = KNeighborsClassifier(n_neighbors=10, weights="uniform")
         elif method == "LG":
@@ -118,9 +122,9 @@ def trainModel(
     
     # Fit data to the model
     if method == "ANCNN":
-        model.fit(X, Y, copy.deepcopy(train["X_pretrain"]))
+        model.fit(X, np.squeeze(Y), copy.deepcopy(train["X_pretrain"]))
     else:
-        model.fit(X, Y)
+        model.fit(X, np.squeeze(Y))
 
     # Save and return model
     if out_p is not None:

@@ -23,11 +23,11 @@ def crossValidation(
     is_regr=False, # regression or classification,
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
-    sequence_length=8, # length of data points (hours) to look back (only work for CRNN)
+    sequence_length=4, # length of data points (hours) to look back (only work for CRNN)
     num_folds=66, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
-    select_feat=True, # select features or not
+    select_feat=False, # select features or not
     logger=None):
 
     log("================================================================================", logger)
@@ -376,6 +376,21 @@ def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
     plt.grid(True)
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_time_true_pred.png")
+    # Time vs Residuals (True - Pred)
+    res = Y_true - Y_pred
+    fig = plt.figure(figsize=(200, 8), dpi=150)
+    plt.plot(range(0, len(res)), res, "-o", alpha=0.8, markersize=3, color=(0,0,0), lw=1)
+    for i in range(0, len(dt_idx)):
+        if dt_idx[i] == False:
+            plt.axvspan(i-0.5, i+0.5, facecolor="0.2", alpha=0.5)
+    plt.xlabel("Time")
+    plt.ylabel("Residuals")
+    plt.title("Method=" + method, fontsize=18)
+    plt.xlim(-1, len(res)+1)
+    plt.ylim(np.amin(res)-0.5, np.amax(res)+0.5)
+    plt.grid(True)
+    plt.tight_layout()
+    fig.savefig(out_p + method + "_regr_time_res.png")
 
 def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     # Histogram of Residual

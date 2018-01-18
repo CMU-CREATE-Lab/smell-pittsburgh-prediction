@@ -75,7 +75,7 @@ def selectFeatures(
 
     # Select features
     log("Perform feature selection...", logger)
-    model.fit(df_X_cp, df_Y_cp)
+    model.fit(df_X_cp, df_Y_cp.squeeze())
     selected_cols = df_X.columns[model.get_support()]
     df_X = df_X[selected_cols]
     log("Select " + str(len(selected_cols)) + " features...", logger)
@@ -86,7 +86,7 @@ def selectFeatures(
         m = ExtraTreesRegressor(n_estimators=200, random_state=0, n_jobs=-1)
     else:
         m = ExtraTreesClassifier(n_estimators=200, random_state=0, n_jobs=-1)
-    m.fit(df_X,df_Y)
+    m.fit(df_X,df_Y.squeeze())
     feat_names = df_X.columns.copy()
     feat_ims = np.array(m.feature_importances_)
     sorted_ims_idx = np.argsort(feat_ims)
