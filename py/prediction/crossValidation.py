@@ -23,9 +23,9 @@ def crossValidation(
     is_regr=False, # regression or classification,
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
-    sequence_length=4, # length of data points (hours) to look back (only work for CRNN)
+    sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
     num_folds=66, # number of folds for validation
-    skip_folds=48, # skip first n folds (not enough data for training) 48
+    skip_folds=65, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # select features or not
     logger=None):
@@ -265,12 +265,16 @@ def crossValidation(
             checkAndCreateDir(out_p)
             r2 = metric["test"]["r2"]
             mse = metric["test"]["mse"]
+            prf = metric["test"]["prf"]
             Y_true = test_all["Y"]
             Y_pred = test_all["Y_pred"]
             r2_dt = metric_dt["test"]["r2"]
             mse_dt = metric_dt["test"]["mse"]
+            log("Print prediction plots...", logger)
             predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
+            log("Print residual plots...", logger)
             residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
+            log("Print time series plots...", logger)
             timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te)
         else:
             out_p = out_p_root + "result/classification/"
@@ -279,7 +283,9 @@ def crossValidation(
             metric["test"]["cm"].to_csv(out_p + method + "_clas_cm.csv")
             Y_true = test_all["Y"]
             Y_score = test_all["Y_score"]
+            log("Print prediction recall plots...", logger)
             prPlot(method, Y_true, Y_score, out_p)
+            log("Print roc curve plots...", logger)
             rocPlot(method, Y_true, Y_score, out_p)
 
 def rocPlot(method, Y_true, Y_score, out_p):
@@ -358,9 +364,10 @@ def prPlot(method, Y_true, Y_score, out_p):
     fig.savefig(out_p + method + "_clas_r_thr.png")
 
 def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
+    if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
+    if len(Y_pred.shape) > 1: Y_pred = np.sum(Y_pred, axis=1)
+    res = Y_true - Y_pred
     # Time vs Prediction (or True)
-    Y_true = np.sum(Y_true, axis=1)
-    Y_pred = np.sum(Y_pred, axis=1)
     fig = plt.figure(figsize=(200, 8), dpi=150)
     plt.plot(range(0, len(Y_true)), Y_true, "-o", alpha=0.8, markersize=3, color=(0,0,1), lw=1)
     plt.plot(range(0, len(Y_pred)), Y_pred, "-o", alpha=0.8, markersize=3, color=(1,0,0), lw=1)
@@ -377,7 +384,6 @@ def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_time_true_pred.png")
     # Time vs Residuals (True - Pred)
-    res = Y_true - Y_pred
     fig = plt.figure(figsize=(200, 8), dpi=150)
     plt.plot(range(0, len(res)), res, "-o", alpha=0.8, markersize=3, color=(0,0,0), lw=1)
     for i in range(0, len(dt_idx)):
@@ -393,9 +399,11 @@ def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
     fig.savefig(out_p + method + "_regr_time_res.png")
 
 def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
+    if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
+    if len(Y_pred.shape) > 1: Y_pred = np.sum(Y_pred, axis=1)
+    res = Y_true - Y_pred
     # Histogram of Residual
     fig = plt.figure(figsize=(8, 8), dpi=150)
-    res = Y_true - Y_pred
     plt.hist(res, bins=100)
     plt.xlabel("Residual")
     plt.ylabel("Frequency")
@@ -463,6 +471,8 @@ def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     fig.savefig(out_p + method + "_regr_res_pred_dt.png")
 
 def predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
+    if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
+    if len(Y_pred.shape) > 1: Y_pred = np.sum(Y_pred, axis=1)
     # True vs Prediction
     fig = plt.figure(figsize=(8, 8), dpi=150)
     plt.plot(Y_true, Y_pred, "o", alpha=0.8, markersize=5, color=(0,0,1))

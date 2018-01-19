@@ -11,7 +11,9 @@ from sklearn.feature_selection import RFE
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.svm import SVC
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import ElasticNet
+from sklearn.multioutput import MultiOutputRegressor
 
 # Perform feature selection (or variable selection)
 # Notice that we are not going to use dimension reduction like PCA
@@ -21,7 +23,7 @@ def selectFeatures(
     df_X, # dataset containing features (in pandas dataframe format)
     df_Y, # dataset containing label (in pandas dataframe format)
     is_regr=False, # regression or classification
-    method="RFE_ET", # method for selecting features
+    method="RFE", # method for selecting features
     balance=False, # oversample or undersample the original features or not
     out_p=None, # the path for saving features
     logger=None):
@@ -36,11 +38,13 @@ def selectFeatures(
             model = SelectFpr(score_func=f_regression, alpha=0.01)
         elif method == "fdr":
             model = SelectFdr(score_func=f_regression, alpha=0.01)
-        elif method == "ET":
-            model = SelectFromModel(ExtraTreesRegressor(n_estimators=100, random_state=0, n_jobs=-1), threshold="15*mean")
-        elif method == "RFE_ET":
-            base = ExtraTreesRegressor(n_estimators=100, random_state=0, n_jobs=-1)
-            model = RFE(base, step=2000, verbose=1, n_features_to_select=30)
+        elif method == "MD":
+            model = SelectFromModel(Lasso(alpha=0.1, max_iter=1000), threshold="15*mean")
+        elif method == "RFE":
+            base = Lasso(alpha=0.1, max_iter=1000)
+            #base = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000)
+            #base = MultiOutputRegressor(base, n_jobs=-1)
+            model = RFE(base, step=1000, verbose=1, n_features_to_select=256)
     else:
         if method == "percent":
             model = SelectPercentile(score_func=f_classif, percentile=10)
@@ -48,9 +52,9 @@ def selectFeatures(
             model = SelectFpr(score_func=f_classif, alpha=0.01)
         elif method == "fdr":
             model = SelectFdr(score_func=f_classif, alpha=0.01)
-        elif method == "ET":
+        elif method == "MD":
             model = SelectFromModel(ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1), threshold="4.7*mean")
-        elif method == "RFE_ET":
+        elif method == "RFE":
             base = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1)
             model = RFE(base, step=1000, verbose=1, n_features_to_select=20)
 

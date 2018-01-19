@@ -22,13 +22,13 @@ class ANCnnLearner(object):
             num_epochs_pre=20, # number of epochs (pre-train)
             init_lr_pre=0.001, # initial learning rate (pre-train)
             l2_regu_weight_decay_pre=0.0001, # loss function regularization (pre-train)
-            lr_schedule_step_size_pre=2, # number of epochs for decaying learning rate (pre-train)
+            lr_schedule_step_size_pre=5, # number of epochs for decaying learning rate (pre-train)
             lr_schedule_gamma_pre=0.5, # the decaying factor for learning rate (pre-train)
             batch_size=64, # size for each batch
-            num_epochs=60, # number of epochs
+            num_epochs=30, # number of epochs
             init_lr=0.0008, # initial learning rate
             l2_regu_weight_decay=0.0001, # loss function regularization
-            lr_schedule_step_size=20, # number of epochs for decaying learning rate
+            lr_schedule_step_size=5, # number of epochs for decaying learning rate
             lr_schedule_gamma=0.5, # the decaying factor for learning rate
             use_class_weights=False, # use class weights when computing the loss
             is_regr=False,  # regression or classification
@@ -163,10 +163,10 @@ class ANCnnLearner(object):
                 loss_all.append(loss.data[0]) # save loss for each step
             # Print the result for the entire epoch
             T_tr, P_tr = self.train["X"], self.predict(self.train["X_corrupt"], pre_train=True)
-            m_train = computeMetric(T_tr, P_tr, True, flatten=True, simple=True, round_to_decimal=2)
+            m_train = computeMetric(T_tr, P_tr, True, flatten=True, simple=True, round_to_decimal=2, no_prf=True)
             if self.test is not None:
                 T_te, P_te = self.test["X"], self.predict(self.test["X"], pre_train=True)
-                m_test = computeMetric(T_te, P_te, True, flatten=True, simple=True, round_to_decimal=2)
+                m_test = computeMetric(T_te, P_te, True, flatten=True, simple=True, round_to_decimal=2, no_prf=True)
             lr_now = optimizer.state_dict()["param_groups"][0]["lr"]
             avg_loss = np.mean(loss_all)
             if self.test is not None:
@@ -400,7 +400,7 @@ class ResNet(nn.Module):
 
 # Convolution Neural Network (encoder)
 class CnnEncoder(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size, hidden_size_2, hidden_size_3):
+    def __init__(self, input_size, output_size, hidden_size, hidden_size_2):
         super(CnnEncoder, self).__init__()
 
         self.conv = nn.Sequential(
@@ -409,23 +409,19 @@ class CnnEncoder(nn.Module):
             nn.SELU(),
             nn.Conv2d(hidden_size, hidden_size_2, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False),
             nn.SELU(),
-            nn.Conv2d(hidden_size_2, hidden_size_3, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False),
-            nn.SELU(),
-            nn.Conv2d(hidden_size_3, output_size, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False))
+            nn.Conv2d(hidden_size_2, output_size, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False))
 
     def forward(self, x):
         return self.conv(x)
 
 # Convolution Neural Network (decoder)
 class CnnDecoder(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size, hidden_size_2, hidden_size_3):
+    def __init__(self, input_size, output_size, hidden_size, hidden_size_2):
         super(CnnDecoder, self).__init__()
         
         self.conv = nn.Sequential(
             nn.SELU(),
-            nn.ConvTranspose2d(output_size, hidden_size_3, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
-            nn.SELU(),
-            nn.ConvTranspose2d(hidden_size_3, hidden_size_2, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
+            nn.ConvTranspose2d(output_size, hidden_size_2, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
             nn.SELU(),
             nn.ConvTranspose2d(hidden_size_2, hidden_size, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
             nn.SELU(),
@@ -436,14 +432,16 @@ class CnnDecoder(nn.Module):
 
 # Fully Connnected Block
 class FC(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size):
+    def __init__(self, input_size, output_size, hidden_size, hidden_size_2):
         super(FC, self).__init__()
         
         self.fc = nn.Sequential(
             nn.SELU(),
             nn.Linear(input_size, hidden_size, bias=False),
             nn.SELU(),
-            nn.Linear(hidden_size, output_size, bias=False))
+            nn.Linear(hidden_size, hidden_size_2, bias=False),
+            nn.SELU(),
+            nn.Linear(hidden_size_2, output_size, bias=False))
 
     def forward(self, x):
         f = self.fc(x)
@@ -460,19 +458,19 @@ class ANCNN(nn.Module):
         self.channel_size = channel_size
 
         # CNN Encoder (Feature Extraction)
-        hidden_cnn = 84
-        hidden2_cnn = 168
-        hidden3_cnn = 336
-        output_cnn = 672
-        self.encoder = CnnEncoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn, hidden3_cnn)
+        hidden_cnn = 64
+        hidden2_cnn = 128
+        output_cnn = 256
+        self.encoder = CnnEncoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
        
         # CNN Decoder
-        self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn, hidden3_cnn)
+        self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
 
         # Fully Connected
         hidden_fc = 128
+        hidden_fc_2 = 64
         input_fc = self.fullyConnectedLayerInputSize()
-        self.fc = FC(input_fc, output_size, hidden_fc)
+        self.fc = FC(input_fc, output_size, hidden_fc, hidden_fc_2)
 
     def forward(self, x, pre_train=False):
         f = self.encoder(x)

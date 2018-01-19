@@ -226,30 +226,110 @@ def computeTimeSeriesBatches(X, Y, sequence_length, index_filter=None):
 # Denote T the 1D signal of the true data
 # Denote P the 1D signal of the predicted data
 # 1. Detect the time intervals in T and P that has values larger than a threshold "thr"
-# 2. Merge intervals that are with "h" hours away from each other
-#    ... e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5]
+# 2. Merge intervals that are less or equal than "h" hours away from each other
+#    (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
 # 3. Compute the precision, recall, and f-score for each interval ...
 #    ... true positive: for each t in T, if it overlaps with a least one p in P
 #    ... false positive: for each p in P, if there is no t in T that overlaps with it
 #    ... false negative: for each t in T, if there is no p in P that overlaps with it
-def evalEventDetection(Y_true, Y_pred, thr=40, h=1):
+def evalEventDetection(Y_true, Y_pred, thr=40, h=1, round_to_decimal=3):
     # Copy
     Y_true, Y_pred = deepcopy(Y_true), deepcopy(Y_pred)
 
-    # Convert Y_true and Y_pred into binary based on thr
-    Y_true, Y_pred = Y_true>=thr, Y_pred>=thr
+    # Convert Y_true and Y_pred into binary signals and to intervals
+    Y_true_iv, Y_pred_iv = binary2Interval(Y_true>=thr), binary2Interval(Y_pred>=thr)
 
-    # Convert Y_true and Y_pred into intervals
-    Y_true_iv, Y_pred_iv = [], []
+    # Merge intervals
+    Y_true_iv, Y_pred_iv = mergeInterval(Y_true_iv, h=h), mergeInterval(Y_pred_iv, h=h)
 
-    return False    
+    print Y_true
+    print Y_true>=thr
+    print Y_true_iv
+    print Y_pred
+    print Y_pred>=thr
+    print Y_pred_iv
+
+    # Compute true positive and false negative
+    TP = 0
+    FN = 0
+    for t in Y_true_iv:
+        has_overlap = False
+        for p in Y_pred_iv:
+            # find overlaps (four possible cases)
+            c1 = t[0]<=p[0]<=t[1] and t[0]<=p[1]<=t[1]
+            c2 = p[0]<t[0] and t[0]<=p[1]<=t[1]
+            c3 = t[0]<=p[0]<=t[1] and p[1]>t[1]
+            c4 = p[0]<t[0] and p[1]>t[1]
+            if c1 or c2 or c3 or c4:
+                has_overlap = True
+                break
+        if has_overlap: TP += 1
+        else: FN += 1
+
+    # Compute false positive
+    FP = 0
+    for p in Y_pred_iv:
+        has_overlap = False
+        for t in Y_true_iv:
+            # find overlaps (four possible cases)
+            c1 = p[0]<=t[0]<=p[1] and p[0]<=t[1]<=p[1]
+            c2 = t[0]<p[0] and p[0]<=t[1]<=p[1]
+            c3 = p[0]<=t[0]<=p[1] and t[1]>p[1]
+            c4 = t[0]<p[0] and t[1]>p[1]
+            if c1 or c2 or c3 or c4:
+                has_overlap = True
+                break
+        if not has_overlap: FP += 1
+
+    # Compute precision, recall, f-score
+    TP, FN, FP = float(TP), float(FN), float(FP)
+    if TP + FP == 0: precision = 0
+    else: precision = TP / (TP + FP)
+    if TP + FN == 0: recall = 0
+    else: recall = TP / (TP + FN)
+    if precision + recall == 0: f_score = 0
+    else: f_score = 2 * (precision * recall) / (precision + recall) 
+
+    # Round to
+    precision = round(precision, round_to_decimal)
+    recall = round(recall, round_to_decimal)
+    f_score = round(f_score, round_to_decimal)
+
+    return {"TP":TP, "FP":FP, "FN":FN, "precision":precision, "recall":recall, "f_score":f_score} 
+
+# Merge intervals that are less or equal than "h" hours away from each other
+# (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
+def mergeInterval(intervals, h=1):
+    intervals_merged = []
+    current_iv = None
+    for iv in intervals:
+        if current_iv is None:
+            current_iv = iv
+        else:
+            if iv[0] - current_iv[1] <= h:
+                current_iv[1] = iv[1]
+            else:
+                intervals_merged.append(current_iv)
+                current_iv = iv
+    if current_iv is not None:
+        intervals_merged.append(current_iv)
+    return intervals_merged
 
 # Convert a binary array with False and True to intervals
 # input = [False, True, True, False, True, False]
 # output = [[1,2], [4,4]]
 def binary2Interval(Y):
-    
-    return False    
+    Y_cp = np.append(Y, False) # this is important for case like [False, True, True]
+    intervals = []
+    current_iv = None
+    for i in range(0, len(Y_cp)):
+        if Y_cp[i] and current_iv is None:
+            current_iv = [i, i]
+        if not Y_cp[i] and current_iv is not None:
+            current_iv[1] = i - 1
+            intervals.append(current_iv)
+            current_iv = None
+    return intervals
 
 # Compute the evaluation result of regression or classification Y=F(X)
 # INPUTS:
@@ -262,13 +342,14 @@ def binary2Interval(Y):
 # - prf: precision, recall, and f-score (for classification) in pandas dataframe format
 # - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
-        round_to_decimal=3, labels=[0,1], aggr_axis=False):
+        round_to_decimal=3, labels=[0,1], aggr_axis=False, no_prf=False):
     metric = {}
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
-    if aggr_axis:
-        if is_regr:
+    if aggr_axis and is_regr:
+        if len(Y_true.shape) > 1:
             Y_true = np.sum(Y_true, axis=1)
+        if len(Y_pred.shape) > 1:
             Y_pred = np.sum(Y_pred, axis=1)
     if is_regr:
         # Compute r-squared value and mean square error
@@ -276,6 +357,9 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
         mse = mean_squared_error(Y_true, Y_pred, multioutput="uniform_average")
         metric["r2"] = round(r2, round_to_decimal)
         metric["mse"] = round(mse, round_to_decimal)
+        if not no_prf:
+            prf = evalEventDetection(Y_true, Y_pred, round_to_decimal=round_to_decimal)
+            metric["prf"] = prf 
     else:
         # Compute precision, recall, fscore, and confusion matrix
         cm = confusion_matrix(Y_true, Y_pred).round(round_to_decimal)
