@@ -26,9 +26,11 @@ class ANCnnLearner(object):
             lr_schedule_gamma_pre=0.5, # the decaying factor for learning rate (pre-train)
             batch_size=64, # size for each batch
             num_epochs=30, # number of epochs
-            init_lr=0.0008, # initial learning rate
+            #init_lr=0.0008, # initial learning rate (for regression)
+            init_lr=0.0002, # initial learning rate (for classification)
             l2_regu_weight_decay=0.0001, # loss function regularization
-            lr_schedule_step_size=5, # number of epochs for decaying learning rate
+            #lr_schedule_step_size=5, # number of epochs for decaying learning rate (for regression)
+            lr_schedule_step_size=10, # number of epochs for decaying learning rate (for classification)
             lr_schedule_gamma=0.5, # the decaying factor for learning rate
             use_class_weights=False, # use class weights when computing the loss
             is_regr=False,  # regression or classification
@@ -163,10 +165,10 @@ class ANCnnLearner(object):
                 loss_all.append(loss.data[0]) # save loss for each step
             # Print the result for the entire epoch
             T_tr, P_tr = self.train["X"], self.predict(self.train["X_corrupt"], pre_train=True)
-            m_train = computeMetric(T_tr, P_tr, True, flatten=True, simple=True, round_to_decimal=2, no_prf=True)
+            m_train = computeMetric(T_tr, P_tr, True, flatten=True, simple=True, round_to_decimal=2)
             if self.test is not None:
                 T_te, P_te = self.test["X"], self.predict(self.test["X"], pre_train=True)
-                m_test = computeMetric(T_te, P_te, True, flatten=True, simple=True, round_to_decimal=2, no_prf=True)
+                m_test = computeMetric(T_te, P_te, True, flatten=True, simple=True, round_to_decimal=2)
             lr_now = optimizer.state_dict()["param_groups"][0]["lr"]
             avg_loss = np.mean(loss_all)
             if self.test is not None:
@@ -204,7 +206,8 @@ class ANCnnLearner(object):
             if self.use_class_weights:
                 self.log("Regression will ignore class weights")
         else:
-            criterion = nn.CrossEntropyLoss()
+            #criterion = nn.CrossEntropyLoss()
+            criterion = nn.MultiMarginLoss()
             # Compute the weight of each class (because the dataset is imbalanced)
             if self.use_class_weights:
                 class_weights = float(X.shape[0]) / (output_size * np.bincount(Y.squeeze()))
@@ -254,10 +257,10 @@ class ANCnnLearner(object):
                 loss_all.append(loss.data[0]) # save loss for each step
             # Print the result for the entire epoch
             T_tr, P_tr = self.train["Y"], self.predict(self.train["X"])
-            m_train = computeMetric(T_tr, P_tr, self.is_regr, flatten=True, simple=True, aggr_axis=True, no_prf=True)
+            m_train = computeMetric(T_tr, P_tr, self.is_regr, flatten=True, simple=True, aggr_axis=True)
             if self.test is not None:
                 T_te, P_te = self.test["Y"], self.predict(self.test["X"])
-                m_test = computeMetric(T_te, P_te, self.is_regr, flatten=True, simple=True, aggr_axis=True, no_prf=True)
+                m_test = computeMetric(T_te, P_te, self.is_regr, flatten=True, simple=True, aggr_axis=True)
             lr_now = optimizer.state_dict()["param_groups"][0]["lr"]
             avg_loss = np.mean(loss_all)
             if self.is_regr:

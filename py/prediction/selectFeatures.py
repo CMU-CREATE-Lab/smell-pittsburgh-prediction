@@ -43,7 +43,6 @@ def selectFeatures(
         elif method == "RFE":
             base = Lasso(alpha=0.1, max_iter=1000)
             #base = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000)
-            #base = MultiOutputRegressor(base, n_jobs=-1)
             model = RFE(base, step=1000, verbose=1, n_features_to_select=256)
     else:
         if method == "percent":
@@ -56,7 +55,7 @@ def selectFeatures(
             model = SelectFromModel(ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1), threshold="4.7*mean")
         elif method == "RFE":
             base = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1)
-            model = RFE(base, step=1000, verbose=1, n_features_to_select=20)
+            model = RFE(base, step=1000, verbose=1, n_features_to_select=40)
 
     # If method is None or not supported, just return the original features
     if model is None:

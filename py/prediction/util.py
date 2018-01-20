@@ -333,7 +333,7 @@ def binary2Interval(Y):
 # - prf: precision, recall, and f-score (for classification) in pandas dataframe format
 # - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
-        round_to_decimal=3, labels=[0,1], aggr_axis=False, no_prf=False):
+        round_to_decimal=3, labels=[0,1], aggr_axis=False):
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
     if aggr_axis and is_regr:
@@ -344,15 +344,17 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
     Y_true_origin, Y_pred_origin = deepcopy(Y_true), deepcopy(Y_pred)
     Y_true, Y_pred = Y_true[~np.isnan(Y_true)], Y_pred[~np.isnan(Y_pred)]
     metric = {}
+    # Compute the precision, recall, and f-score for smoke events 
+    if not simple:
+        thr = 40 if is_regr else 1
+        event_prf = evalEventDetection(Y_true_origin, Y_pred_origin, thr=thr)
+        metric["event_prf"] = event_prf 
     if is_regr:
         # Compute r-squared value and mean square error
         r2 = r2_score(Y_true, Y_pred, multioutput="variance_weighted")
         mse = mean_squared_error(Y_true, Y_pred, multioutput="uniform_average")
         metric["r2"] = round(r2, round_to_decimal)
         metric["mse"] = round(mse, round_to_decimal)
-        if not no_prf:
-            prf = evalEventDetection(Y_true_origin, Y_pred_origin, round_to_decimal=round_to_decimal)
-            metric["prf"] = prf 
     else:
         # Compute precision, recall, fscore, and confusion matrix
         cm = confusion_matrix(Y_true, Y_pred).round(round_to_decimal)

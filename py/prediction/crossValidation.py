@@ -27,7 +27,7 @@ def crossValidation(
     num_folds=66, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
-    select_feat=False, # select features or not
+    select_feat=True, # select features or not
     logger=None):
 
     log("================================================================================", logger)
@@ -246,9 +246,15 @@ def crossValidation(
     dt_idx_tr = (hd_val_train>=hd_start)&(hd_val_train<=hd_end)
     dt_idx_te = (hd_val_test>=hd_start)&(hd_val_test<=hd_end)
     train_all_dt = copy.deepcopy(train_all)
+    if not is_regr:
+        train_all_dt["Y"] = train_all_dt["Y"].astype(float)
+        train_all_dt["Y_pred"] = train_all_dt["Y_pred"].astype(float)
     train_all_dt["Y"][~dt_idx_tr] = None
     train_all_dt["Y_pred"][~dt_idx_tr] = None
     test_all_dt = copy.deepcopy(test_all)
+    if not is_regr:
+        test_all_dt["Y"] = test_all_dt["Y"].astype(float)
+        test_all_dt["Y_pred"] = test_all_dt["Y_pred"].astype(float)
     test_all_dt["Y"][~dt_idx_te] = None
     test_all_dt["Y_pred"][~dt_idx_te] = None
     log("--------------------------------------------------------------", logger)
@@ -271,7 +277,6 @@ def crossValidation(
             checkAndCreateDir(out_p)
             r2 = metric["test"]["r2"]
             mse = metric["test"]["mse"]
-            prf = metric["test"]["prf"]
             Y_true = test_all["Y"]
             Y_pred = test_all["Y_pred"]
             r2_dt = metric_dt["test"]["r2"]
@@ -285,8 +290,6 @@ def crossValidation(
         else:
             out_p = out_p_root + "result/classification/"
             checkAndCreateDir(out_p)
-            metric["test"]["prf"].to_csv(out_p + method + "_clas_prf.csv")
-            metric["test"]["cm"].to_csv(out_p + method + "_clas_cm.csv")
             Y_true = test_all["Y"]
             Y_score = test_all["Y_score"]
             log("Print prediction recall plots...", logger)

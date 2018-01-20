@@ -12,7 +12,7 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
-    is_regr = True # is regression or classification
+    is_regr = False # is regression or classification
     if mode == "run_all":
         get_data = True
         compute_features = True
@@ -38,10 +38,10 @@ def main(argv):
     # INPUT: raw esdr and smell data
     # OUTPUT: features
     if compute_features:
-        computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
-        #computeFeatures(in_p=[p+"esdr.csv", p+"smell.csv"], out_p=[p+"X.csv", p+"Y.csv"],
-        #    is_regr=is_regr, f_hr=8, b_hr=1, thr=40, add_inter=True, add_roll=False, add_diff=False)
+        #computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
+        #    is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
+        computeFeatures(in_p=[p+"esdr.csv", p+"smell.csv"], out_p=[p+"X.csv", p+"Y.csv"],
+            is_regr=is_regr, f_hr=8, b_hr=2, thr=40, add_inter=True, add_roll=False, add_diff=False)
 
     # Plot features
     if plot_features:
@@ -54,9 +54,11 @@ def main(argv):
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "GP", "ANCNN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "GP", "ANCNN", "DMLP"] # classification
         #methods = ["DMLP"]
-        methods = ["ANCNN"]
-        #methods = ["SVM"]
+        #methods = ["ET", "KN", "LG"]
+        methods = ["SVM"]
         p_log = p + "log/"
+        if is_regr: p_log += "regression/"
+        else: p_log += "classification/"
         checkAndCreateDir(p_log)
         for m in methods:
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")

@@ -73,8 +73,8 @@ def computeFeatures(
     if df_smell is not None:
         bins = None if is_regr else [-np.inf, thr, np.inf] # bin smell reports into labels or not
         labels = None if is_regr else [0, 1]
-        aggr_axis = False if is_regr else True
-        #aggr_axis = True
+        #aggr_axis = False if is_regr else True
+        aggr_axis = True
         df_Y = extractSmellResponse(df_smell, f_hr, bins, labels, aggr_axis=aggr_axis)
         df_Y = df_Y.reset_index()
         # Sync DateTime column in esdr and smell data
