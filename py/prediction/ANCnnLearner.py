@@ -254,10 +254,10 @@ class ANCnnLearner(object):
                 loss_all.append(loss.data[0]) # save loss for each step
             # Print the result for the entire epoch
             T_tr, P_tr = self.train["Y"], self.predict(self.train["X"])
-            m_train = computeMetric(T_tr, P_tr, self.is_regr, flatten=True, simple=True, aggr_axis=True)
+            m_train = computeMetric(T_tr, P_tr, self.is_regr, flatten=True, simple=True, aggr_axis=True, no_prf=True)
             if self.test is not None:
                 T_te, P_te = self.test["Y"], self.predict(self.test["X"])
-                m_test = computeMetric(T_te, P_te, self.is_regr, flatten=True, simple=True, aggr_axis=True)
+                m_test = computeMetric(T_te, P_te, self.is_regr, flatten=True, simple=True, aggr_axis=True, no_prf=True)
             lr_now = optimizer.state_dict()["param_groups"][0]["lr"]
             avg_loss = np.mean(loss_all)
             if self.is_regr:

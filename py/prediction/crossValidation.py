@@ -25,7 +25,7 @@ def crossValidation(
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
     num_folds=66, # number of folds for validation
-    skip_folds=65, # skip first n folds (not enough data for training) 48
+    skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # select features or not
     logger=None):
@@ -245,15 +245,21 @@ def crossValidation(
     hd_val_test = test_all["X"][:,-1:].squeeze()
     dt_idx_tr = (hd_val_train>=hd_start)&(hd_val_train<=hd_end)
     dt_idx_te = (hd_val_test>=hd_start)&(hd_val_test<=hd_end)
+    train_all_dt = copy.deepcopy(train_all)
+    train_all_dt["Y"][~dt_idx_tr] = None
+    train_all_dt["Y_pred"][~dt_idx_tr] = None
+    test_all_dt = copy.deepcopy(test_all)
+    test_all_dt["Y"][~dt_idx_te] = None
+    test_all_dt["Y_pred"][~dt_idx_te] = None
     log("--------------------------------------------------------------", logger)
     log("(Daytime only) For all training data:", logger)
-    metric_dt["train"] = computeMetric(train_all["Y"][dt_idx_tr], train_all["Y_pred"][dt_idx_tr], is_regr, aggr_axis=True)
+    metric_dt["train"] = computeMetric(train_all_dt["Y"], train_all_dt["Y_pred"], is_regr, aggr_axis=True)
     for m in metric_dt["train"]:
         log("Metric: " + m, logger)
         log(metric_dt["train"][m], logger)
     log("--------------------------------------------------------------", logger)
     log("(Daytime only) For all testing data:", logger)
-    metric_dt["test"] = computeMetric(test_all["Y"][dt_idx_te], test_all["Y_pred"][dt_idx_te], is_regr, aggr_axis=True)
+    metric_dt["test"] = computeMetric(test_all_dt["Y"], test_all_dt["Y_pred"], is_regr, aggr_axis=True)
     for m in metric_dt["test"]:
         log("Metric: " + m, logger)
         log(metric_dt["test"][m], logger)

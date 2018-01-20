@@ -221,6 +221,7 @@ def computeTimeSeriesBatches(X, Y, sequence_length, index_filter=None):
     return data_X, data_Y
 
 # Compute a custom metric for evaluating the regression function
+# Notice that for daytime cases, the Y arrays may contain NaN
 # For each smoke event, the prediction only need to hit the event at some time point
 # (for an event from 9am to 11am, good enough if there are at least one predicted event within it)
 # Denote T the 1D signal of the true data
@@ -233,21 +234,11 @@ def computeTimeSeriesBatches(X, Y, sequence_length, index_filter=None):
 #    ... false positive: for each p in P, if there is no t in T that overlaps with it
 #    ... false negative: for each t in T, if there is no p in P that overlaps with it
 def evalEventDetection(Y_true, Y_pred, thr=40, h=1, round_to_decimal=3):
-    # Copy
-    Y_true, Y_pred = deepcopy(Y_true), deepcopy(Y_pred)
-
     # Convert Y_true and Y_pred into binary signals and to intervals
     Y_true_iv, Y_pred_iv = binary2Interval(Y_true>=thr), binary2Interval(Y_pred>=thr)
 
     # Merge intervals
     Y_true_iv, Y_pred_iv = mergeInterval(Y_true_iv, h=h), mergeInterval(Y_pred_iv, h=h)
-
-    print Y_true
-    print Y_true>=thr
-    print Y_true_iv
-    print Y_pred
-    print Y_pred>=thr
-    print Y_pred_iv
 
     # Compute true positive and false negative
     TP = 0
@@ -343,7 +334,6 @@ def binary2Interval(Y):
 # - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
         round_to_decimal=3, labels=[0,1], aggr_axis=False, no_prf=False):
-    metric = {}
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
     if aggr_axis and is_regr:
@@ -351,6 +341,9 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
             Y_true = np.sum(Y_true, axis=1)
         if len(Y_pred.shape) > 1:
             Y_pred = np.sum(Y_pred, axis=1)
+    Y_true_origin, Y_pred_origin = deepcopy(Y_true), deepcopy(Y_pred)
+    Y_true, Y_pred = Y_true[~np.isnan(Y_true)], Y_pred[~np.isnan(Y_pred)]
+    metric = {}
     if is_regr:
         # Compute r-squared value and mean square error
         r2 = r2_score(Y_true, Y_pred, multioutput="variance_weighted")
@@ -358,7 +351,7 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
         metric["r2"] = round(r2, round_to_decimal)
         metric["mse"] = round(mse, round_to_decimal)
         if not no_prf:
-            prf = evalEventDetection(Y_true, Y_pred, round_to_decimal=round_to_decimal)
+            prf = evalEventDetection(Y_true_origin, Y_pred_origin, round_to_decimal=round_to_decimal)
             metric["prf"] = prf 
     else:
         # Compute precision, recall, fscore, and confusion matrix
