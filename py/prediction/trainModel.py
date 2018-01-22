@@ -70,7 +70,7 @@ def trainModel(
             model = GaussianProcessRegressor(n_restarts_optimizer=10)
             model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "MLP":
-            model = MLPRegressor(hidden_layer_sizes=128)
+            model = MLPRegressor(hidden_layer_sizes=(128, 64))
         elif method == "KN":
             model = KNeighborsRegressor(n_neighbors=10, weights="uniform")
         elif method == "DMLP":
@@ -92,7 +92,7 @@ def trainModel(
         elif method == "GP":
             model = GaussianProcessClassifier(max_iter_predict=1000)
         elif method == "MLP":
-            model = MLPClassifier(hidden_layer_sizes=128)
+            model = MLPClassifier(hidden_layer_sizes=(128, 64))
         elif method == "KN":
             model = KNeighborsClassifier(n_neighbors=10, weights="uniform")
         elif method == "LG":

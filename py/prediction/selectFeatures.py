@@ -43,7 +43,7 @@ def selectFeatures(
         elif method == "RFE":
             base = Lasso(alpha=0.1, max_iter=1000)
             #base = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000)
-            model = RFE(base, step=1000, verbose=1, n_features_to_select=256)
+            model = RFE(base, step=1000, verbose=1, n_features_to_select=40)
     else:
         if method == "percent":
             model = SelectPercentile(score_func=f_classif, percentile=10)

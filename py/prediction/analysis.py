@@ -32,7 +32,7 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 1, 11, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 1, 18, 0))
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -41,7 +41,7 @@ def main(argv):
         #computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
         #    is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
         computeFeatures(in_p=[p+"esdr.csv", p+"smell.csv"], out_p=[p+"X.csv", p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=2, thr=40, add_inter=True, add_roll=False, add_diff=False)
+            is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=True, add_roll=False, add_diff=False)
 
     # Plot features
     if plot_features:
@@ -53,9 +53,9 @@ def main(argv):
     if cross_validation:
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "GP", "ANCNN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "GP", "ANCNN", "DMLP"] # classification
-        #methods = ["DMLP"]
-        #methods = ["ET", "KN", "LG"]
-        methods = ["SVM"]
+        methods = ["LG"]
+        #methods = ["DMLP", "ET", "KN", "LG"]
+        #methods = ["SVM"]
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"

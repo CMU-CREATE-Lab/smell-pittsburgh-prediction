@@ -15,14 +15,10 @@ class DmlpLearner(object):
     def __init__(self,
             test=None, # the testing set for evaluating performance after each epoch
             batch_size=128, # size for each batch
-            num_epochs=30, # number of epochs (for classification)
-            #num_epochs=30, # number of epochs (for regression)
-            init_lr=0.001, # initial learning rate (for classification)
-            #init_lr=0.005, # initial learning rate (for regression)
-            l2_regu_weight_decay=0.001, # loss function regularization (for classification)
-            #l2_regu_weight_decay=0.001, # loss function regularization (for regression)
-            lr_schedule_step_size=10, # number of epochs for decaying learning rate (for classification)
-            #lr_schedule_step_size=10, # number of epochs for decaying learning rate (for regression)
+            num_epochs=30, # number of epochs
+            init_lr=0.001, # initial learning rate
+            l2_regu_weight_decay=0.001, # loss function regularization
+            lr_schedule_step_size=10, # number of epochs for decaying learning rate
             lr_schedule_gamma=0.5, # the decaying factor for learning rate
             use_class_weights=False, # use class weights when computing the loss
             is_regr=False,  # regression or classification
@@ -94,13 +90,13 @@ class DmlpLearner(object):
         
         # Loss function
         if self.is_regr:
-            #criterion = nn.SmoothL1Loss()
-            criterion = nn.MSELoss()
+            criterion = nn.SmoothL1Loss()
+            #criterion = nn.MSELoss()
             if self.use_class_weights:
                 self.log("Regression will ignore class weights")
         else:
-            criterion = nn.CrossEntropyLoss()
-            #criterion = nn.MultiMarginLoss()
+            #criterion = nn.CrossEntropyLoss()
+            criterion = nn.MultiMarginLoss()
             # Compute the weight of each class (because the dataset is imbalanced)
             if self.use_class_weights:
                 class_weights = float(X.shape[0]) / (output_size * np.bincount(Y.squeeze()))

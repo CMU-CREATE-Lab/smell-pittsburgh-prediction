@@ -24,7 +24,7 @@ def crossValidation(
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=66, # number of folds for validation
+    num_folds=67, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=True, # select features or not
@@ -286,16 +286,20 @@ def crossValidation(
             log("Print residual plots...", logger)
             residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
             log("Print time series plots...", logger)
-            timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te)
+            timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
         else:
             out_p = out_p_root + "result/classification/"
             checkAndCreateDir(out_p)
             Y_true = test_all["Y"]
+            Y_pred = test_all["Y_pred"]
             Y_score = test_all["Y_score"]
             log("Print prediction recall plots...", logger)
             prPlot(method, Y_true, Y_score, out_p)
             log("Print roc curve plots...", logger)
             rocPlot(method, Y_true, Y_score, out_p)
+            log("Print time series plots...", logger)
+            Y_pred[Y_pred==1] = 2
+            timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
 
 def rocPlot(method, Y_true, Y_score, out_p):
     # Precision vs recall
@@ -372,7 +376,7 @@ def prPlot(method, Y_true, Y_score, out_p):
     plt.tight_layout()
     fig.savefig(out_p + method + "_clas_r_thr.png")
 
-def timeSeriesPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx):
+def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx):
     if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
     if len(Y_pred.shape) > 1: Y_pred = np.sum(Y_pred, axis=1)
     res = Y_true - Y_pred
