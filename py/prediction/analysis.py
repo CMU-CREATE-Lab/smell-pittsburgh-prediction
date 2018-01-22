@@ -41,7 +41,7 @@ def main(argv):
         #computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
         #    is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
         computeFeatures(in_p=[p+"esdr.csv", p+"smell.csv"], out_p=[p+"X.csv", p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=True, add_roll=False, add_diff=False)
+            is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=True, add_roll=False, add_diff=False)
 
     # Plot features
     if plot_features:

@@ -27,7 +27,7 @@ def crossValidation(
     num_folds=67, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
-    select_feat=True, # select features or not
+    select_feat=False, # select features or not
     logger=None):
 
     log("================================================================================", logger)

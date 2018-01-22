@@ -49,6 +49,7 @@ def computeFeatures(
     # Extract features (X) from ESDR data
     # For models that do not have time-series structure, we want to add time-series features
     # For models that do have time-series structure (e.g. RNN), we want to use original features
+    df_esdr[df_esdr < 1e-6] = 0 # prevent extreme small values 
     df_X = extractFeatures(df_esdr, b_hr, add_inter, add_roll, add_diff)
     df_X[df_X < 1e-6] = 0 # prevent extreme small values 
     
@@ -129,12 +130,12 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
         df_previous = df.shift(b_hr)
         df_previous.columns += ".previous." + str(b_hr) + ".hour"
         df_all.append(df_previous)
-        if add_roll:
+        if add_diff:
             # Add differential feature
             df_previous_diff = df_diff.shift(b_hr - 1).copy(deep=True)
             df_previous_diff.columns += ".diff.of.previous." + str(b_hr-1) + ".and." + str(b_hr) + ".hour"
             df_all.append(df_previous_diff)
-        if add_diff:
+        if add_roll:
             # Perform rolling mean and max (data is already resampled by hour)
             if b_hr <= 1: continue
             df_roll = df.rolling(b_hr, min_periods=1)
@@ -151,8 +152,15 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     for d in df_all:
         df_feat = df_feat.join(d)
     
+    # Delete the first b_hr rows
+    df_feat = df_feat.iloc[b_hr:]
+
     # Add interaction of variables
     if add_inter:
+        #poly = preprocessing.PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
+        #feat = poly.fit_transform(df_feat)
+        #feat_names = poly.get_feature_names(df_feat.columns)
+        #df_feat = pd.DataFrame(feat, columns=feat_names)
         df_inte = pd.DataFrame()
         L = len(df_feat.columns)
         for i in range(0, L):
@@ -164,8 +172,6 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
                     df_inte[c] = df_feat[c1] * df_feat[c2]
         df_feat = df_feat.join(df_inte)
     
-    # Delete the first b_hr rows
-    df_feat = df_feat.iloc[b_hr:]
     return df_feat
 
 def extractSmellResponse(df, f_hr, bins, labels, aggr_axis=False):
