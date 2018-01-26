@@ -34,19 +34,20 @@ def train():
 
     # Get data
     end_dt = datetime.now() - timedelta(hours=24)
-    start_dt = end_dt - timedelta(hours=6000)
+    start_dt = end_dt - timedelta(hours=8000)
     log("Get data from " + str(start_dt) + " to " + str(end_dt), logger)
     df_esdr, df_smell = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
 
     # Compute features
-    df_X, df_Y = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=7, b_hr=14, thr=50,
-        add_inter=True, add_roll=True, add_diff=True, logger=logger, out_p_mean=p+"mean.csv", out_p_std=p+"std.csv")
+    df_X, df_Y = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=8, b_hr=3, thr=40,
+        add_inter=False, add_roll=False, add_diff=False, logger=logger, out_p_mean=p+"mean.csv", out_p_std=p+"std.csv")
 
     # Select features
-    df_X, df_Y = selectFeatures(df_X, df_Y, logger=logger, out_p=p+"feat_selected.csv")
+    # NOTE: currently, the best model uses all the features
+    #df_X, df_Y = selectFeatures(df_X, df_Y, logger=logger, out_p=p+"feat_selected.csv")
 
     # Train, save, and evaluate model
-    model = trainModel({"X": df_X, "Y": df_Y}, method="SVM", out_p=p+"SVM_model.pkl", logger=logger)
+    model = trainModel({"X": df_X, "Y": df_Y}, method="ET", out_p=p+"model.pkl", logger=logger)
     metric = computeMetric(df_Y, model.predict(df_X), False)
     for m in metric:
         log(metric[m], logger)
@@ -60,7 +61,7 @@ def predict():
     log("--------------------------------  Predict  -------------------------------", logger)
 
     # Get data for previous b_hr hours
-    b_hr = 14
+    b_hr = 3
     end_dt = datetime.now()
     start_dt = end_dt - timedelta(hours=b_hr+1)
     log("Get data from " + str(start_dt) + " to " + str(end_dt), logger)
@@ -71,20 +72,21 @@ def predict():
         return
     
     # Compute features
-    df_X, _ = computeFeatures(df_esdr=df_esdr, f_hr=7, b_hr=14, thr=50,
-        add_inter=True, add_roll=True, add_diff=True, logger=logger, in_p_mean=p+"mean.csv", in_p_std=p+"std.csv")
+    df_X, _ = computeFeatures(df_esdr=df_esdr, f_hr=8, b_hr=3, thr=40,
+        add_inter=False, add_roll=False, add_diff=False, logger=logger, in_p_mean=p+"mean.csv", in_p_std=p+"std.csv")
     if len(df_X) != 1:
         log("ERROR: Length of X is not 1", logger)
         log("Length of X = " + str(len(df_X)), logger)
         return
 
     # Select features
-    df_feat_selected = pd.read_csv(p+"feat_selected.csv")
-    df_X = df_X[df_feat_selected.columns]
+    # NOTE: currently, the best model uses all the features
+    #df_feat_selected = pd.read_csv(p+"feat_selected.csv")
+    #df_X = df_X[df_feat_selected.columns]
 
     # Load model
     log("Load model...", logger)
-    model = joblib.load(p+"SVM_model.pkl")
+    model = joblib.load(p+"model.pkl")
 
     # Predict result
     y_pred = model.predict(df_X)[0]

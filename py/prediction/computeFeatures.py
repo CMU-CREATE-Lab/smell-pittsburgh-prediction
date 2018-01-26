@@ -49,7 +49,6 @@ def computeFeatures(
     # Extract features (X) from ESDR data
     # For models that do not have time-series structure, we want to add time-series features
     # For models that do have time-series structure (e.g. RNN), we want to use original features
-    df_esdr[df_esdr < 1e-6] = 0 # prevent extreme small values 
     df_X = extractFeatures(df_esdr, b_hr, add_inter, add_roll, add_diff)
     df_X[df_X < 1e-6] = 0 # prevent extreme small values 
     
@@ -157,10 +156,6 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
 
     # Add interaction of variables
     if add_inter:
-        #poly = preprocessing.PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
-        #feat = poly.fit_transform(df_feat)
-        #feat_names = poly.get_feature_names(df_feat.columns)
-        #df_feat = pd.DataFrame(feat, columns=feat_names)
         df_inte = pd.DataFrame()
         L = len(df_feat.columns)
         for i in range(0, L):

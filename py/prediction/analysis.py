@@ -12,7 +12,7 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
-    is_regr = False # is regression or classification
+    is_regr = True # is regression or classification
     if mode == "run_all":
         get_data = True
         compute_features = True
@@ -38,10 +38,8 @@ def main(argv):
     # INPUT: raw esdr and smell data
     # OUTPUT: features
     if compute_features:
-        #computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
-        #    is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
-        computeFeatures(in_p=[p+"esdr.csv", p+"smell.csv"], out_p=[p+"X.csv", p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=True, add_roll=False, add_diff=False)
+        computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
+            is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
 
     # Plot features
     if plot_features:
@@ -51,11 +49,11 @@ def main(argv):
     # INPUT: features
     # OUTPUT: plots or metrics
     if cross_validation:
-        #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "GP", "ANCNN", "DMLP"] # regression
-        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "GP", "ANCNN", "DMLP"] # classification
-        methods = ["LG"]
-        #methods = ["DMLP", "ET", "KN", "LG"]
-        #methods = ["SVM"]
+        #methods = ["ANCNN"]
+        #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
+        #methods = ["SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
+        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP"] # classification
+        methods = ["ET"]
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"

@@ -10,7 +10,6 @@ from sklearn.linear_model import HuberRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import ElasticNet
 from sklearn.ensemble import BaggingRegressor
-from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import ExtraTreesRegressor
@@ -21,7 +20,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import AdaBoostClassifier
-from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
@@ -43,9 +41,10 @@ def trainModel(
     balance=False, # oversample or undersample data or not
     logger=None):
 
-    log("Training model...", logger)
+    log("Training model with " + str(train["X"].shape[1]) + " features...", logger)
 
     # Build model
+    multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
     if is_regr:
         if method == "RF":
             model = RandomForestRegressor(n_estimators=800, random_state=0, n_jobs=-1)
@@ -53,22 +52,19 @@ def trainModel(
             model = ExtraTreesRegressor(n_estimators=800, random_state=0, n_jobs=-1)
         elif method == "SVM":
             model = SVR(max_iter=5000)
-            model = MultiOutputRegressor(model, n_jobs=-1)
+            if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "RLR":
             model = HuberRegressor(max_iter=1000)
-            model = MultiOutputRegressor(model, n_jobs=-1)
+            if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "LR":
             model = LinearRegression()
-            model = MultiOutputRegressor(model, n_jobs=-1)
+            if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "EN":
             model = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000)
-            model = MultiOutputRegressor(model, n_jobs=-1)
+            if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "LA":
             model = Lasso(alpha=0.1, max_iter=1000)
-            model = MultiOutputRegressor(model, n_jobs=-1)
-        elif method == "GP":
-            model = GaussianProcessRegressor(n_restarts_optimizer=10)
-            model = MultiOutputRegressor(model, n_jobs=-1)
+            if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "MLP":
             model = MLPRegressor(hidden_layer_sizes=(128, 64))
         elif method == "KN":
@@ -84,13 +80,11 @@ def trainModel(
             return None
     else:
         if method == "RF":
-            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=20)
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=20) 
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", random_state=0, probability=True)
-        elif method == "GP":
-            model = GaussianProcessClassifier(max_iter_predict=1000)
         elif method == "MLP":
             model = MLPClassifier(hidden_layer_sizes=(128, 64))
         elif method == "KN":
@@ -103,6 +97,70 @@ def trainModel(
             model = CRnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
+        elif method == "RF-feat-10":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=10)
+        elif method == "ET-feat-10":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=10)
+        elif method == "RF-feat-20":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=20)
+        elif method == "ET-feat-20":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=20)
+        elif method == "RF-feat-30":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=30)
+        elif method == "ET-feat-30":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=30)
+        elif method == "RF-feat-40":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=40)
+        elif method == "ET-feat-40":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=40)
+        elif method == "RF-feat-50":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=50)
+        elif method == "ET-feat-50":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=50)
+        elif method == "RF-feat-60":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=60)
+        elif method == "ET-feat-60":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=60)
+        elif method == "RF-feat-70":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=70)
+        elif method == "ET-feat-70":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=70)
+        elif method == "RF-feat-80":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=80)
+        elif method == "ET-feat-80":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=80)
+        elif method == "RF-feat-90":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=90)
+        elif method == "ET-feat-90":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=90)
+        elif method == "RF-feat-100":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=100)
+        elif method == "ET-feat-100":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=100)
+        elif method == "RF-feat-110":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=110)
+        elif method == "ET-feat-110":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=110)
+        elif method == "RF-feat-120":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=120)
+        elif method == "ET-feat-120":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=120)
+        elif method == "RF-feat-130":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=130)
+        elif method == "ET-feat-130":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=130)
+        elif method == "RF-feat-140":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=140)
+        elif method == "ET-feat-140":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=140)
+        elif method == "RF-feat-150":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=150)
+        elif method == "ET-feat-150":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=150)
+        elif method == "RF-feat-all":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
+        elif method == "ET-feat-all":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
         else:
             log("ERROR: method " + method + " is not supported", logger)
             return None

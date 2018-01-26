@@ -15,7 +15,7 @@ class DmlpLearner(object):
     def __init__(self,
             test=None, # the testing set for evaluating performance after each epoch
             batch_size=128, # size for each batch
-            num_epochs=30, # number of epochs
+            num_epochs=40, # number of epochs
             init_lr=0.001, # initial learning rate
             l2_regu_weight_decay=0.001, # loss function regularization
             lr_schedule_step_size=10, # number of epochs for decaying learning rate
@@ -90,8 +90,8 @@ class DmlpLearner(object):
         
         # Loss function
         if self.is_regr:
-            criterion = nn.SmoothL1Loss()
-            #criterion = nn.MSELoss()
+            criterion = nn.MSELoss()
+            #criterion = nn.SmoothL1Loss()
             if self.use_class_weights:
                 self.log("Regression will ignore class weights")
         else:
@@ -225,13 +225,16 @@ class DMLP(nn.Module):
         # Fully Connected
         hidden_size = 128
         hidden_size_2 = 64
+        hidden_size_3 = 32
         self.fc = nn.Sequential(
             nn.SELU(),
             nn.Linear(input_size, hidden_size, bias=False),
             nn.SELU(),
             nn.Linear(hidden_size, hidden_size_2, bias=False),
             nn.SELU(),
-            nn.Linear(hidden_size_2, output_size, bias=False))
+            nn.Linear(hidden_size_2, hidden_size_3, bias=False),
+            nn.SELU(),
+            nn.Linear(hidden_size_3, output_size, bias=False))
 
     def forward(self, x):
         f = self.fc(x)

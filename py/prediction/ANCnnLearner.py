@@ -24,10 +24,10 @@ class ANCnnLearner(object):
             l2_regu_weight_decay_pre=0.0001, # loss function regularization (pre-train)
             lr_schedule_step_size_pre=5, # number of epochs for decaying learning rate (pre-train)
             lr_schedule_gamma_pre=0.5, # the decaying factor for learning rate (pre-train)
-            batch_size=64, # size for each batch
-            num_epochs=30, # number of epochs
+            batch_size=128, # size for each batch
+            num_epochs=40, # number of epochs
             #init_lr=0.0008, # initial learning rate (for regression)
-            init_lr=0.0002, # initial learning rate (for classification)
+            init_lr=0.001, # initial learning rate (for classification)
             l2_regu_weight_decay=0.0001, # loss function regularization
             #lr_schedule_step_size=5, # number of epochs for decaying learning rate (for regression)
             lr_schedule_step_size=10, # number of epochs for decaying learning rate (for classification)
@@ -201,8 +201,8 @@ class ANCnnLearner(object):
         
         # Loss function
         if self.is_regr:
-            #criterion = nn.SmoothL1Loss()
             criterion = nn.MSELoss()
+            #criterion = nn.SmoothL1Loss()
             if self.use_class_weights:
                 self.log("Regression will ignore class weights")
         else:
@@ -329,13 +329,13 @@ class ANCnnLearner(object):
 
     def weights_init(self, m):
         if isinstance(m, nn.Conv2d):
-            m.weight.data.normal_(0.0, 0.01)
+            m.weight.data.normal_(0.0, 0.1)
             #n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
             #m.weight.data.normal_(0, math.sqrt(2. / n))
         elif isinstance(m, nn.ConvTranspose2d):
-            m.weight.data.normal_(0.0, 0.01)
+            m.weight.data.normal_(0.0, 0.1)
         elif isinstance(m, nn.Linear):
-            m.weight.data.normal_(0.0, 0.01)
+            m.weight.data.normal_(0.0, 0.1)
 
 # ResNet Block
 class ResBlock(nn.Module):
@@ -461,17 +461,17 @@ class ANCNN(nn.Module):
         self.channel_size = channel_size
 
         # CNN Encoder (Feature Extraction)
-        hidden_cnn = 64
-        hidden2_cnn = 128
-        output_cnn = 256
+        hidden_cnn = 16
+        hidden2_cnn = 32
+        output_cnn = 64
         self.encoder = CnnEncoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
        
         # CNN Decoder
         self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
 
         # Fully Connected
-        hidden_fc = 128
-        hidden_fc_2 = 64
+        hidden_fc = 64
+        hidden_fc_2 = 32
         input_fc = self.fullyConnectedLayerInputSize()
         self.fc = FC(input_fc, output_size, hidden_fc, hidden_fc_2)
 

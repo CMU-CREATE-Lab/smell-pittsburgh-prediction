@@ -12,6 +12,7 @@ from selectFeatures import *
 import copy
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
 
 # Cross validation
 def crossValidation(
@@ -27,7 +28,7 @@ def crossValidation(
     num_folds=67, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
-    select_feat=False, # select features or not
+    select_feat=False, # False means do not select features, int means select n number of features
     logger=None):
 
     log("================================================================================", logger)
@@ -107,7 +108,7 @@ def crossValidation(
         if len(X.shape) == 2:
             X_train, Y_train, X_test, Y_test = X.iloc[train_idx], Y.iloc[train_idx], X.iloc[test_idx], Y.iloc[test_idx]
             if select_feat:
-                X_train, Y_train = selectFeatures(X_train, Y_train, is_regr=is_regr, logger=logger)
+                X_train, Y_train = selectFeatures(X_train, Y_train, is_regr=is_regr, logger=logger, num_feat=select_feat)
             X_test = X_test[X_train.columns]
             X_train, Y_train, X_test, Y_test = X_train.values, Y_train.values, X_test.values, Y_test.values
             if augment_data:
@@ -273,7 +274,7 @@ def crossValidation(
     # Save plot
     if out_p_root is not None:
         if is_regr:
-            out_p = out_p_root + "result/regression/"
+            out_p = out_p_root + "result/regression/method_" + method + "/"
             checkAndCreateDir(out_p)
             r2 = metric["test"]["r2"]
             mse = metric["test"]["mse"]
@@ -288,7 +289,7 @@ def crossValidation(
             log("Print time series plots...", logger)
             timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
         else:
-            out_p = out_p_root + "result/classification/"
+            out_p = out_p_root + "result/classification/method_" + method + "/"
             checkAndCreateDir(out_p)
             Y_true = test_all["Y"]
             Y_pred = test_all["Y_pred"]
@@ -302,6 +303,7 @@ def crossValidation(
             timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
 
 def rocPlot(method, Y_true, Y_score, out_p):
+    roc = round(roc_auc_score(Y_true, Y_score[:, -1]), 4)
     # Precision vs recall
     fig = plt.figure(figsize=(8, 8), dpi=150)
     fpr, tpr, threshold = roc_curve(Y_true, Y_score[:, -1])
@@ -310,7 +312,7 @@ def rocPlot(method, Y_true, Y_score, out_p):
     plt.plot([0,1], [0,1], "--", alpha=0.8, markersize=0, color=(0,0,1), lw=2)
     plt.xlabel("False Positive Rate")
     plt.ylabel("True Positive Rate")
-    plt.title("Method=" + method, fontsize=18)
+    plt.title("Method=" + method + ", roc_auc=" + str(roc), fontsize=18)
     plt.xlim(0, 1)
     plt.ylim(0, 1)
     plt.grid(True)
