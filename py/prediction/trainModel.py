@@ -36,7 +36,7 @@ def trainModel(
     train, # the training set in pandas dataframe (contain train["X"] and train["Y"])
     test=None, # the testing set in pandas dataframe (contain test["X"] and test["Y"])
     out_p=None, # the path for saving the model
-    method="SVM", # the regression or classification method
+    method="ET", # the regression or classification method
     is_regr=False, # is regression or not
     balance=False, # oversample or undersample data or not
     logger=None):

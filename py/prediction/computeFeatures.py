@@ -14,11 +14,11 @@ def computeFeatures(
     out_p_std=None, # output path for the standard deviation of features
     is_regr=False, # regression or classification
     f_hr=8, # the number of hours to look further and compute responses (Y)
-    b_hr=12, # the number of hours to look back and compute features (X)
-    thr=80, # for binning the smell value into two classes (this is for classification)
-    add_roll=True, # add rolling features
-    add_diff=True, # add differential features
-    add_inter=True, # add variable interaction (X1*X2) terms in the features or not
+    b_hr=3, # the number of hours to look back and compute features (X)
+    thr=40, # for binning the smell value into two classes (this is for classification)
+    add_roll=False, # add rolling features
+    add_diff=False, # add differential features
+    add_inter=False, # add variable interaction (X1*X2) terms in the features or not
     in_p_mean=None, # the path of mean values in pandas dataframe for scaling features
     in_p_std=None, # the path of std in pandas dataframe for scaling features
     logger=None):

@@ -12,7 +12,7 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
-    is_regr = True # is regression or classification
+    is_regr = False # is regression or classification
     if mode == "run_all":
         get_data = True
         compute_features = True
