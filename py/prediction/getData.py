@@ -32,6 +32,10 @@ def getData(
             {"feed": "11067", "channel": "CO_PPB,NO2_PPB,NOX_PPB,NO_PPB,PM25T_UG_M3,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"},
             {"feed": "43", "channel": "CO_PPB,NO2_PPB,NOX_PPB,NO_PPB,PM25T_UG_M3,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"}
         ],
+        [{"feed": "3506", "channel": "PM2_5,OZONE"}],
+        [{"feed": "5975", "channel": "PM2_5"}],
+        [{"feed": "3508", "channel": "PM2_5"}],
+        [{"feed": "24", "channel": "PM10_UG_M3"}]
     ]
     start_time = datetimeToEpochtime(start_dt) / 1000 # ESDR uses seconds
     end_time = datetimeToEpochtime(end_dt) / 1000 # ESDR uses seconds

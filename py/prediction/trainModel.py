@@ -157,6 +157,14 @@ def trainModel(
             model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=150)
         elif method == "ET-feat-150":
             model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=150)
+        elif method == "RF-feat-160":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=160)
+        elif method == "ET-feat-160":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=160)
+        elif method == "RF-feat-170":
+            model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=170)
+        elif method == "ET-feat-170":
+            model = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=170)
         elif method == "RF-feat-all":
             model = RandomForestClassifier(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
         elif method == "ET-feat-all":
