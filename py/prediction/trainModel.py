@@ -25,6 +25,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import LinearSVC
+
 from CRnnLearner import CRnnLearner
 from ANCnnLearner import ANCnnLearner
 from DmlpLearner import DmlpLearner

@@ -660,9 +660,10 @@ def getSmellReports(**options):
 
     # Url
     api_url = smellPghRootUrl() + "api/v1/"
-    #api_url = smellPghStagingRootUrl() + "api/v1/" # TODO: change this back to production when ready
-    api_para = "smell_reports?zipcodes=15221,15218,15222,15219,15201,15224,15213,15232,15206,15208,15217,15207,15260,15104"
-    #api_para = "smell_reports?allegheny_county_only=True"
+    api_para = "smell_reports?"
+    api_para += "zipcodes=15221,15218,15222,15219,15201,15224,15213,15232,15206,15208,15217,15207,15260,15104"
+    #api_para += "allegheny_county_only=True"
+    api_para += "prediction_query=true" # this returns the user hash for identifying unique users
     if "start_time" in options:
         api_para += "&start_time=" + str(options["start_time"])
     if "end_time" in options:
@@ -674,7 +675,7 @@ def getSmellReports(**options):
 
     # Load smell reports
     df = pd.read_json(api_url + api_para, convert_dates=False)
-
+    
     # If empty, return None
     if df.empty:
         return None

@@ -10,7 +10,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 def getData(
     out_p=None, # output file path
     start_dt=datetime(2016, 10, 6, 0), # starting date for the data
-    end_dt=datetime(2017, 12, 7, 0), # ending data for the data
+    end_dt=datetime(2018, 1, 25, 0), # ending data for the data
     logger=None):
 
     log("Get data...", logger)
@@ -42,7 +42,7 @@ def getData(
     esdr_data = getEsdrData(source, start_time=start_time, end_time=end_time)
     df_esdr = mergeEsdrData(esdr_data)
     
-    # Get smell reports
+    # Get smell reports (datetime object in "DateTime" column is in UTC tzinfo)
     df_smell = getSmellReports(start_time=start_time, end_time=end_time)
     if df_smell is not None:
         df_smell = aggregateSmellData(df_smell)
@@ -107,12 +107,13 @@ def aggregateSmellData(df):
     
     return df
 
-def resampleData(df, **options):
+def resampleData(df, method=None):
     df = df.copy(deep=True)
     df = epochtimeIdxToDatetime(df).resample("1h")
-    if "method" in options:
-        if options["method"] == "sum":
-            return df.sum()
+    if method == "sum":
+        return df.sum()
+    elif method == "count":
+        return df.count()
     else:
         return df.mean()
 

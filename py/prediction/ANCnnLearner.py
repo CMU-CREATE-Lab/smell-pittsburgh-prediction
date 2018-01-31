@@ -25,12 +25,12 @@ class ANCnnLearner(object):
             lr_schedule_step_size_pre=5, # number of epochs for decaying learning rate (pre-train)
             lr_schedule_gamma_pre=0.5, # the decaying factor for learning rate (pre-train)
             batch_size=128, # size for each batch
-            num_epochs=40, # number of epochs
-            #init_lr=0.0008, # initial learning rate (for regression)
-            init_lr=0.001, # initial learning rate (for classification)
+            num_epochs=50, # number of epochs
+            init_lr=0.004, # initial learning rate (for regression)
+            #init_lr=0.001, # initial learning rate (for classification)
             l2_regu_weight_decay=0.0001, # loss function regularization
-            #lr_schedule_step_size=5, # number of epochs for decaying learning rate (for regression)
-            lr_schedule_step_size=10, # number of epochs for decaying learning rate (for classification)
+            lr_schedule_step_size=5, # number of epochs for decaying learning rate (for regression)
+            #lr_schedule_step_size=10, # number of epochs for decaying learning rate (for classification)
             lr_schedule_gamma=0.5, # the decaying factor for learning rate
             use_class_weights=False, # use class weights when computing the loss
             is_regr=False,  # regression or classification
@@ -97,7 +97,7 @@ class ANCnnLearner(object):
             model.cuda()
         self.model = model
         
-        #self.pre_train(X_pretrain)
+        self.pre_train(X_pretrain)
         #model.freezeEncoder()
         self.fine_tune(X, Y)
     
@@ -117,13 +117,14 @@ class ANCnnLearner(object):
         start_time = datetime.now()
         
         # Randomly corrupt the input with missing values
-        C = 0.2 # percentage of missing values
+        C = 0 # percentage of missing values
         X_corrupt = deepcopy(X)
         mask = np.random.choice([0, 1], size=X_corrupt.shape, p=[C, 1-C])
         X_corrupt = np.multiply(X_corrupt, mask)
 
         # Loss function
         criterion = nn.MSELoss()
+        #criterion = nn.SmoothL1Loss()
 
         # Optimizer
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.init_lr_pre, weight_decay=self.l2_regu_weight_decay_pre)
@@ -405,14 +406,16 @@ class ResNet(nn.Module):
 class CnnEncoder(nn.Module):
     def __init__(self, input_size, output_size, hidden_size, hidden_size_2):
         super(CnnEncoder, self).__init__()
-
+        
+        ks = (3,1)
+        p = (1,0)
         self.conv = nn.Sequential(
             nn.SELU(),
-            nn.Conv2d(input_size, hidden_size, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False),
+            nn.Conv2d(input_size, hidden_size, kernel_size=ks, padding=p, stride=(1,1), bias=False),
             nn.SELU(),
-            nn.Conv2d(hidden_size, hidden_size_2, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False),
+            nn.Conv2d(hidden_size, hidden_size_2, kernel_size=ks, padding=p, stride=(1,1), bias=False),
             nn.SELU(),
-            nn.Conv2d(hidden_size_2, output_size, kernel_size=(3,1), padding=(1,0), stride=(1,1), bias=False))
+            nn.Conv2d(hidden_size_2, output_size, kernel_size=ks, padding=p, stride=(1,1), bias=False))
 
     def forward(self, x):
         return self.conv(x)
@@ -422,13 +425,15 @@ class CnnDecoder(nn.Module):
     def __init__(self, input_size, output_size, hidden_size, hidden_size_2):
         super(CnnDecoder, self).__init__()
         
+        ks = (3,1)
+        p = (1,0)
         self.conv = nn.Sequential(
             nn.SELU(),
-            nn.ConvTranspose2d(output_size, hidden_size_2, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
+            nn.ConvTranspose2d(output_size, hidden_size_2, kernel_size=ks, padding=p, stride=(1, 1), bias=False),
             nn.SELU(),
-            nn.ConvTranspose2d(hidden_size_2, hidden_size, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False),
+            nn.ConvTranspose2d(hidden_size_2, hidden_size, kernel_size=ks, padding=p, stride=(1, 1), bias=False),
             nn.SELU(),
-            nn.ConvTranspose2d(hidden_size, input_size, kernel_size=(3, 1), padding=(1,0), stride=(1, 1), bias=False))
+            nn.ConvTranspose2d(hidden_size, input_size, kernel_size=ks, padding=p, stride=(1, 1), bias=False))
 
     def forward(self, x):
         return self.conv(x)
@@ -461,17 +466,17 @@ class ANCNN(nn.Module):
         self.channel_size = channel_size
 
         # CNN Encoder (Feature Extraction)
-        hidden_cnn = 16
+        hidden_cnn = 64
         hidden2_cnn = 32
-        output_cnn = 64
+        output_cnn = 16
         self.encoder = CnnEncoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
        
         # CNN Decoder
         self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
 
         # Fully Connected
-        hidden_fc = 64
-        hidden_fc_2 = 32
+        hidden_fc = 128
+        hidden_fc_2 = 64
         input_fc = self.fullyConnectedLayerInputSize()
         self.fc = FC(input_fc, output_size, hidden_fc, hidden_fc_2)
 

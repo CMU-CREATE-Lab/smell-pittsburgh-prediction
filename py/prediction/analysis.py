@@ -12,7 +12,7 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
-    is_regr = False # is regression or classification
+    is_regr = True # is regression or classification
     if mode == "run_all":
         get_data = True
         compute_features = True
@@ -24,22 +24,22 @@ def main(argv):
         plot_features = False
         cross_validation = True
     else:
-        get_data = False
+        get_data = True
         compute_features = False
         plot_features = False
-        cross_validation = True
+        cross_validation = False
 
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 1, 25, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 1, 30, 0))
 
     # Compute features
     # INPUT: raw esdr and smell data
     # OUTPUT: features
     if compute_features:
         computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
+            is_regr=is_regr, f_hr=8, b_hr=0, thr=40, add_inter=False, add_roll=False, add_diff=False)
 
     # Plot features
     if plot_features:
@@ -49,14 +49,14 @@ def main(argv):
     # INPUT: features
     # OUTPUT: plots or metrics
     if cross_validation:
-        #methods = ["ANCNN"]
+        methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP"] # classification
-        methods = ["ET-feat-all", "RF-feat-all"]
-        for i in range(10, 180, 10):
-            methods.append("ET-feat-" + str(i))
-            methods.append("RF-feat-" + str(i))
+        #methods = ["ET-feat-all", "RF-feat-all"]
+        #for i in range(10, 180, 10):
+        #    methods.append("ET-feat-" + str(i))
+        #    methods.append("RF-feat-" + str(i))
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
