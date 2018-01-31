@@ -24,10 +24,10 @@ def main(argv):
         plot_features = False
         cross_validation = True
     else:
-        get_data = True
+        get_data = False
         compute_features = False
         plot_features = False
-        cross_validation = False
+        cross_validation = True
 
     # Get data
     # OUTPUT: raw esdr and smell data
