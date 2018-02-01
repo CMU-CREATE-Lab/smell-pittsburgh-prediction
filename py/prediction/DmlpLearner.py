@@ -225,16 +225,13 @@ class DMLP(nn.Module):
         # Fully Connected
         hidden_size = 128
         hidden_size_2 = 64
-        hidden_size_3 = 32
         self.fc = nn.Sequential(
             nn.SELU(),
             nn.Linear(input_size, hidden_size, bias=False),
             nn.SELU(),
             nn.Linear(hidden_size, hidden_size_2, bias=False),
             nn.SELU(),
-            nn.Linear(hidden_size_2, hidden_size_3, bias=False),
-            nn.SELU(),
-            nn.Linear(hidden_size_3, output_size, bias=False))
+            nn.Linear(hidden_size_2, output_size, bias=False))
 
     def forward(self, x):
         f = self.fc(x)

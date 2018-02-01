@@ -88,6 +88,7 @@ def aggregateSmellData(df):
         return None
 
     # Group by zipcode and output a vector with zipcodes
+    # TODO: need to merge the reports submitted by the same user in an hour
     data = []
     for z, df_z in df.groupby("zipcode"):
         # Select only smell values

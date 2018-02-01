@@ -170,7 +170,7 @@ def augmentTimeSeriesData(X, Y):
             y = Y[i]
             Y_new.append(y)
         # Resize a small part of image
-        for kernel_size in [4 ,6]:
+        for kernel_size in [2]:
             for j in range(0, int(np.floor(x.shape[1]-kernel_size+1))):
                 # Choose a block in the middle
                 before = x[:, 0:j, :]

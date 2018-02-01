@@ -19,17 +19,17 @@ class ANCnnLearner(object):
     def __init__(self,
             test=None, # the testing set for evaluating performance after each epoch
             batch_size_pre=128, # size for each batch (pre-train)
-            num_epochs_pre=20, # number of epochs (pre-train)
-            init_lr_pre=0.001, # initial learning rate (pre-train)
+            num_epochs_pre=30, # number of epochs (pre-train)
+            init_lr_pre=0.008, # initial learning rate (pre-train)
             l2_regu_weight_decay_pre=0.0001, # loss function regularization (pre-train)
             lr_schedule_step_size_pre=5, # number of epochs for decaying learning rate (pre-train)
             lr_schedule_gamma_pre=0.5, # the decaying factor for learning rate (pre-train)
             batch_size=128, # size for each batch
-            num_epochs=50, # number of epochs
-            init_lr=0.004, # initial learning rate (for regression)
+            num_epochs=40, # number of epochs
+            init_lr=0.002, # initial learning rate (for regression)
             #init_lr=0.001, # initial learning rate (for classification)
             l2_regu_weight_decay=0.0001, # loss function regularization
-            lr_schedule_step_size=5, # number of epochs for decaying learning rate (for regression)
+            lr_schedule_step_size=10, # number of epochs for decaying learning rate (for regression)
             #lr_schedule_step_size=10, # number of epochs for decaying learning rate (for classification)
             lr_schedule_gamma=0.5, # the decaying factor for learning rate
             use_class_weights=False, # use class weights when computing the loss
@@ -97,7 +97,7 @@ class ANCnnLearner(object):
             model.cuda()
         self.model = model
         
-        self.pre_train(X_pretrain)
+        #self.pre_train(X_pretrain)
         #model.freezeEncoder()
         self.fine_tune(X, Y)
     
@@ -475,8 +475,8 @@ class ANCNN(nn.Module):
         self.decoder = CnnDecoder(channel_size, output_cnn, hidden_cnn, hidden2_cnn)
 
         # Fully Connected
-        hidden_fc = 128
-        hidden_fc_2 = 64
+        hidden_fc = 64
+        hidden_fc_2 = 32
         input_fc = self.fullyConnectedLayerInputSize()
         self.fc = FC(input_fc, output_size, hidden_fc, hidden_fc_2)
 

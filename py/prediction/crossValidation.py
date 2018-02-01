@@ -26,14 +26,14 @@ def crossValidation(
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
     num_folds=68, # number of folds for validation
-    skip_folds=48, # skip first n folds (not enough data for training) 48
+    skip_folds=67, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
     logger=None):
 
     log("================================================================================", logger)
     log("================================================================================", logger)
-    log("Inference using method = " + method, logger)
+    log("Cross validation using method = " + method, logger)
     log("balance = " + str(balance), logger)
     log("only_day_time = " + str(only_day_time), logger)
     log("is_regr = " + str(is_regr), logger)
