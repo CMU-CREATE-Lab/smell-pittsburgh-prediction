@@ -1,6 +1,6 @@
 # Python helper functions
 # Developed by Yen-Chia Hsu, hsu.yenchia@gmail.com
-# v1.1
+# v1.2
 
 import logging
 from os import listdir
@@ -691,26 +691,23 @@ def getSmellReports(**options):
     # Return
     return df
 
-# Usage:
-# in_path = "../../data/ga/client_secrets.json" # client secrets for Google Analytics
-# out_path = "../../data/raw/tracker/"
-def getGA(in_path, out_path):
+# Get Google Analytics data, need to obtain the client secret from Google API console first
+# see https://developers.google.com/analytics/devguides/config/mgmt/v3/authorization
+def getGA(
+    in_path="client_secrets.json", # client secret json file
+    out_path="GA/", # the path to store CSV files
+    date_info=[{"startDate":"2017-12-11", "endDate":"2017-12-12"}, {"startDate":"2018-01-10", "endDate":"2018-01-11"}],
+    view_id="ga:131141811", # obtain this ID from Google Analytics dashboard
+    metrics=[{"expression": "ga:pageviews"}],
+    metrics_col_names=["Pageviews"], # pretty names for metrics
+    dimensions=[{"name": "ga:dimension1"}, {"name": "ga:dimension4"}, {"name": "ga:dimension5"}],
+    dimensions_col_names=["UserID", "HitTimestamp", "DataTimestamp"] # pretty names for dimensions
+    ):
+    
     print "Get Google Analytics..."
-
-    date_info = [
-        {"startDate": "2016-10-06", "endDate": "2016-10-31"},
-        {"startDate": "2016-11-01", "endDate": "2016-11-15"},
-        {"startDate": "2016-11-16", "endDate": "2016-11-30"},
-        {"startDate": "2016-12-01", "endDate": "2016-12-31"},
-        {"startDate": "2017-01-01", "endDate": "2017-01-31"},
-        {"startDate": "2017-02-01", "endDate": "2017-02-15"},
-        {"startDate": "2017-02-16", "endDate": "2017-02-28"},
-        {"startDate": "2017-03-01", "endDate": "2017-03-29"}
-    ]
 
     SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
     KEY_FILE_LOCATION = in_path 
-    VIEW_ID = "ga:131141811"
 
     # Build the service object
     credentials = ServiceAccountCredentials.from_json_keyfile_name(KEY_FILE_LOCATION, SCOPES)
@@ -724,10 +721,10 @@ def getGA(in_path, out_path):
         info = {
             "reportRequests": [
                 {
-                    "viewId": VIEW_ID,
+                    "viewId": view_id,
                     "dateRanges": [k],
-                    "metrics": [{"expression": "ga:pageviews"}],
-                    "dimensions": [{"name": "ga:dimension1"}, {"name": "ga:dimension4"}, {"name": "ga:dimension5"}],
+                    "metrics": metrics,
+                    "dimensions": dimensions,
                     "includeEmptyRows": True,
                     "pageSize": 10000
                 }
@@ -737,7 +734,7 @@ def getGA(in_path, out_path):
         # Parse rows and put them into a csv file
         file_name = "tracker-from-" + k["startDate"] + "-to-" + k["endDate"] + ".csv"
         with open(out_path + file_name, 'w') as out_file:
-            out_file.write("UserID,HitTimestamp,DataTimestamp,Pageviews\n")
+            out_file.write(",".join(dimensions_col_names) + "," + ",".join(metrics_col_names) + "\n")
             rows = r["reports"][0]["data"]["rows"]
             for p in rows:
                 line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
