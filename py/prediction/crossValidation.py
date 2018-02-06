@@ -13,6 +13,7 @@ import copy
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
+import gc
 
 # Cross validation
 def crossValidation(
@@ -25,7 +26,7 @@ def crossValidation(
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=68, # number of folds for validation
+    num_folds=69, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
@@ -301,6 +302,19 @@ def crossValidation(
             log("Print time series plots...", logger)
             Y_pred[Y_pred==1] = 2
             timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
+
+    # Release memory
+    df_X = None
+    df_Y = None
+    X = None
+    Y = None
+    X_train = None
+    X_test = None
+    train_all_dt = None
+    train_all = None
+    test_all_dt = None
+    test_all = None
+    gc.collect()
 
 def rocPlot(method, Y_true, Y_score, out_p):
     roc = round(roc_auc_score(Y_true, Y_score[:, -1]), 4)

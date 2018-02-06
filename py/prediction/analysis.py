@@ -32,7 +32,7 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 1, 25, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 2, 1, 0))
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -64,12 +64,16 @@ def main(argv):
             logger = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
             crossValidation(in_p=[p+"X.csv",p+"Y.csv"], out_p_root=p, method=m, is_regr=is_regr, logger=logger)
 
+def genMethodSetET_good():
+    m = "ET-"
+    return map(lambda x: m+x, ["800-50-2", "400-70-2", "200-60-2", "100-60-2"])
+
 def genMethodSetET():
     m_all = []
     m = "ET"
     n_estimators = [100,200,400,800]
     max_features = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,None]
-    min_samples_split = [2,4,8,16]
+    min_samples_split = [2]
     for n in n_estimators:
         for mf in max_features:
             for mss in min_samples_split:
