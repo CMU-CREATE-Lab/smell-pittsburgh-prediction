@@ -1,4 +1,5 @@
 import sys
+import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
 from computeFeatures import *
@@ -39,7 +40,7 @@ def main(argv):
     # OUTPUT: features
     if compute_features:
         computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
+            is_regr=is_regr, f_hr=6, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
 
     # Plot features
     if plot_features:
@@ -63,10 +64,6 @@ def main(argv):
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
             logger = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
             crossValidation(in_p=[p+"X.csv",p+"Y.csv"], out_p_root=p, method=m, is_regr=is_regr, logger=logger)
-
-def genMethodSetET_good():
-    m = "ET-"
-    return map(lambda x: m+x, ["800-50-2", "400-70-2", "200-60-2", "100-60-2"])
 
 def genMethodSetET():
     m_all = []
