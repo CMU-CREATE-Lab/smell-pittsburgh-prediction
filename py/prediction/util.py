@@ -1,6 +1,6 @@
 # Python helper functions
 # Developed by Yen-Chia Hsu, hsu.yenchia@gmail.com
-# v1.2
+# v1.3
 
 import logging
 from os import listdir
@@ -29,10 +29,10 @@ from sklearn.metrics import precision_recall_fscore_support
 from imblearn.over_sampling import SMOTE
 from imblearn.over_sampling import RandomOverSampler
 
-import torch
 import scipy.ndimage as ndimage
 
-# For GA
+# For Google Analytics
+# sudo pip install --upgrade google-api-python-client
 from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -52,9 +52,12 @@ def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()),
     return logger
 
 # log and print
-def log(msg, logger):
+def log(msg, logger, level="info"):
     if logger is not None:
-        logger.info(msg)
+        if level == "info":
+            logger.info(msg)
+        elif level == "error":
+            logger.error(msg)
     print msg
 
 # find the least common elements in a given array
@@ -125,8 +128,9 @@ def flipDict(a):
 
 # Check if a directory exists, if not, create it
 def checkAndCreateDir(path):
-    if not os.path.exists(os.path.dirname(path)):
-        os.makedirs(os.path.dirname(path))
+    dir_name = os.path.dirname(path)
+    if dir_name != "" and not os.path.exists(dir_name):
+        os.makedirs(dir_name)
 
 # Convert the epochtime index in a pandas dataframe to datetime index
 def epochtimeIdxToDatetime(df):
@@ -478,7 +482,8 @@ def saveJson(content, fpath):
     with open(fpath, "w") as f:
         json.dump(content, f)
 
-# Get the access token from ESDR
+# Get the access token from ESDR, need the auth.json file
+# See https://github.com/CMU-CREATE-Lab/esdr/blob/master/HOW_TO.md
 def getEsdrAccessToken(auth_json_path):
     logger = generateLogger("log.log")
     logger.info("Get access token from ESDR")
@@ -498,7 +503,7 @@ def getEsdrAccessToken(auth_json_path):
         logger.info("Receive user ID " + str(user_id))
         return access_token, user_id 
 
-# Upload data to ESDR
+# Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
 # data_json = {
 #   "channel_names": ["particle_concentration", "particle_count", "raw_particles", "temperature"],
 #   "data": [[1449776044, 0.3, 8.0, 6.0, 2.3], [1449776104, 0.1, 3.0, 0.0, 4.9]]
