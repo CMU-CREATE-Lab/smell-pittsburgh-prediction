@@ -1,4 +1,5 @@
 import sys
+import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
 from computeFeatures import *
