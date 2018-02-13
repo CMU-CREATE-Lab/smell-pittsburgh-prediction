@@ -44,9 +44,10 @@ def getData(
     
     # Get smell reports (datetime object in "DateTime" column is in UTC tzinfo)
     df_smell = getSmellReports(start_time=start_time, end_time=end_time)
+    df_smell = aggregateSmellData(df_smell)
+    
+    # Sync DateTime column in esdr and smell data
     if df_smell is not None:
-        df_smell = aggregateSmellData(df_smell)
-        # Sync DateTime column in esdr and smell data
         df_smell = pd.merge_ordered(df_esdr["DateTime"].to_frame(), df_smell, on="DateTime", how="left", fill_method=None)
         df_smell = df_smell.fillna(0)
     
@@ -70,6 +71,8 @@ def mergeEsdrData(data):
     return df
 
 def aggregateSmellData(df):
+    if df is None: return None
+
     # Bag of words
     #bow = bagOfWords(df["smell_description"])
     
