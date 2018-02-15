@@ -9,13 +9,16 @@ class HybridCrowdClassifier(object):
         self.base_estimator = base_estimator
 
     def fit(self, X, Y):
-        return None
+        self.base_estimator.fit(X, Y)
 
-    def predict(self, X, threshold=0.6):
-        return None
+    # Be careful that this function only works for binary classification
+    def predict(self, X, threshold=0.5):
+        prob = self.base_estimator.predict_proba(X)
+        res = (prob[:,1] > threshold).astype(int)
+        return res
 
     def predict_proba(self, X):
-        return None
+        return self.base_estimator.predict_proba(X)
 
     def save(self, out_path):
         return None

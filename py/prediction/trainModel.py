@@ -26,6 +26,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import LinearSVC
+from HybridCrowdClassifier import HybridCrowdClassifier
 
 from CRnnLearner import CRnnLearner
 from ANCnnLearner import ANCnnLearner
@@ -49,9 +50,9 @@ def trainModel(
     multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
     if is_regr:
         if method == "RF":
-            model = RandomForestRegressor(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
+            model = RandomForestRegressor(n_estimators=100, max_features=None, min_samples_split=5, random_state=0, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesRegressor(n_estimators=800, random_state=0, n_jobs=-1, max_features=None)
+            model = ExtraTreesRegressor(n_estimators=100, max_features=None, min_samples_split=5, random_state=0, n_jobs=-1)
         elif method == "SVM":
             model = SVR(max_iter=5000)
             if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
@@ -78,8 +79,17 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         else:
-            log("ERROR: method " + method + " is not supported", logger)
-            return None
+            if method[:2] == "ET":
+                # parse tuning parameters
+                p = method.split("-")
+                log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", min_samples_split=" + p[3], logger)
+                for i in range(1, len(p)):
+                    if p[i] == "None": p[i] = None
+                    else: p[i] = int(p[i])
+                model = ExtraTreesRegressor(n_estimators=p[1], max_features=p[2], min_samples_split=p[3], random_state=0, n_jobs=-1)
+            else:
+                log("ERROR: method " + method + " is not supported", logger)
+                return None
     else:
         if method == "RF":
             model = RandomForestClassifier(n_estimators=100, max_features=60, min_samples_split=2, random_state=0, n_jobs=-1)
@@ -99,11 +109,14 @@ def trainModel(
             model = CRnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
+        elif method == "HC":
+            model = ExtraTreesClassifier(n_estimators=100, max_features=60, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         else:
             if method[:2] == "ET":
                 # parse tuning parameters
                 p = method.split("-")
-                log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", max_depth=" + p[3], logger)
+                log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", min_samples_split=" + p[3], logger)
                 for i in range(1, len(p)):
                     if p[i] == "None": p[i] = None
                     else: p[i] = int(p[i])

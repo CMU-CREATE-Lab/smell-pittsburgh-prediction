@@ -52,10 +52,9 @@ def main(argv):
     if cross_validation:
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
-        #methods = ["SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
-        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP"] # classification
-        #methods = ["ET"]
-        methods = genMethodSetET()
+        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HC"] # classification
+        methods = ["HC"]
+        #methods = genMethodSetETR()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
@@ -65,12 +64,24 @@ def main(argv):
             logger = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
             crossValidation(in_p=[p+"X.csv",p+"Y.csv"], out_p_root=p, method=m, is_regr=is_regr, logger=logger)
 
-def genMethodSetET():
+def genMethodSetETC():
     m_all = []
     m = "ET"
     n_estimators = [100,200,400,800]
     max_features = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,None]
     min_samples_split = [2]
+    for n in n_estimators:
+        for mf in max_features:
+            for mss in min_samples_split:
+                m_all.append(m + "-" + str(n) + "-" + str(mf) + "-" + str(mss))
+    return m_all
+
+def genMethodSetETR():
+    m_all = []
+    m = "ET"
+    n_estimators = [100]
+    max_features = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,None]
+    min_samples_split = [2,4,8,16]
     for n in n_estimators:
         for mf in max_features:
             for mss in min_samples_split:
