@@ -30,7 +30,7 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 2, 8, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 2, 15, 0))
 
     # Analyze data
     if analyze_data:
@@ -54,8 +54,8 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HC"] # classification
-        methods = ["HC"]
-        #methods = genMethodSetETR()
+        #methods = ["ET"]
+        methods = genMethodSetETC()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"

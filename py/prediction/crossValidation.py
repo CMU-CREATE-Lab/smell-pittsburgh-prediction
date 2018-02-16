@@ -26,8 +26,8 @@ def crossValidation(
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=70, # number of folds for validation
-    skip_folds=68, # skip first n folds (not enough data for training) 48
+    num_folds=71, # number of folds for validation
+    skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
     logger=None):

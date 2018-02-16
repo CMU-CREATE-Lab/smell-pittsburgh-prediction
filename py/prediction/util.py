@@ -337,7 +337,7 @@ def binary2Interval(Y):
 # - prf: precision, recall, and f-score (for classification) in pandas dataframe format
 # - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
-        round_to_decimal=3, labels=[0,1], aggr_axis=False):
+        round_to_decimal=3, labels=[0,1], aggr_axis=False, only_binary=True):
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
     if aggr_axis and is_regr:
@@ -345,6 +345,8 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
             Y_true = np.sum(Y_true, axis=1)
         if len(Y_pred.shape) > 1:
             Y_pred = np.sum(Y_pred, axis=1)
+    if only_binary and not is_regr:
+        Y_pred[Y_pred>1] = 1
     Y_true_origin, Y_pred_origin = deepcopy(Y_true), deepcopy(Y_pred)
     Y_true, Y_pred = Y_true[~np.isnan(Y_true)], Y_pred[~np.isnan(Y_pred)]
     metric = {}

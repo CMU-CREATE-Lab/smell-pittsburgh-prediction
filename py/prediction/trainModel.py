@@ -92,9 +92,9 @@ def trainModel(
                 return None
     else:
         if method == "RF":
-            model = RandomForestClassifier(n_estimators=100, max_features=60, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=800, max_features=50, min_samples_split=2, random_state=0, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=100, max_features=60, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=800, max_features=50, min_samples_split=2, random_state=0, n_jobs=-1)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", random_state=0, probability=True)
         elif method == "MLP":
