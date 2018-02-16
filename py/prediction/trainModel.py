@@ -110,7 +110,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HC":
-            model = ExtraTreesClassifier(n_estimators=100, max_features=60, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=800, max_features=50, min_samples_split=2, random_state=0, n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         else:
             if method[:2] == "ET":

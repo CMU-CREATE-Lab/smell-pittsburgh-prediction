@@ -54,8 +54,8 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HC"] # classification
-        #methods = ["ET"]
-        methods = genMethodSetETC()
+        methods = ["HC"]
+        #methods = genMethodSetETC()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
