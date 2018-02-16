@@ -2,38 +2,39 @@ import sys
 import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
+from analyzeData import *
 from computeFeatures import *
 from plotFeatures import *
 from crossValidation import *
 
 def main(argv):
-    p = "data_analysis/"
+    p = "data_main/"
     mode = None
     if len(argv) >= 2:
         mode = argv[1]
 
     # Parameters
     is_regr = False # is regression or classification
+    get_data, analyze_data, compute_features, plot_features, cross_validation = False, False, False, False, False
     if mode == "run_all":
         get_data = True
         compute_features = True
-        plot_features = False
         cross_validation = True
     elif mode == "test":
-        get_data = False
         compute_features = True
-        plot_features = False
         cross_validation = True
     else:
-        get_data = False
-        compute_features = False
-        plot_features = False
+        #analyze_data = True
         cross_validation = True
 
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
         getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 2, 8, 0))
+
+    # Analyze data
+    if analyze_data:
+        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"])
 
     # Compute features
     # INPUT: raw esdr and smell data
