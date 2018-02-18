@@ -19,6 +19,7 @@ import gc
 def crossValidation(
     df_X=None, # features
     df_Y=None, # labels
+    df_C=None, # crowd feature, total smell values for the previous hour
     in_p=None, # input path of features and labels
     out_p_root=None, # root directory for outputing files
     method="SVM", # see trainModel.py
@@ -48,6 +49,7 @@ def crossValidation(
         if in_p is not None:
             df_X = pd.read_csv(in_p[0])
             df_Y = pd.read_csv(in_p[1])
+            df_C = pd.read_csv(in_p[2])
         else:
             log("ERROR: no input data, return None.")
             return None
@@ -66,6 +68,7 @@ def crossValidation(
     if "CRNN" in method or "ANCNN" in method:
         log("sequence_length = " + str(sequence_length), logger) # the number of data points to look back
         # Compute batches
+        C = df_C.values
         X, Y = computeTimeSeriesBatches(df_X.values, df_Y.values, sequence_length, index_filter=daytime_idx)
         # For CNN, we want to do 1D convolution on time-series images
         # Each image has dimention (sequence_length * 1), and has channel size equal to feature_size
@@ -78,8 +81,8 @@ def crossValidation(
         # For non-CNN methods, we need to perform feature selection for each cross validation fold
         # So do not convert the dataframe to numpy format yet
         if only_day_time:
-            df_X, df_Y = df_X[daytime_idx], df_Y[daytime_idx]
-        X, Y = df_X, df_Y
+            df_X, df_Y = df_X[daytime_idx], df_Y[daytime_idx], df_C[daytime_idx]
+        X, Y, C = df_X, df_Y, df_C
 
     # Validation folds
     # Notice that this is time-series prediction, we cannot use traditional cross-validation folds
@@ -95,34 +98,37 @@ def crossValidation(
 
     # Perform cross validation
     counter = 0
-    train_all = {"X": [], "Y": [], "Y_pred": [], "Y_score": []}
-    test_all = {"X": [], "Y": [], "Y_pred": [], "Y_score": []}
+    train_all = {"X": [], "Y": [], "Y_pred": [], "Y_score": [], "C": []}
+    test_all = {"X": [], "Y": [], "Y_pred": [], "Y_score": [], "C": []}
     metric_all = {"train": [], "test": []}
     for train_idx, test_idx in tscv.split(X, Y):
         if counter < skip_folds:
             counter += 1
             continue
+        counter += 1
         log("--------------------------------------------------------------", logger)
-        log("Processing fold " + str(counter + 1) + ":", logger)
-        # For non-CNN methods, we need to do feature selection and convert data to numpy format
-        # For CNN methods, we need to augment time series data
+        log("Processing fold " + str(counter) + ":", logger)
         if len(X.shape) == 2:
-            X_train, Y_train, X_test, Y_test = X.iloc[train_idx], Y.iloc[train_idx], X.iloc[test_idx], Y.iloc[test_idx]
+            # For non-CNN methods, we need to do feature selection and convert data to numpy format
+            X_train, Y_train, C_train = X.iloc[train_idx], Y.iloc[train_idx], C.iloc[train_idx]
+            X_test, Y_test, C_test = X.iloc[test_idx], Y.iloc[test_idx], C.iloc[test_idx]
             if select_feat:
                 X_train, Y_train = selectFeatures(X_train, Y_train, is_regr=is_regr, logger=logger, num_feat=select_feat)
             X_test = X_test[X_train.columns]
-            X_train, Y_train, X_test, Y_test = X_train.values, Y_train.values, X_test.values, Y_test.values
+            X_train, Y_train, C_train = X_train.values, Y_train.values, C_train.values
+            X_test, Y_test, C_test = X_test.values, Y_test.values, C_test.values
             if augment_data:
                 log("Data augmentation is ignored for non-CNN methods", logger)
         else:
-            X_train, Y_train = X[train_idx], Y[train_idx]
+            # For CNN methods, we need to augment time series data
+            X_train, Y_train, C_train = X[train_idx], Y[train_idx], C[train_idx]
             if augment_data:
                 log("Augment time series data...", logger)
                 X_train, Y_train = augmentTimeSeriesData(X_train, Y_train)
-            X_test, Y_test = X[test_idx], Y[test_idx]
+            X_test, Y_test, C_test = X[test_idx], Y[test_idx], C[test_idx]
         # Prepare training and testing set
-        train = {"X": X_train, "Y": Y_train, "Y_pred": None}
-        test = {"X": X_test, "Y": Y_test, "Y_pred": None}
+        train = {"X": X_train, "Y": Y_train, "Y_pred": None, "C": C_train}
+        test = {"X": X_test, "Y": Y_test, "Y_pred": None, "C": C_test}
         if "ANCNN" in method:
             tr_idx, te_idx = tscv_pretrain_split[counter]
             train["X_pretrain"] = X_pretrain[tr_idx]
@@ -133,13 +139,9 @@ def crossValidation(
         # Train model
         model = trainModel(train, test=test, method=method, is_regr=is_regr, logger=logger, balance=balance)
         # Evaluate model
-        if method == "HC": # the hybrid crowd classifier requires Y
-            test["Y_previous"] = np.roll(test["Y"].squeeze(), 1)
-            train["Y_previous"] = np.roll(train["Y"].squeeze(), 1)
-            test["Y_previous"][0] = 0
-            train["Y_previous"][0] = 0
-            test["Y_pred"] = model.predict(test["X"], test["Y_previous"])
-            train["Y_pred"] = model.predict(train["X"], train["Y_previous"])
+        if method == "HCR" or method == "CR": # the hybrid crowd classifier requires Y
+            test["Y_pred"] = model.predict(test["X"], test["C"])
+            train["Y_pred"] = model.predict(train["X"], train["C"])
         else:
             test["Y_pred"] = model.predict(test["X"])
             train["Y_pred"] = model.predict(train["X"])
@@ -152,9 +154,9 @@ def crossValidation(
         metric_i_train = computeMetric(train["Y"], train["Y_pred"], is_regr, aggr_axis=True)
         metric_all["train"].append(metric_i_train)
         if not is_regr:
-            if method == "HC": # the hybrid crowd classifier requires Y
-                test_all["Y_score"].append(model.predict_proba(test["X"], test["Y_previous"]))
-                train_all["Y_score"].append(model.predict_proba(train["X"], train["Y_previous"]))
+            if method == "HCR" or method == "CR": # the hybrid crowd classifier requires Y
+                test_all["Y_score"].append(model.predict_proba(test["X"], test["C"]))
+                train_all["Y_score"].append(model.predict_proba(train["X"], train["C"]))
             else:
                 test_all["Y_score"].append(model.predict_proba(test["X"]))
                 train_all["Y_score"].append(model.predict_proba(train["X"]))
@@ -172,7 +174,6 @@ def crossValidation(
             for m in metric_i_test:
                 log("Testing metrics: " + m, logger)
                 log(metric_i_test[m], logger)
-        counter += 1
 
     # Merge all evaluation data
     test_all["Y"] = np.concatenate(test_all["Y"], axis=0)
@@ -312,7 +313,6 @@ def crossValidation(
             log("Print roc curve plots...", logger)
             rocPlot(method, Y_true, Y_score, out_p)
             log("Print time series plots...", logger)
-            Y_pred[Y_pred==1] = 2
             timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
 
     # Release memory
@@ -411,7 +411,7 @@ def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx):
     # Time vs Prediction (or True)
     fig = plt.figure(figsize=(200, 8), dpi=150)
     plt.plot(range(0, len(Y_true)), Y_true, "-o", alpha=0.8, markersize=3, color=(0,0,1), lw=1)
-    plt.plot(range(0, len(Y_pred)), Y_pred, "-o", alpha=0.8, markersize=3, color=(1,0,0), lw=1)
+    plt.plot(range(0, len(Y_pred)), Y_pred, "-o", alpha=0.8, markersize=3, color=(1,0,0), lw=2)
     for i in range(0, len(dt_idx)):
         if dt_idx[i] == False:
             plt.axvspan(i-0.5, i+0.5, facecolor="0.2", alpha=0.5)

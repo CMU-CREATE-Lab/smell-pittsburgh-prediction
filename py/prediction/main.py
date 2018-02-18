@@ -24,6 +24,8 @@ def main(argv):
         compute_features = True
         cross_validation = True
     else:
+        #get_data = True
+        #compute_features = True
         #analyze_data = True
         cross_validation = True
 
@@ -38,9 +40,9 @@ def main(argv):
 
     # Compute features
     # INPUT: raw esdr and smell data
-    # OUTPUT: features
+    # OUTPUT: features and label
     if compute_features:
-        computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv"],
+        computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv",p+"C.csv"],
             is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
 
     # Plot features
@@ -53,22 +55,23 @@ def main(argv):
     if cross_validation:
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
-        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HC"] # classification
-        methods = ["HC"]
-        #methods = genMethodSetETC()
+        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR"] # classification
+        #methods = ["CR", "HCR", "ET"]
+        #methods = ["ET"]
+        methods = genMethodSetETC()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
         checkAndCreateDir(p_log)
         for m in methods:
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
-            logger = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
-            crossValidation(in_p=[p+"X.csv",p+"Y.csv"], out_p_root=p, method=m, is_regr=is_regr, logger=logger)
+            lg = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
+            crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p, method=m, is_regr=is_regr, logger=lg)
 
 def genMethodSetETC():
     m_all = []
     m = "ET"
-    n_estimators = [100,200,400,800]
+    n_estimators = [100,200,300,400,500,600,700,800,900,1000]
     max_features = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,None]
     min_samples_split = [2]
     for n in n_estimators:

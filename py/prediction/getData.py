@@ -113,7 +113,7 @@ def aggregateSmellData(df):
 
 def resampleData(df, method=None):
     df = df.copy(deep=True)
-    df = epochtimeIdxToDatetime(df).resample("1h")
+    df = epochtimeIdxToDatetime(df).resample("1h", label="right")
     if method == "sum":
         return df.sum()
     elif method == "count":

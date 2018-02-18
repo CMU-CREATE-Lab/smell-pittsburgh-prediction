@@ -21,6 +21,7 @@ def computeFeatures(
     add_inter=False, # add variable interaction (X1*X2) terms in the features or not
     in_p_mean=None, # the path of mean values in pandas dataframe for scaling features
     in_p_std=None, # the path of std in pandas dataframe for scaling features
+    aggr_axis=True, # whether we want to sum all smell reports together for all zipcodes
     logger=None):
     
     log("Compute features...", logger)
@@ -51,7 +52,7 @@ def computeFeatures(
     # For models that do have time-series structure (e.g. RNN), we want to use original features
     df_X = extractFeatures(df_esdr, b_hr, add_inter, add_roll, add_diff)
     df_X[df_X < 1e-6] = 0 # prevent extreme small values 
-    
+
     # Transform features
     if in_p_mean is not None and in_p_std is not None:
         df_X_mean = pd.read_csv(in_p_mean, header=None, index_col=0, squeeze=True)
@@ -73,28 +74,34 @@ def computeFeatures(
     if df_smell is not None:
         bins = None if is_regr else [-np.inf, thr, np.inf] # bin smell reports into labels or not
         labels = None if is_regr else [0, 1]
-        #aggr_axis = False if is_regr else True
-        aggr_axis = True
         df_Y = extractSmellResponse(df_smell, f_hr, bins, labels, aggr_axis=aggr_axis)
         df_Y = df_Y.reset_index()
         # Sync DateTime column in esdr and smell data
         df_Y = pd.merge_ordered(df_X["DateTime"].to_frame(), df_Y, on="DateTime", how="inner", fill_method=None)
         df_X = pd.merge_ordered(df_Y["DateTime"].to_frame(), df_X, on="DateTime", how="inner", fill_method=None)
+        # Extract crowd features (total smell values for the previous hour)
+        df_C = extractSmellResponse(df_smell, None, None, None, aggr_axis=aggr_axis)
+        df_C = df_C.reset_index()
+        df_C = pd.merge_ordered(df_X["DateTime"].to_frame(), df_C, on="DateTime", how="inner", fill_method=None)
 
     # drop datetime
     df_X = df_X.drop("DateTime", axis=1)
     if df_smell is not None:
         df_Y = df_Y.drop("DateTime", axis=1)
+        df_C = df_C.drop("DateTime", axis=1)
     else:
         df_Y = None
+        df_C = None
 
     # Write dataframe into a csv file
     if out_p:
         for p in out_p: checkAndCreateDir(p)
         df_X.to_csv(out_p[0], index=False)
         df_Y.to_csv(out_p[1], index=False)
+        df_C.to_csv(out_p[2], index=False)
         log("Features created at " + out_p[0], logger)
         log("Labels created at " + out_p[1], logger)
+        log("Crowd feature created at " + out_p[2], logger)
     if out_p_mean:
         checkAndCreateDir(out_p_mean)
         df_X_mean.to_csv(out_p_mean, index=True)
@@ -103,7 +110,7 @@ def computeFeatures(
         checkAndCreateDir(out_p_std)
         df_X_std.to_csv(out_p_std, index=True)
         log("Original std created at " + out_p_std, logger)
-    return df_X, df_Y
+    return df_X, df_Y, df_C 
 
 def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     df = df.copy(deep=True)
@@ -170,11 +177,11 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     return df_feat
 
 def extractSmellResponse(df, f_hr, bins, labels, aggr_axis=False):
-    df = df.copy(deep=True)
+    df_resp = df.copy(deep=True)
     
     # Compute the total smell_values in future f_hr hours
     if f_hr is not None:
-        df_resp = df.rolling(f_hr, min_periods=1).sum().shift(-1*f_hr)
+        df_resp = df_resp.rolling(f_hr, min_periods=1).sum().shift(-1*f_hr)
         # Remove the last f_hr rows
         df_resp = df_resp.iloc[:-1*f_hr]
     
