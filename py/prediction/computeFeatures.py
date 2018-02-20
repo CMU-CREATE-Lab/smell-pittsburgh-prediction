@@ -75,10 +75,11 @@ def computeFeatures(
         bins = None if is_regr else [-np.inf, thr, np.inf] # bin smell reports into labels or not
         labels = None if is_regr else [0, 1]
         df_Y = extractSmellResponse(df_smell, f_hr, bins, labels, aggr_axis=aggr_axis)
-        df_Y = df_Y.reset_index()
-        # Sync DateTime column in esdr and smell data
-        df_Y = pd.merge_ordered(df_X["DateTime"].to_frame(), df_Y, on="DateTime", how="inner", fill_method=None)
-        df_X = pd.merge_ordered(df_Y["DateTime"].to_frame(), df_X, on="DateTime", how="inner", fill_method=None)
+        if df_Y is not None:
+            df_Y = df_Y.reset_index()
+            # Sync DateTime column in esdr and smell data
+            df_Y = pd.merge_ordered(df_X["DateTime"].to_frame(), df_Y, on="DateTime", how="inner", fill_method=None)
+            df_X = pd.merge_ordered(df_Y["DateTime"].to_frame(), df_X, on="DateTime", how="inner", fill_method=None)
         # Extract crowd features (total smell values for the previous hour)
         df_C = extractSmellResponse(df_smell, None, None, None, aggr_axis=aggr_axis)
         df_C = df_C.reset_index()
@@ -87,7 +88,8 @@ def computeFeatures(
     # drop datetime
     df_X = df_X.drop("DateTime", axis=1)
     if df_smell is not None:
-        df_Y = df_Y.drop("DateTime", axis=1)
+        if df_Y is not None:
+            df_Y = df_Y.drop("DateTime", axis=1)
         df_C = df_C.drop("DateTime", axis=1)
     else:
         df_Y = None
@@ -190,6 +192,9 @@ def extractSmellResponse(df, f_hr, bins, labels, aggr_axis=False):
     if bins is not None and labels is not None:
         df_resp = pd.cut(df_resp, bins, labels=labels, right=False)
     if aggr_axis: df_resp.name = "smell"
+
+    # Sanity check
+    if len(df_resp) == 0: df_resp = None
 
     return df_resp
 

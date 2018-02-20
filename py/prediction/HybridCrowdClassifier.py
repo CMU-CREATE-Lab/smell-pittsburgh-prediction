@@ -24,6 +24,10 @@ class HybridCrowdClassifier(object):
         pred = np.squeeze(crowd>=self.crowd_thr) * 2
         
         # Use the model to predict result and merge them
+        # if pred==0, no event
+        # if pred==1, event predicted by the base estimator
+        # if pred==2, event detected by the crowd
+        # if pred==3, event both predicted by the base estimator and detected by the crowd
         if self.base_estimator is not None:
             prob_model = self.base_estimator.predict_proba(X)
             pred_model = (prob_model[:,1] > X_thr).astype(int)
