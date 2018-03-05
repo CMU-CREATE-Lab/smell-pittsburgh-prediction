@@ -32,7 +32,7 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 2, 15, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 3, 1, 0))
 
     # Analyze data
     if analyze_data:
