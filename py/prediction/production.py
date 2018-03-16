@@ -48,7 +48,7 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     df_esdr, df_smell = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
 
     # Compute features
-    df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr,
+    df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger, out_p_mean=p+"mean.csv", out_p_std=p+"std.csv")
  
     # Select features
@@ -80,7 +80,7 @@ def predict(f_hr=8, b_hr=3, thr=40):
         return
     
     # Compute features
-    df_X, _, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr,
+    df_X, _, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger, in_p_mean=p+"mean.csv", in_p_std=p+"std.csv")
     if len(df_X) != 1:
         log("ERROR: Length of X is not 1", logger)
