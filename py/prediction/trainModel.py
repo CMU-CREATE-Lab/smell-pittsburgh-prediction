@@ -79,7 +79,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         else:
-            if method[:2] == "ET":
+            if method[:2] in ["RF", "ET"]:
                 # parse tuning parameters
                 p = method.split("-")
                 log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", min_samples_split=" + p[3], logger)
@@ -115,7 +115,7 @@ def trainModel(
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)
         else:
-            if method[:2] == "ET":
+            if method[:2] in ["RF", "ET"]:
                 # parse tuning parameters
                 p = method.split("-")
                 log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", min_samples_split=" + p[3], logger)

@@ -64,6 +64,7 @@ class ForestInterpreter(object):
 
     def printDecisionPath(self, tree_id, leaf_id):
         # need to print the decision path based on tree_id and leaf_id
+        return
 
     def reportPerformance(self):
         self.log("Report training performance...")
