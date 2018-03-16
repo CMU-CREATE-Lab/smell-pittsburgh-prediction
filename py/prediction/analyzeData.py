@@ -2,7 +2,7 @@ from util import *
 import numpy as np
 import pandas as pd
 from computeFeatures import *
-from trainModel import *
+from ForestInterpreter import *
 import copy
 
 def analyzeData(
@@ -12,10 +12,10 @@ def analyzeData(
     log("Analyze data...", logger)
 
     # Evaluate model performance
-    #evalModel(in_p, logger=logger)
+    evalModel(in_p, logger=logger)
     
     # Correlational study
-    corrStudy(in_p, logger=logger)
+    #corrStudy(in_p, logger=logger)
 
 # Correlational study
 def corrStudy(in_p, logger=None):
@@ -37,21 +37,8 @@ def corrStudy(in_p, logger=None):
 
 # Evaluate the model and compute feature performance
 def evalModel(in_p, logger=None):
-    # Compute feature importance
-    log("Compute feature importance using ExtraTrees...", logger)
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    model = trainModel({"X": df_X, "Y": df_Y}, method="ET", logger=logger)
-    feat_ims = np.array(model.feature_importances_)
-    sorted_ims_idx = np.argsort(feat_ims)
-    feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
-    feat_names = df_X.columns.copy()
-    feat_names = feat_names[sorted_ims_idx]
-    for k in zip(feat_ims, feat_names):
-        log("{0:.5f}".format(k[0]) + "--" + str(k[1]), logger)
-
-    # Evaluate performance
-    log("Compute evaluation metrics...", logger)
-    metric = computeMetric(df_Y, model.predict(df_X), False)
-    for m in metric:
-        log(metric[m], logger)
+    model = ForestInterpreter(df_X=df_X, df_Y=df_Y, logger=logger)
+    #model.reportFeatureImportance()
+    #model.reportPerformance()
