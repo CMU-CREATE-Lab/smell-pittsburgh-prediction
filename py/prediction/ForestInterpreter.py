@@ -15,8 +15,12 @@ class ForestInterpreter(object):
         df_Y = df_Y.squeeze()
         self.df_X = df_X
         self.df_Y = df_Y
-        self.path = {} # decision paths indexed by tree_id and path_id
         self.logger = logger
+
+        # Store all decision path details
+        # key: (tree_id, leaf_id), a tuple
+        # value: decision rule of the path, a string
+        self.d_path = {}
 
         # Fit the ExtraTrees model
         self.log("Fit ExtraTrees model..")
@@ -29,38 +33,41 @@ class ForestInterpreter(object):
         # Find all predictors with responese 1
         df_X = df_X[df_Y == 1].reset_index(drop=True)
 
-        # Get all decision paths of df_X (labels are already 1)
-        sample_id = 0
+        # Get all decision paths of all samples in df_X (labels are already 1)
+        d_path_2_sample_id = {} # the mapping of decision path and sample ids
         for i in range(0, len(model)):
+            log("=================================================")
+            log("Tree id : " + str(i))
             tree = model[i]
             Y_pred = tree.predict(df_X)
             leave_id = tree.apply(df_X)
-            leaf_id = leave_id[sample_id]
-            print "-------------------------------"
-            print "Tree id : " + str(i)
-            if Y_pred[sample_id] != 1:
-                print "The predicted result is not 1"
-                continue
-            else:
-                print "Leaf id : " + str(leaf_id)
             value = tree.tree_.value # class value of the leaf node
             feature = tree.tree_.feature
             threshold = tree.tree_.threshold
             node_indicator = tree.decision_path(df_X)
-            node_index = node_indicator.indices[node_indicator.indptr[sample_id]:node_indicator.indptr[sample_id + 1]]
-            for node_id in node_index:
-                if df_X.iloc[sample_id, feature[node_id]] <= threshold[node_id]:
-                    threshold_sign = "<="
+            # Loop all samples in df_X
+            for j in range(0, len(df_X)):
+                leaf_id = leave_id[j]
+                if Y_pred[j] != 1:
+                    log("Sample id " + str(j) + " : predicted result is not 1")
+                    continue
                 else:
-                    threshold_sign = ">"
-                #print("decision id node %s : %s (= %s) %s %s"
-                #print("%20s : %s (= %s) %s %s" % (
-                #    value[node_id],
-                #    df_X.columns[feature[node_id]],
-                #    np.round(df_X.iloc[sample_id, feature[node_id]], 3),
-                #    threshold_sign,
-                #    np.round(threshold[node_id], 3)))
-            #break
+                    log("Sample id " + str(j) + " : find leaf id " + str(leaf_id))
+                node_index = node_indicator.indices[node_indicator.indptr[j]:node_indicator.indptr[j+1]]
+                # Extract decision rules
+                rule = ""
+                for node_id in node_index:
+                    if df_X.iloc[sample_id, feature[node_id]] <= threshold[node_id]:
+                        threshold_sign = "<="
+                    else:
+                        threshold_sign = ">"
+                    print("%20s : %s (= %s) %s %s" % (
+                        value[node_id],
+                        df_X.columns[feature[node_id]],
+                        np.round(df_X.iloc[j, feature[node_id]], 3),
+                        threshold_sign,
+                        np.round(threshold[node_id], 3)))
+            break
 
     def printDecisionPath(self, tree_id, leaf_id):
         # need to print the decision path based on tree_id and leaf_id

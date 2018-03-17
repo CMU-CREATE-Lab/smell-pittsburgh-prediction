@@ -92,9 +92,9 @@ def trainModel(
                 return None
     else:
         if method == "RF":
-            model = RandomForestClassifier(n_estimators=1000, max_features=20, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=1000, max_features=20, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", random_state=0, probability=True)
         elif method == "MLP":
@@ -110,7 +110,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HCR":
-            model = ExtraTreesClassifier(n_estimators=1000, max_features=20, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)

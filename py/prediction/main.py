@@ -57,8 +57,8 @@ def main(argv):
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR"] # classification
         #methods = ["CR", "HCR", "ET"]
-        #methods = ["ET", "RF"]
-        methods = genMethodSet()
+        methods = ["HCR"]
+        #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
