@@ -40,5 +40,3 @@ def evalModel(in_p, logger=None):
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
     model = ForestInterpreter(df_X=df_X, df_Y=df_Y, logger=logger)
-    #model.reportFeatureImportance()
-    #model.reportPerformance()

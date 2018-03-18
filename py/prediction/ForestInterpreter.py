@@ -1,9 +1,9 @@
 from util import *
 import numpy as np
 import copy
-from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import _tree
+from sklearn.cluster import SpectralClustering
 
 # This class builds and interprets the ExtraTrees model
 class ForestInterpreter(object):
@@ -12,66 +12,127 @@ class ForestInterpreter(object):
         df_Y=None, # the responses, a pandas dataframe
         logger=None):
         
-        df_Y = df_Y.squeeze()
         self.df_X = df_X
         self.df_Y = df_Y
         self.logger = logger
 
-        # Store all decision path details
+        # Fit the predictive model
+        self.log("Fit predictive model..")
+        self.model = RandomForestClassifier(n_estimators=10, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+        self.model.fit(df_X, df_Y.squeeze())
+        #self.reportPerformance()
+        #self.reportFeatureImportance()
+
+        # Build the decision paths
+        self.dp_rules, self.dp_samples = self.extractDecisionPath()
+        #for k in self.dp_rules:
+        #    print "--------------------------------------------------"
+        #    print k, self.dp_samples[k]
+        #    print self.dp_rules[k]
+
+        # Compute the similarity matrix
+        self.sm, self.sm_cols = self.computeSimilarityMatrix()
+        print self.sm[self.sm>0.1]
+        print self.sm_cols
+
+        # Cluster decision paths based on the similarity matrix
+        sc = SpectralClustering(n_clusters=8, affinity="precomputed", n_init=100, random_state=0)
+        sc.fit(self.sm)
+
+    def computeSimilarityMatrix(self):
+        self.log("Compute the similarity matrix of decision paths...")
+        keys = self.dp_samples.keys()
+        values = self.dp_samples.values()
+        values = map(set, values)
+        L = len(values)
+        sm = np.empty([L, L])
+        sm[:] = np.nan
+
+        # Loop and build the similarity matrix
+        for i in range(0, L):
+            for j in range(0, L):
+                # For diagonal entries, just use 0
+                if i == j:
+                    sm[i,j] = 0
+                    continue
+                # If it is already computed, just use the old value
+                if not np.isnan(sm[j,i]):
+                    sm[i,j] = sm[j,i]
+                    continue
+                # Compute weighted Jaccard Similarity of two sample sets i and j
+                set_i, set_j = values[i], values[j]
+                intersect_len = len(set_i & set_j)
+                union_len = len(set_i | set_j)
+                similarity = float(intersect_len) / float(union_len) # the normal Jaccard Similarit
+                similarity *= intersect_len # weighted by the number of common samples
+                sm[i,j] = similarity
+                #if sm[i,j] > 10:
+                #    print "-----------------------"
+                #    print sm[i,j]
+                #    print self.dp_rules[keys[i]]
+                #    print self.dp_rules[keys[j]]
+
+        # Scale the entire similaity matrix to range 0 and 1
+        min_sm = np.min(sm)
+        max_sm = np.max(sm)
+        sm = (sm - min_sm) / (max_sm - min_sm)
+        sm = np.round(sm, 4)
+
+        # Return the similarity matrix and the columns (indicating path_id)
+        return sm, keys
+    
+    def extractDecisionPath(self):
+        self.log("Extract decision paths...")
+
+        # Store all decision path rules
         # key: (tree_id, leaf_id), a tuple
         # value: decision rule of the path, a string
-        self.d_path = {}
+        dp_rules = {}
 
-        # Fit the ExtraTrees model
-        self.log("Fit ExtraTrees model..")
-        #model = ExtraTreesClassifier(n_estimators=1000, max_features=20, min_samples_split=2, random_state=0, n_jobs=-1)
-        model = RandomForestClassifier(n_estimators=100, max_features=20, min_samples_split=2, random_state=0, n_jobs=-1)
-        #model = ExtraTreesClassifier(n_estimators=100, max_features=20, min_samples_split=2, random_state=0, n_jobs=-1)
-        model.fit(df_X, df_Y)
-        self.model = model
+        # Store all decision path samples
+        # key: (tree_id, leaf_id), a tuple
+        # value: sample ids for the path, a string
+        dp_samples = {}
 
         # Find all predictors with responese 1
-        df_X = df_X[df_Y == 1].reset_index(drop=True)
+        df = self.df_X[self.df_Y.squeeze() == 1].reset_index(drop=True)
 
-        # Get all decision paths of all samples in df_X (labels are already 1)
-        d_path_2_sample_id = {} # the mapping of decision path and sample ids
-        for i in range(0, len(model)):
-            log("=================================================")
-            log("Tree id : " + str(i))
-            tree = model[i]
-            Y_pred = tree.predict(df_X)
-            leave_id = tree.apply(df_X)
-            value = tree.tree_.value # class value of the leaf node
+        # Get all decision paths of all samples with label 1
+        # Loop all trees in model, i is the sample id
+        for i in range(0, len(self.model)):
+            self.log("Process tree id : %s" %(i))
+            tree = self.model[i]
+            Y_pred = tree.predict(df)
+            leave_id = tree.apply(df) # leaf node id for all samples
+            value = tree.tree_.value # class label of the leaf node
             feature = tree.tree_.feature
             threshold = tree.tree_.threshold
-            node_indicator = tree.decision_path(df_X)
-            # Loop all samples in df_X
-            for j in range(0, len(df_X)):
-                leaf_id = leave_id[j]
-                if Y_pred[j] != 1:
-                    log("Sample id " + str(j) + " : predicted result is not 1")
-                    continue
-                else:
-                    log("Sample id " + str(j) + " : find leaf id " + str(leaf_id))
-                node_index = node_indicator.indices[node_indicator.indptr[j]:node_indicator.indptr[j+1]]
+            node_indicator = tree.decision_path(df)
+            # Loop all samples with label 1, j is the sample id
+            for j in range(0, len(df)):
+                if Y_pred[j] != 1: continue # skip if the predicted label is not one
+                dp_id = (i, leave_id[j])
                 # Extract decision rules
-                rule = ""
-                for node_id in node_index:
-                    if df_X.iloc[sample_id, feature[node_id]] <= threshold[node_id]:
-                        threshold_sign = "<="
-                    else:
-                        threshold_sign = ">"
-                    print("%20s : %s (= %s) %s %s" % (
-                        value[node_id],
-                        df_X.columns[feature[node_id]],
-                        np.round(df_X.iloc[j, feature[node_id]], 3),
-                        threshold_sign,
-                        np.round(threshold[node_id], 3)))
-            break
+                if dp_id not in dp_rules: # onlt compute the path when it does not exist
+                    node_index = node_indicator.indices[node_indicator.indptr[j]:node_indicator.indptr[j+1]]
+                    rule = ""
+                    for node_id in node_index:
+                        if df.iloc[j, feature[node_id]] <= threshold[node_id]:
+                            threshold_sign = "<="
+                        else:
+                            threshold_sign = ">"
+                        rule += ("%20s : %s (= %s) %s %s\n" % (
+                            value[node_id],
+                            df.columns[feature[node_id]],
+                            np.round(df.iloc[j, feature[node_id]], 3),
+                            threshold_sign,
+                            np.round(threshold[node_id], 3)))
+                    dp_rules[dp_id] = rule
+                # Update the samples
+                dp_samples[dp_id] = dp_samples.get(dp_id, []) + [j]
 
-    def printDecisionPath(self, tree_id, leaf_id):
-        # need to print the decision path based on tree_id and leaf_id
-        return
+        # return result
+        return dp_rules, dp_samples
 
     def reportPerformance(self):
         self.log("Report training performance...")

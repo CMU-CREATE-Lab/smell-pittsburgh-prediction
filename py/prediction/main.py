@@ -26,8 +26,8 @@ def main(argv):
     else:
         #get_data = True
         #compute_features = True
-        #analyze_data = True
-        cross_validation = True
+        analyze_data = True
+        #cross_validation = True
 
     # Get data
     # OUTPUT: raw esdr and smell data
