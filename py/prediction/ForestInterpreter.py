@@ -3,7 +3,7 @@ import numpy as np
 import copy
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import _tree
-from sklearn.cluster import SpectralClustering
+from sklearn.cluster import DBSCAN
 
 # This class builds and interprets the ExtraTrees model
 class ForestInterpreter(object):
@@ -18,29 +18,48 @@ class ForestInterpreter(object):
 
         # Fit the predictive model
         self.log("Fit predictive model..")
-        self.model = RandomForestClassifier(n_estimators=10, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+        self.model = RandomForestClassifier(n_estimators=100, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
         self.model.fit(df_X, df_Y.squeeze())
-        #self.reportPerformance()
-        #self.reportFeatureImportance()
+        self.reportPerformance()
+        self.reportFeatureImportance()
 
-        # Build the decision paths
-        self.dp_rules, self.dp_samples = self.extractDecisionPath()
-        #for k in self.dp_rules:
-        #    print "--------------------------------------------------"
-        #    print k, self.dp_samples[k]
-        #    print self.dp_rules[k]
+        # Build the decision paths of samples with label 1
+        self.log("Extract decision paths...")
+        self.dp_rules, self.dp_samples, self.df_X_pos = self.extractDecisionPath()
 
-        # Compute the similarity matrix
-        self.sm, self.sm_cols = self.computeSimilarityMatrix()
-        print self.sm[self.sm>0.1]
-        print self.sm_cols
+        # Compute the similarity matrix of samples having label 1
+        self.log("Compute the similarity matrix of samples...")
+        self.sm = self.computeSampleSimilarity()
+        print self.sm[self.sm>0.7]
 
-        # Cluster decision paths based on the similarity matrix
-        sc = SpectralClustering(n_clusters=8, affinity="precomputed", n_init=100, random_state=0)
-        sc.fit(self.sm)
+        # Cluster samples with label 1 based on the similarity matrix
+        self.log("Cluster samples...")
+        c = DBSCAN(metric="precomputed", min_samples=5, eps=0.75, n_jobs=-1)
+        dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
+        cluster = c.fit_predict(dist)
+        print "Unique cluster ids : %s" % np.unique(cluster)
+        print "Total number of positive samples : %s" % len(self.df_X_pos)
+        for c_id in np.unique(cluster):
+            if c_id < 0:
+                print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
+            else:
+                print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
 
-    def computeSimilarityMatrix(self):
-        self.log("Compute the similarity matrix of decision paths...")
+    def computeSampleSimilarity(self):
+        L = len(self.df_X_pos)
+        sm = np.zeros([L, L])
+
+        # Loop and build the similarity matrix for samples with label 1
+        for k in self.dp_samples:
+            s = self.dp_samples[k]
+            for i in range(0, len(s)):
+                for j in range(i+1, len(s)):
+                    sm[s[i], s[j]] += 1
+                    sm[s[j], s[i]] += 1
+        
+        return self.scaleMatrix(sm) 
+
+    def computeDecisionPathSimilarity(self):
         keys = self.dp_samples.keys()
         values = self.dp_samples.values()
         values = map(set, values)
@@ -66,24 +85,26 @@ class ForestInterpreter(object):
                 similarity = float(intersect_len) / float(union_len) # the normal Jaccard Similarit
                 similarity *= intersect_len # weighted by the number of common samples
                 sm[i,j] = similarity
-                #if sm[i,j] > 10:
-                #    print "-----------------------"
-                #    print sm[i,j]
-                #    print self.dp_rules[keys[i]]
-                #    print self.dp_rules[keys[j]]
-
-        # Scale the entire similaity matrix to range 0 and 1
-        min_sm = np.min(sm)
-        max_sm = np.max(sm)
-        sm = (sm - min_sm) / (max_sm - min_sm)
-        sm = np.round(sm, 4)
+                if sm[i,j] > 15:
+                    print "-----------------------"
+                    print sm[i,j]
+                    print keys[i]
+                    print self.dp_rules[keys[i]]
+                    print keys[j]
+                    print self.dp_rules[keys[j]]
 
         # Return the similarity matrix and the columns (indicating path_id)
-        return sm, keys
-    
-    def extractDecisionPath(self):
-        self.log("Extract decision paths...")
+        return self.scaleMatrix(sm), keys
 
+    def scaleMatrix(self, m):
+        # Scale the entire matrix to range 0 and 1
+        min_m = np.min(m)
+        max_m = np.max(m)
+        m = (m - min_m) / (max_m - min_m)
+        m = np.round(m, 4)
+        return m
+
+    def extractDecisionPath(self):
         # Store all decision path rules
         # key: (tree_id, leaf_id), a tuple
         # value: decision rule of the path, a string
@@ -132,16 +153,14 @@ class ForestInterpreter(object):
                 dp_samples[dp_id] = dp_samples.get(dp_id, []) + [j]
 
         # return result
-        return dp_rules, dp_samples
+        return dp_rules, dp_samples, df
 
     def reportPerformance(self):
-        self.log("Report training performance...")
         metric = computeMetric(self.df_Y, self.model.predict(self.df_X), False)
         for m in metric:
             self.log(metric[m])
 
     def reportFeatureImportance(self):
-        self.log("Report 50% feature importance...") 
         feat_ims = np.array(self.model.feature_importances_)
         sorted_ims_idx = np.argsort(feat_ims)[::-1]
         feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
