@@ -4,7 +4,6 @@ from util import *
 from getData import *
 from analyzeData import *
 from computeFeatures import *
-from plotFeatures import *
 from crossValidation import *
 
 def main(argv):
@@ -14,8 +13,9 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
-    is_regr = False # is regression or classification
-    get_data, analyze_data, compute_features, plot_features, cross_validation = False, False, False, False, False
+    is_regr = False # is classification
+    #is_regr = True # is regression
+    get_data, analyze_data, compute_features, cross_validation = False, False, False, False
     if mode == "run_all":
         get_data = True
         compute_features = True
@@ -25,8 +25,8 @@ def main(argv):
         cross_validation = True
     else:
         #get_data = True
-        #compute_features = True
         analyze_data = True
+        #compute_features = True
         #cross_validation = True
 
     # Get data
@@ -36,7 +36,7 @@ def main(argv):
 
     # Analyze data
     if analyze_data:
-        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"])
+        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -44,10 +44,6 @@ def main(argv):
     if compute_features:
         computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv",p+"C.csv"],
             is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
-
-    # Plot features
-    if plot_features:
-        plotFeatures([p+"X.csv",p+"Y.csv"], p, is_regr=is_regr)
 
     # Cross validation
     # INPUT: features

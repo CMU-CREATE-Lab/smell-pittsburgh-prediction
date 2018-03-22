@@ -118,19 +118,6 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     df = df.copy(deep=True)
     df_all = []
 
-    # Add interaction of variables
-    #if add_inter:
-    #    df_inte = pd.DataFrame()
-    #    L = len(df.columns)
-    #    for i in range(0, L):
-    #        for j in range(0, L):
-    #            if j > i:
-    #                c1 = df.columns[i]
-    #                c2 = df.columns[j]
-    #                c = "interaction..." + c1 + "...and..." + c2
-    #                df_inte[c] = df[c1] * df[c2]
-    #    df_all.append(df_inte)
-
     # Extract time series features
     df_diff = df.diff()
     for b_hr in range(1, b_hr + 1):

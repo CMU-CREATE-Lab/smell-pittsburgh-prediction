@@ -45,6 +45,12 @@ class ForestInterpreter(object):
             else:
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
 
+        # Visualize the clusters using manifold learning
+
+        # Cluster samples with label 1 on the original X predictor data
+
+        # Visualize the clusters using manifold learning
+
     def computeSampleSimilarity(self):
         L = len(self.df_X_pos)
         sm = np.zeros([L, L])
