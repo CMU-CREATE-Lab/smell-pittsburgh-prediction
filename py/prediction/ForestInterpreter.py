@@ -18,7 +18,7 @@ class ForestInterpreter(object):
 
         # Fit the predictive model
         self.log("Fit predictive model..")
-        self.model = RandomForestClassifier(n_estimators=100, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+        self.model = RandomForestClassifier(n_estimators=10, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
         self.model.fit(df_X, df_Y.squeeze())
         self.reportPerformance()
         self.reportFeatureImportance()
@@ -46,10 +46,7 @@ class ForestInterpreter(object):
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
 
         # Visualize the clusters using manifold learning
-
-        # Cluster samples with label 1 on the original X predictor data
-
-        # Visualize the clusters using manifold learning
+        
 
     def computeSampleSimilarity(self):
         L = len(self.df_X_pos)
