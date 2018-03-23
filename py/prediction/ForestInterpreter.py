@@ -10,6 +10,7 @@ class ForestInterpreter(object):
     def __init__(self,
         df_X=None, # the predictors, a pandas dataframe
         df_Y=None, # the responses, a pandas dataframe
+        out_p=None, # the path for saving graphs
         logger=None):
         
         self.df_X = df_X
@@ -45,7 +46,8 @@ class ForestInterpreter(object):
             else:
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
 
-        # Visualize the clusters using manifold learning
+        # Visualize the clusters using PCA and kernel PCA
+
         
 
     def computeSampleSimilarity(self):

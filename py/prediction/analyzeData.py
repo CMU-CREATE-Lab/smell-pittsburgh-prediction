@@ -8,13 +8,14 @@ import gc
 from util import *
 from sklearn.decomposition import PCA
 from sklearn.decomposition import KernelPCA
+from sklearn.decomposition import TruncatedSVD
 import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from computeFeatures import *
 from ForestInterpreter import *
-from sklearn.manifold import Isomap
+from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.manifold import SpectralEmbedding
-from sklearn.manifold import TSNE
+from copy import deepcopy
 
 # Analyze data
 def analyzeData(
@@ -33,13 +34,19 @@ def analyzeData(
     #plotDayHour(in_p, out_p, logger)
 
     # Plot dimension reduction
-    plotLowDimensions(in_p, out_p, logger)
+    #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
     #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    #interpretModel(in_p, out_p, logger=logger)
+    interpretModel(in_p, out_p, logger=logger)
+
+# Interpret the model
+def interpretModel(in_p, out_p, logger):
+    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
+        add_inter=False, add_roll=False, add_diff=False, logger=logger)
+    model = ForestInterpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
 
 # Correlational study
 def corrStudy(in_p, out_p, logger):
@@ -68,70 +75,6 @@ def corrStudy(in_p, out_p, logger):
     plt.suptitle("Correlation with time lag", fontsize=18)
     fig.subplots_adjust(top=0.92)
     fig.savefig(out_p + "corr_with_time_lag.png", dpi=150)
-    fig.clf()
-    plt.close()
-
-# Interpret the model
-def interpretModel(in_p, out_p, logger):
-    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
-        add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    model = ForestInterpreter(df_X=df_X, df_Y=df_Y, logger=logger)
-
-def plotLowDimensions(in_p, out_p, logger):
-    plot_PCA = False
-    plot_manifold = True
-    is_regr = False
-    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
-        add_inter=False, add_roll=False, add_diff=False, logger=logger)
-
-    if plot_PCA:
-        log("Plot PCA...", logger)
-        plotPCA(df_X, df_Y, out_p, is_regr=is_regr, use_kernel=False)
-        log("Plot Kernel PCA...", logger)
-        plotPCA(df_X, df_Y, out_p, is_regr=is_regr, use_kernel=True)
-
-    if plot_manifold:
-        log("Plot manifold...", logger)
-        plotManifold(df_X, df_Y, out_p, is_regr=is_regr)
-    
-    log("Finished", logger)
-
-def plotManifold(df_X, df_Y, out_p, is_regr=False):
-    # Use PCA to reduce dimensions first (speed up manifold learning and reduce noise)
-    pca = PCA(n_components=10)
-    X = pca.fit_transform(df_X)
-
-    # Apply manifold learning
-    n_c = 3
-    #model = Isomap(n_neighbors=10, n_components=n_c, max_iter=500, n_jobs=-1)
-    model = TSNE(n_components=n_c, perplexity=50.0, init="pca", n_iter=500, verbose=1)
-    X = model.fit_transform(X)
-    Y = df_Y.squeeze().values
-     
-    dot_cmap = "RdBu"
-    dot_size = 20
-    w = 3
-    h = 1
-    c = 1
-    if not is_regr:
-        c0 = (Y == 0)
-        c1 = (Y == 1)
-    fig = plt.figure(figsize=(18, 6), dpi=150)
-    for i in range(0, n_c-1):
-        for j in range(i+1, n_c):
-            plt.subplot(h, w, c)
-            if is_regr:
-                plt.scatter(X[:,i], X[:,j], c=Y, s=dot_size, alpha=0.2, cmap=dot_cmap)
-            else:
-                plt.scatter(X[c0,i], X[c0,j], c="b", s=dot_size, alpha=0.1, cmap=dot_cmap)
-                plt.scatter(X[c1,i], X[c1,j], c="r", s=dot_size, alpha=0.2, cmap=dot_cmap)
-            plt.xlabel("Component " + str(i))
-            plt.ylabel("Component " + str(j))
-            c += 1
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.92)
-    plt.suptitle("Dimension reduction using manifold learning", fontsize=22)
-    fig.savefig(out_p + "manifold.png")
     fig.clf()
     plt.close()
 
@@ -224,66 +167,7 @@ def plotFeatures(in_p, out_p_root, logger):
         log("Plot correlation matrix of predictors...", logger)
         plotCorrMatirx(df_X, out_p[3])
 
-# Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
-def plotCorrMatirx(df, out_p):
-    # Compute correlation matrix
-    df_corr = df.corr().round(3)
-    df_corr.to_csv(out_p + "corr_matrix.csv")
-    # Plot graph
-    fig, ax = plt.subplots(figsize=(10, 8))
-    im = ax.imshow(df_corr, cmap=plt.get_cmap("RdBu"), interpolation="nearest",vmin=-1, vmax=1)
-    fig.colorbar(im)
-    fig.tight_layout()
-    plt.suptitle("Correlation matrix", fontsize=18)
-    fig.subplots_adjust(top=0.92)
-    fig.savefig(out_p + "corr_matrix.png", dpi=150)
-    fig.clf()
-    plt.close()
-
-def plotPCA(df_X, df_Y, out_p, is_regr=False, use_kernel=False):
-    n_c = 5
-    if use_kernel:
-        pca = KernelPCA(n_components=n_c, kernel="rbf")
-    else:
-        pca = PCA(n_components=n_c)
-    X = pca.fit_transform(df_X)
-    Y = df_Y.squeeze()
-    if use_kernel:
-        r = pca.lambdas_
-        r = np.round(r/sum(r), 3)
-    else:
-        r = np.round(pca.explained_variance_ratio_, 3)
-
-    dot_size = 15
-    dot_cmap = "brg"
-    w = 5
-    h = 2
-    c = 1
-    if not is_regr:
-        c0 = (Y == 0)
-        c1 = (Y == 1)
-    fig = plt.figure(figsize=(30, 12), dpi=150)
-    for i in range(0, n_c-1):
-        for j in range(i+1, n_c):
-            plt.subplot(h, w, c)
-            if is_regr:
-                plt.scatter(X[:,i], X[:,j], c=Y, s=dot_size, alpha=0.2, cmap=dot_cmap)
-            else:
-                plt.scatter(X[c0,i], X[c0,j], c="b", s=dot_size, alpha=0.1, cmap=dot_cmap)
-                plt.scatter(X[c1,i], X[c1,j], c="r", s=dot_size, alpha=0.2, cmap=dot_cmap)
-            plt.xlabel("Component " + str(i) + " (" + str(r[i]) + ")")
-            plt.ylabel("Component " + str(j) + " (" + str(r[j]) + ")")
-            c += 1
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.92)
-    if use_kernel:
-        plt.suptitle("Kernel PCA = " + str(r), fontsize=22)
-        fig.savefig(out_p + "kernel_pca.png")
-    else:
-        plt.suptitle("PCA = " + str(r), fontsize=22)
-        fig.savefig(out_p + "pca.png")
-    fig.clf()
-    plt.close()
+    log("Finished plotting features", logger)
 
 def plotTime(df_v, title_head, out_p):
     v = df_v.name
@@ -321,3 +205,129 @@ def plotPair(df_v1, df_v2, title_head, out_p):
     fig.clf()
     plt.close()
     gc.collect()
+
+# Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
+def plotCorrMatirx(df, out_p):
+    # Compute correlation matrix
+    df_corr = df.corr().round(3)
+    df_corr.to_csv(out_p + "corr_matrix.csv")
+    # Plot graph
+    fig, ax = plt.subplots(figsize=(10, 8))
+    im = ax.imshow(df_corr, cmap=plt.get_cmap("RdBu"), interpolation="nearest",vmin=-1, vmax=1)
+    fig.colorbar(im)
+    fig.tight_layout()
+    plt.suptitle("Correlation matrix", fontsize=18)
+    fig.subplots_adjust(top=0.92)
+    fig.savefig(out_p + "corr_matrix.png", dpi=150)
+    fig.clf()
+    plt.close()
+
+def plotLowDimensions(in_p, out_p, logger):
+    plot_PCA = False
+    plot_RTE = False
+    plot_SE = True
+
+    is_regr = False
+    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
+        add_inter=False, add_roll=False, add_diff=False, logger=logger)
+    X = df_X.values
+    Y = df_Y.squeeze().values
+
+    if plot_PCA:
+        log("Plot PCA...", logger)
+        plotPCA(X, Y, out_p, is_regr=is_regr)
+        log("Plot Kernel PCA...", logger)
+        plotKernelPCA(X, Y, out_p, is_regr=is_regr)
+
+    if plot_RTE:
+        log("Plot Random Trees Embedding...", logger)
+        plotRandomTreesEmbedding(X, Y, out_p, is_regr=is_regr)
+    
+    if plot_SE:
+        log("Plot Spectral Embedding...", logger)
+        plotSpectralEmbedding(X, Y, out_p, is_regr=is_regr)
+    
+    log("Finished plotting dimensions", logger)
+
+def plotSpectralEmbedding(X, Y, out_p, is_regr=False):
+    X, Y = deepcopy(X), deepcopy(Y)
+    pca = PCA(n_components=10)
+    X = pca.fit_transform(X)
+    sm = SpectralEmbedding(n_components=4, eigen_solver="arpack", n_neighbors=10, n_jobs=-1)
+    X = sm.fit_transform(X)
+    title = "Spectral Embedding"
+    out_p += "spectral_embedding.png"
+    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+
+def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
+    X, Y = deepcopy(X), deepcopy(Y)
+    hasher = RandomTreesEmbedding(n_estimators=1000, max_depth=5, min_samples_split=2, n_jobs=-1)
+    X = hasher.fit_transform(X)
+    pca = TruncatedSVD(n_components=4)
+    X = pca.fit_transform(X)
+    title = "Random Trees Embedding"
+    out_p += "random_trees_embedding.png"
+    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+
+def plotKernelPCA(X, Y, out_p, is_regr=False):
+    X, Y = deepcopy(X), deepcopy(Y)
+    pca = KernelPCA(n_components=4, kernel="rbf")
+    X = pca.fit_transform(X)
+    r = pca.lambdas_
+    r = np.round(r/sum(r), 3)
+    title = "Kernel PCA, eigenvalue = " + str(r)
+    out_p += "kernel_pca.png"
+    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+
+def plotPCA(X, Y, out_p, is_regr=False):
+    X, Y = deepcopy(X), deepcopy(Y)
+    pca = PCA(n_components=4)
+    X = pca.fit_transform(X)
+    r = np.round(pca.explained_variance_ratio_, 3)
+    title = "PCA, eigenvalue = " + str(r)
+    out_p += "pca.png"
+    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+        
+def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
+    c_ls=[(0.5, 0.5, 0.5), (0, 0, 1), (1, 0, 0), (0, 1, 0)], # color list
+    c_alpha=[0.1, 0.1, 0.2, 0.1], # color opacity
+    c_bin=[0, 1], # color is mapped to index [Y<c_bin[0], Y==c_bin[1], Y==c_bin[2], Y>c_bin[3]]
+    logger=None):
+
+    if not is_Y_continuous:
+        c_idx = [Y<c_bin[0]]
+        for k in range(0, len(c_bin)):
+            c_idx.append(Y==c_bin[k])
+        c_idx.append(Y>c_bin[-1])
+        if not (len(c_idx)==len(c_ls)==len(c_alpha)):
+            log("Parameter sizes does not match.", logger)
+            return
+
+    dot_size = 15
+    title_font_size = 35
+    label_font_size = 16
+    tick_font_size = 16
+    alpha = 0.2
+    fig = plt.figure(figsize=(6*w, 5*h+1), dpi=150)
+    num_cols = X.shape[1]
+    cmap = "RdBu"
+    c = 1
+    for i in range(0, num_cols-1):
+        for j in range(i+1, num_cols):
+            plt.subplot(h, w, c)
+            if is_Y_continuous:
+                plt.scatter(X[:,i], X[:,j], c=Y, s=dot_size, alpha=alpha, cmap=cmap)
+            else:
+                for k in range(0, len(c_idx)):
+                    plt.scatter(X[c_idx[k],i], X[c_idx[k],j], c=c_ls[k], s=dot_size, alpha=alpha, cmap=cmap)
+            plt.xlabel("Component " + str(i), fontsize=label_font_size)
+            plt.ylabel("Component " + str(j), fontsize=label_font_size)
+            plt.xticks(fontsize=tick_font_size)
+            plt.yticks(fontsize=tick_font_size)
+            c += 1
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.92)
+    plt.suptitle(title, fontsize=title_font_size)
+    fig.savefig(out_p)
+    fig.clf()
+    plt.close()
