@@ -1,9 +1,11 @@
 from util import *
 import numpy as np
-import copy
+from copy import deepcopy
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import _tree
 from sklearn.cluster import DBSCAN
+from sklearn.decomposition import PCA
+from sklearn.decomposition import KernelPCA
 
 # This class builds and interprets the ExtraTrees model
 class ForestInterpreter(object):
@@ -19,7 +21,7 @@ class ForestInterpreter(object):
 
         # Fit the predictive model
         self.log("Fit predictive model..")
-        self.model = RandomForestClassifier(n_estimators=10, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+        self.model = RandomForestClassifier(n_estimators=20, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
         self.model.fit(df_X, df_Y.squeeze())
         self.reportPerformance()
         self.reportFeatureImportance()
@@ -29,13 +31,13 @@ class ForestInterpreter(object):
         self.dp_rules, self.dp_samples, self.df_X_pos = self.extractDecisionPath()
 
         # Compute the similarity matrix of samples having label 1
-        self.log("Compute the similarity matrix of samples...")
+        self.log("Compute the similarity matrix of samples with label 1...")
         self.sm = self.computeSampleSimilarity()
         print self.sm[self.sm>0.7]
 
         # Cluster samples with label 1 based on the similarity matrix
         self.log("Cluster samples...")
-        c = DBSCAN(metric="precomputed", min_samples=5, eps=0.75, n_jobs=-1)
+        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.75, n_jobs=-1)
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
         print "Unique cluster ids : %s" % np.unique(cluster)
@@ -46,9 +48,30 @@ class ForestInterpreter(object):
             else:
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
 
-        # Visualize the clusters using PCA and kernel PCA
+        # Visualize the clusters using PCA
+        print "Plot PCA of positive labels..."
+        pca = PCA(n_components=4)
+        X = pca.fit_transform(deepcopy(self.df_X_pos.values))
+        r = np.round(pca.explained_variance_ratio_, 3)
+        title = "PCA of positive labels, eigenvalue = " + str(r)
+        out_p_tmp = out_p + "pca_positive_labels.png"
+        c_ls = [(0.5, 0.5, 0.5), (1, 0, 0), (0, 0, 1)]
+        c_alpha = [0.1, 0.2, 0.1]
+        c_bin=[0]
+        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 2, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
-        
+        # Visualize the clusters using kernel PCA
+        print "Plot Kernel PCA of positive labels..."
+        pca = KernelPCA(n_components=4, kernel="rbf")
+        X = pca.fit_transform(deepcopy(self.df_X_pos.values))
+        r = pca.lambdas_
+        r = np.round(r/sum(r), 3)
+        title = "Kernel PCA of positive labels, eigenvalue = " + str(r)
+        out_p_tmp = out_p + "kernel_pca_positive_labels.png"
+        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 2, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
+
+        # Train a decision tree classifier on the selected cluster
+        # (the label for samples outside the cluster all become zero)
 
     def computeSampleSimilarity(self):
         L = len(self.df_X_pos)
@@ -175,7 +198,7 @@ class ForestInterpreter(object):
         for (fi, fn) in zip(feat_ims, feat_names):
             self.log("{0:.5f}".format(fi) + " -- " + str(fn))
             c += fi
-            if c > 0.5: break
+            if c > 0.3: break
 
     def tree_to_code(self, tree, feature_names):
         tree_ = tree.tree_

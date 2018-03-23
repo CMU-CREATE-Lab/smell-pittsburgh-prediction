@@ -31,6 +31,10 @@ from imblearn.over_sampling import RandomOverSampler
 
 import scipy.ndimage as ndimage
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 # For Google Analytics
 # sudo pip install --upgrade google-api-python-client
 from apiclient.discovery import build
@@ -748,3 +752,48 @@ def getGA(
                 line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
                 out_file.write(line + "\n")
             print "Google Analytics file created at " + out_path + file_name
+
+# Plot a grid of scatter plot pairs in X, with point colors representing binary labels
+def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
+    c_ls=[(0.5, 0.5, 0.5), (0, 0, 1), (1, 0, 0), (0, 1, 0)], # color list
+    c_alpha=[0.1, 0.1, 0.2, 0.1], # color opacity
+    c_bin=[0, 1], # color is mapped to index [Y<c_bin[0], Y==c_bin[1], Y==c_bin[2], Y>c_bin[3]]
+    logger=None):
+
+    if not is_Y_continuous:
+        c_idx = [Y<c_bin[0]]
+        for k in range(0, len(c_bin)):
+            c_idx.append(Y==c_bin[k])
+        c_idx.append(Y>c_bin[-1])
+        if not (len(c_idx)==len(c_ls)==len(c_alpha)):
+            log("Parameter sizes does not match.", logger)
+            return
+
+    dot_size = 15
+    title_font_size = 35
+    label_font_size = 16
+    tick_font_size = 16
+    alpha = 0.2
+    fig = plt.figure(figsize=(6*w, 5*h+1), dpi=150)
+    num_cols = X.shape[1]
+    cmap = "RdBu"
+    c = 1
+    for i in range(0, num_cols-1):
+        for j in range(i+1, num_cols):
+            plt.subplot(h, w, c)
+            if is_Y_continuous:
+                plt.scatter(X[:,i], X[:,j], c=Y, s=dot_size, alpha=alpha, cmap=cmap)
+            else:
+                for k in range(0, len(c_idx)):
+                    plt.scatter(X[c_idx[k],i], X[c_idx[k],j], c=c_ls[k], s=dot_size, alpha=alpha, cmap=cmap)
+            plt.xlabel("Component " + str(i), fontsize=label_font_size)
+            plt.ylabel("Component " + str(j), fontsize=label_font_size)
+            plt.xticks(fontsize=tick_font_size)
+            plt.yticks(fontsize=tick_font_size)
+            c += 1
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.92)
+    plt.suptitle(title, fontsize=title_font_size)
+    fig.savefig(out_p)
+    fig.clf()
+    plt.close()
