@@ -2,41 +2,117 @@ from util import *
 import numpy as np
 from copy import deepcopy
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import _tree
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 from sklearn.decomposition import KernelPCA
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_graphviz
+from sklearn.feature_selection import SelectFromModel
+from sklearn.linear_model import LogisticRegression
+from selectFeatures import *
 
-# This class builds and interprets the ExtraTrees model
-class ForestInterpreter(object):
+# This class builds and interprets the model
+class Interpreter(object):
     def __init__(self,
         df_X=None, # the predictors, a pandas dataframe
         df_Y=None, # the responses, a pandas dataframe
         out_p=None, # the path for saving graphs
+        use_forest=True,
         logger=None):
-        
-        self.df_X = df_X
-        self.df_Y = df_Y
+       
+        df_X, df_Y = deepcopy(df_X), deepcopy(df_Y)
+        self.df_X, self.df_Y = df_X, df_Y
+        self.out_p = out_p
         self.logger = logger
+        
+        if use_forest:
+            # Fit the predictive model
+            self.log("Fit predictive model..")
+            #F = RandomForestClassifier(n_estimators=100, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            F = ExtraTreesClassifier(n_estimators=100, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            F.fit(df_X, df_Y.squeeze())
 
-        # Fit the predictive model
-        self.log("Fit predictive model..")
-        self.model = RandomForestClassifier(n_estimators=20, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
-        self.model.fit(df_X, df_Y.squeeze())
-        self.reportPerformance()
-        self.reportFeatureImportance()
+            # Build the decision paths of samples with label 1
+            # self.dp_rules contains all decision paths of positive labels
+            # self.dp_samples contains all sample ids for all decision paths
+            # self.df_X_pos contains samples with positive labels
+            # self.df_X_pos_idx contains the index of samples with positive labels
+            self.log("Extract decision paths...")
+            self.dp_rules, self.dp_samples, self.df_X_pos, self.df_X_pos_idx = self.extractDecisionPath(F)
 
-        # Build the decision paths of samples with label 1
-        self.log("Extract decision paths...")
-        self.dp_rules, self.dp_samples, self.df_X_pos = self.extractDecisionPath()
+            # Compute the similarity matrix of samples having label 1
+            self.log("Compute the similarity matrix of samples with label 1...")
+            self.sm = self.computeSampleSimilarity()
 
-        # Compute the similarity matrix of samples having label 1
-        self.log("Compute the similarity matrix of samples with label 1...")
-        self.sm = self.computeSampleSimilarity()
-        print self.sm[self.sm>0.7]
+            # Cluster samples with label 1 based on the similarity matrix
+            self.log("Cluster samples with label 1...")
+            self.cluster = self.clusterSamplesWithPositiveLabels()
+        else:
+            df_X_pos = df_X[df_Y["smell"]==1]
+            df_X_pos_idx = df_X_pos.index.values
+            df_X_pos = df_X_pos.reset_index(drop=True)
+            pca = PCA(n_components=50)
+            X = pca.fit_transform(df_X_pos)
+            c = DBSCAN(min_samples=30, eps=35, n_jobs=-1)
+            cluster = c.fit_predict(X)
+            self.cluster, self.df_X_pos, self.df_X_pos_idx = cluster, df_X_pos, df_X_pos_idx
+            print "Unique cluster ids : %s" % np.unique(cluster)
+            print "Total number of positive samples : %s" % len(self.df_X_pos)
+            for c_id in np.unique(cluster):
+                if c_id < 0:
+                    print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
+                else:
+                    print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
+            if self.out_p is not None:
+                self.plotClusters(cluster, self.out_p)
 
-        # Cluster samples with label 1 based on the similarity matrix
-        self.log("Cluster samples...")
+        # Set the label for samples outside the cluster to zero
+        df_X_pos_idx_c0 = self.df_X_pos_idx[self.cluster==0] # select the largest cluster
+        df_X_neg_idx_c0 = ~self.df_X.index.isin(df_X_pos_idx_c0) # select samples that are not in the cluster
+        self.df_Y["smell"].iloc[df_X_neg_idx_c0] = 0 # select labels of samples that are not in the cluster to zero
+        
+        # Feature selection
+        #self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y, method="model", is_regr=False)
+        self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y, method="RFE", is_regr=False)
+
+        # Train a decision tree classifier on the selected cluster
+        print "Train a decision tree..."
+        dt = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=5)
+        dt.fit(self.df_X, self.df_Y.squeeze())
+        self.reportPerformance(dt)
+        self.reportFeatureImportance(dt)
+        self.exportTreeGraph(dt)
+
+        # Train a L1 logistic regression on the selected cluster
+        print "Train a logistic regression model..."
+        lr = LogisticRegression(random_state=0, penalty="l1", C=0.1)
+        lr.fit(self.df_X, self.df_Y.squeeze())
+        self.reportPerformance(lr)
+        self.reportCoefficient(lr)
+
+    def reportCoefficient(self, model):
+        for (c, fn) in zip(np.squeeze(model.coef_), self.df_X.columns.values):
+            if c > 0.00001: self.log("{0:.5f}".format(c) + " -- " + str(fn))
+
+    def getFilteredLabels(self):
+        return self.df_Y
+
+    def getSelectedFeatures(self):
+        return self.df_X
+
+    def exportTreeGraph(self, tree):
+        # For http://webgraphviz.com/
+        with open(self.out_p + "decision_tree.dot", "w") as f:
+            export_graphviz(tree,
+                out_file=f,
+                feature_names=self.df_X.columns,
+                class_names=["no", "yes"],
+                max_depth=5,
+                filled=True)
+
+    def clusterSamplesWithPositiveLabels(self):
         c = DBSCAN(metric="precomputed", min_samples=30, eps=0.75, n_jobs=-1)
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
@@ -47,7 +123,11 @@ class ForestInterpreter(object):
                 print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
             else:
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
+        if self.out_p is not None:
+            self.plotClusters(cluster, self.out_p)
+        return cluster
 
+    def plotClusters(self, cluster, out_p):
         # Visualize the clusters using PCA
         print "Plot PCA of positive labels..."
         pca = PCA(n_components=4)
@@ -62,16 +142,13 @@ class ForestInterpreter(object):
 
         # Visualize the clusters using kernel PCA
         print "Plot Kernel PCA of positive labels..."
-        pca = KernelPCA(n_components=4, kernel="rbf")
+        pca = KernelPCA(n_components=4, kernel="rbf", n_jobs=-1)
         X = pca.fit_transform(deepcopy(self.df_X_pos.values))
         r = pca.lambdas_
         r = np.round(r/sum(r), 3)
         title = "Kernel PCA of positive labels, eigenvalue = " + str(r)
         out_p_tmp = out_p + "kernel_pca_positive_labels.png"
         plotClusterPairGrid(X, cluster, out_p_tmp, 3, 2, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
-
-        # Train a decision tree classifier on the selected cluster
-        # (the label for samples outside the cluster all become zero)
 
     def computeSampleSimilarity(self):
         L = len(self.df_X_pos)
@@ -132,7 +209,7 @@ class ForestInterpreter(object):
         m = np.round(m, 4)
         return m
 
-    def extractDecisionPath(self):
+    def extractDecisionPath(self, model):
         # Store all decision path rules
         # key: (tree_id, leaf_id), a tuple
         # value: decision rule of the path, a string
@@ -144,13 +221,15 @@ class ForestInterpreter(object):
         dp_samples = {}
 
         # Find all predictors with responese 1
-        df = self.df_X[self.df_Y.squeeze() == 1].reset_index(drop=True)
+        df = self.df_X[self.df_Y["smell"] == 1]
+        df_idx = df.index
+        df = df.reset_index(drop=True)
 
         # Get all decision paths of all samples with label 1
         # Loop all trees in model, i is the sample id
-        for i in range(0, len(self.model)):
-            self.log("Process tree id : %s" %(i))
-            tree = self.model[i]
+        for i in range(0, len(model)):
+            if i % 5 == 0: self.log("Process tree id : %s" %(i))
+            tree = model[i]
             Y_pred = tree.predict(df)
             leave_id = tree.apply(df) # leaf node id for all samples
             value = tree.tree_.value # class label of the leaf node
@@ -181,15 +260,15 @@ class ForestInterpreter(object):
                 dp_samples[dp_id] = dp_samples.get(dp_id, []) + [j]
 
         # return result
-        return dp_rules, dp_samples, df
+        return dp_rules, dp_samples, df, df_idx.values
 
-    def reportPerformance(self):
-        metric = computeMetric(self.df_Y, self.model.predict(self.df_X), False)
+    def reportPerformance(self, model):
+        metric = computeMetric(self.df_Y, model.predict(self.df_X), False)
         for m in metric:
             self.log(metric[m])
 
-    def reportFeatureImportance(self):
-        feat_ims = np.array(self.model.feature_importances_)
+    def reportFeatureImportance(self, model, thr=0.8):
+        feat_ims = np.array(model.feature_importances_)
         sorted_ims_idx = np.argsort(feat_ims)[::-1]
         feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
         feat_names = self.df_X.columns.copy()
@@ -198,7 +277,7 @@ class ForestInterpreter(object):
         for (fi, fn) in zip(feat_ims, feat_names):
             self.log("{0:.5f}".format(fi) + " -- " + str(fn))
             c += fi
-            if c > 0.3: break
+            if c > thr: break
 
     def tree_to_code(self, tree, feature_names):
         tree_ = tree.tree_
@@ -206,7 +285,7 @@ class ForestInterpreter(object):
             feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
             for i in tree_.feature
         ]
-        print "def tree({}):".format(", ".join(feature_names))
+        #print "def tree({}):".format(", ".join(feature_names))
 
         def recurse(node, depth):
             indent = "  " * depth

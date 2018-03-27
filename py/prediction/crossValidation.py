@@ -107,7 +107,7 @@ def crossValidation(
             continue
         counter += 1
         log("--------------------------------------------------------------", logger)
-        log("Processing fold " + str(counter) + ":", logger)
+        log("Processing fold " + str(counter) + " with method " + str(method) + ":", logger)
         if len(X.shape) == 2:
             # For non-CNN methods, we need to do feature selection and convert data to numpy format
             X_train, Y_train, C_train = X.iloc[train_idx], Y.iloc[train_idx], C.iloc[train_idx]
@@ -273,13 +273,13 @@ def crossValidation(
     test_all_dt["Y"][~dt_idx_te] = None
     test_all_dt["Y_pred"][~dt_idx_te] = None
     log("--------------------------------------------------------------", logger)
-    log("(Daytime only) For all training data:", logger)
+    log("(Daytime only) For all training data with method " + str(method) +  ":", logger)
     metric_dt["train"] = computeMetric(train_all_dt["Y"], train_all_dt["Y_pred"], is_regr, aggr_axis=True)
     for m in metric_dt["train"]:
         log("Metric: " + m, logger)
         log(metric_dt["train"][m], logger)
     log("--------------------------------------------------------------", logger)
-    log("(Daytime only) For all testing data:", logger)
+    log("(Daytime only) For all testing data with method " + str(method) + ":", logger)
     metric_dt["test"] = computeMetric(test_all_dt["Y"], test_all_dt["Y_pred"], is_regr, aggr_axis=True)
     for m in metric_dt["test"]:
         log("Metric: " + m, logger)

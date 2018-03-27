@@ -10,10 +10,8 @@ from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.linear_model import Lasso
-from sklearn.linear_model import ElasticNet
-from sklearn.multioutput import MultiOutputRegressor
+from sklearn.linear_model import LogisticRegression
 
 # Perform feature selection (or variable selection)
 # Notice that we are not going to use dimension reduction like PCA
@@ -30,6 +28,8 @@ def selectFeatures(
     logger=None):
 
     log("Select features using method: " + method, logger)
+    n = len(df_Y)
+    RFE_step = n/20
 
     # Select model
     if is_regr:
@@ -39,12 +39,12 @@ def selectFeatures(
             model = SelectFpr(score_func=f_regression, alpha=0.01)
         elif method == "fdr":
             model = SelectFdr(score_func=f_regression, alpha=0.01)
-        elif method == "MD":
-            model = SelectFromModel(Lasso(alpha=0.1, max_iter=1000), threshold="15*mean")
+        elif method == "model":
+            base = Lasso(alpha=0.1, max_iter=1000)
+            model = SelectFromModel(base)
         elif method == "RFE":
             base = Lasso(alpha=0.1, max_iter=1000)
-            #base = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000)
-            model = RFE(base, step=1000, verbose=1, n_features_to_select=num_feat)
+            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_feat)
     else:
         if method == "percent":
             model = SelectPercentile(score_func=f_classif, percentile=10)
@@ -52,11 +52,12 @@ def selectFeatures(
             model = SelectFpr(score_func=f_classif, alpha=0.01)
         elif method == "fdr":
             model = SelectFdr(score_func=f_classif, alpha=0.01)
-        elif method == "MD":
-            model = SelectFromModel(ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1), threshold="4.7*mean")
+        elif method == "model":
+            base = LogisticRegression(random_state=0, penalty="l1", C=0.1)
+            model = SelectFromModel(base)
         elif method == "RFE":
-            base = ExtraTreesClassifier(n_estimators=800, random_state=0, n_jobs=-1)
-            model = RFE(base, step=1000, verbose=1, n_features_to_select=num_feat)
+            base = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_feat)
 
     # If method is None or not supported, just return the original features
     if model is None:
@@ -89,7 +90,7 @@ def selectFeatures(
     if is_regr:
         m = ExtraTreesRegressor(n_estimators=200, random_state=0, n_jobs=-1)
     else:
-        m = ExtraTreesClassifier(n_estimators=200, random_state=0, n_jobs=-1)
+        m = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
     m.fit(df_X,df_Y.squeeze())
     feat_names = df_X.columns.copy()
     feat_ims = np.array(m.feature_importances_)
@@ -97,7 +98,7 @@ def selectFeatures(
     feat_names = feat_names[sorted_ims_idx]
     feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
     for k in zip(feat_ims, feat_names):
-        log("{0:.5f}".format(k[0]) + "--" + str(k[1]), logger)
+        log("{0:.5f}".format(k[0]) + " -- " + str(k[1]), logger)
     
     # Merge
     log("Merge DayOfWeek and HourOfDay back to selected features...", logger)

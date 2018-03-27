@@ -12,10 +12,11 @@ from sklearn.decomposition import TruncatedSVD
 import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from computeFeatures import *
-from ForestInterpreter import *
+from Interpreter import *
 from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.manifold import SpectralEmbedding
 from copy import deepcopy
+from crossValidation import *
 
 # Analyze data
 def analyzeData(
@@ -44,9 +45,15 @@ def analyzeData(
 
 # Interpret the model
 def interpretModel(in_p, out_p, logger):
-    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
+    df_X, df_Y, df_C = computeFeatures(in_p=in_p, f_hr=8, b_hr=1, thr=40, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    model = ForestInterpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
+    model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
+    df_Y = model.getFilteredLabels()
+    df_X = model.getSelectedFeatures()
+    for m in ["DT", "LG"]:
+        start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
+        lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
+        crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg)
 
 # Correlational study
 def corrStudy(in_p, out_p, logger):
@@ -271,7 +278,7 @@ def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
 
 def plotKernelPCA(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
-    pca = KernelPCA(n_components=4, kernel="rbf")
+    pca = KernelPCA(n_components=4, kernel="rbf", n_jobs=-1)
     X = pca.fit_transform(X)
     r = pca.lambdas_
     r = np.round(r/sum(r), 3)

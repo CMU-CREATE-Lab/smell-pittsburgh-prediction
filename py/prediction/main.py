@@ -51,9 +51,8 @@ def main(argv):
     if cross_validation:
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
-        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR"] # classification
-        #methods = ["CR", "HCR", "ET"]
-        methods = ["HCR"]
+        #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
+        methods = ["RF", "ET"]
         #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
