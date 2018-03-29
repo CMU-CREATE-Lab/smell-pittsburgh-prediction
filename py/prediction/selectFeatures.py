@@ -9,6 +9,7 @@ from sklearn.feature_selection import f_regression
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier 
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LogisticRegression
@@ -24,12 +25,12 @@ def selectFeatures(
     method="RFE", # method for selecting features
     balance=False, # oversample or undersample the original features or not
     out_p=None, # the path for saving features,
-    num_feat=40, # number of features to select
+    num_rfe_feat=30, # number of features to select for RFE
+    num_rfe_loop=10, # number of loops for RFE
     logger=None):
 
     log("Select features using method: " + method, logger)
-    n = len(df_Y)
-    RFE_step = n/20
+    RFE_step = len(df_X.columns) / num_rfe_loop
 
     # Select model
     if is_regr:
@@ -44,7 +45,7 @@ def selectFeatures(
             model = SelectFromModel(base)
         elif method == "RFE":
             base = Lasso(alpha=0.1, max_iter=1000)
-            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_feat)
+            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_rfe_feat)
     else:
         if method == "percent":
             model = SelectPercentile(score_func=f_classif, percentile=10)
@@ -56,8 +57,9 @@ def selectFeatures(
             base = LogisticRegression(random_state=0, penalty="l1", C=0.1)
             model = SelectFromModel(base)
         elif method == "RFE":
-            base = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
-            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_feat)
+            #base = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+            base = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_rfe_feat)
 
     # If method is None or not supported, just return the original features
     if model is None:
@@ -86,11 +88,11 @@ def selectFeatures(
     log("Select " + str(len(selected_cols)) + " features...", logger)
     
     # Print feature importance
-    log("Compute feature importance using ExtraTrees...", logger)
+    log("Compute feature importance...", logger)
     if is_regr:
         m = ExtraTreesRegressor(n_estimators=200, random_state=0, n_jobs=-1)
     else:
-        m = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+        m = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
     m.fit(df_X,df_Y.squeeze())
     feat_names = df_X.columns.copy()
     feat_ims = np.array(m.feature_importances_)

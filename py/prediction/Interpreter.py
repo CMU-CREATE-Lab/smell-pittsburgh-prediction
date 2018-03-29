@@ -12,6 +12,8 @@ from sklearn.tree import export_graphviz
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import LogisticRegression
 from selectFeatures import *
+from sklearn.metrics import silhouette_score
+from sklearn.cluster import MeanShift
 
 # This class builds and interprets the model
 class Interpreter(object):
@@ -30,8 +32,8 @@ class Interpreter(object):
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            #F = RandomForestClassifier(n_estimators=100, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
-            F = ExtraTreesClassifier(n_estimators=100, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            F = RandomForestClassifier(n_estimators=100, max_features="sqrt", min_samples_split=2, random_state=0, n_jobs=-1)
+            #F = ExtraTreesClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
 
             # Build the decision paths of samples with label 1
@@ -53,10 +55,9 @@ class Interpreter(object):
             df_X_pos = df_X[df_Y["smell"]==1]
             df_X_pos_idx = df_X_pos.index.values
             df_X_pos = df_X_pos.reset_index(drop=True)
-            pca = PCA(n_components=50)
-            X = pca.fit_transform(df_X_pos)
-            c = DBSCAN(min_samples=30, eps=35, n_jobs=-1)
-            cluster = c.fit_predict(X)
+            X = KernelPCA(n_components=10, kernel="rbf", n_jobs=-1).fit_transform(df_X_pos)
+            cluster = MeanShift(n_jobs=-1, bandwidth=0.25).fit_predict(X)
+            cluster[cluster>0] = -1
             self.cluster, self.df_X_pos, self.df_X_pos_idx = cluster, df_X_pos, df_X_pos_idx
             print "Unique cluster ids : %s" % np.unique(cluster)
             print "Total number of positive samples : %s" % len(self.df_X_pos)
@@ -67,30 +68,32 @@ class Interpreter(object):
                     print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
             if self.out_p is not None:
                 self.plotClusters(cluster, self.out_p)
+            qc = silhouette_score(X, cluster)
+            print "Silhouette Coefficient: %0.3f" % qc
 
         # Set the label for samples outside the cluster to zero
         df_X_pos_idx_c0 = self.df_X_pos_idx[self.cluster==0] # select the largest cluster
         df_X_neg_idx_c0 = ~self.df_X.index.isin(df_X_pos_idx_c0) # select samples that are not in the cluster
         self.df_Y["smell"].iloc[df_X_neg_idx_c0] = 0 # select labels of samples that are not in the cluster to zero
-        
+
         # Feature selection
-        #self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y, method="model", is_regr=False)
-        self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y, method="RFE", is_regr=False)
+        self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y,
+            method="RFE", is_regr=False, num_rfe_feat=30, num_rfe_loop=10)
+        
+        # Train a L1 logistic regression on the selected cluster
+        print "Train a logistic regression model..."
+        lr = LogisticRegression(random_state=0, penalty="l1", C=0.01)
+        lr.fit(self.df_X, self.df_Y.squeeze())
+        self.reportPerformance(lr)
+        self.reportCoefficient(lr)
 
         # Train a decision tree classifier on the selected cluster
         print "Train a decision tree..."
-        dt = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=5)
+        dt = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=6)
         dt.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(dt)
         self.reportFeatureImportance(dt)
         self.exportTreeGraph(dt)
-
-        # Train a L1 logistic regression on the selected cluster
-        print "Train a logistic regression model..."
-        lr = LogisticRegression(random_state=0, penalty="l1", C=0.1)
-        lr.fit(self.df_X, self.df_Y.squeeze())
-        self.reportPerformance(lr)
-        self.reportCoefficient(lr)
 
     def reportCoefficient(self, model):
         for (c, fn) in zip(np.squeeze(model.coef_), self.df_X.columns.values):
@@ -113,9 +116,12 @@ class Interpreter(object):
                 filled=True)
 
     def clusterSamplesWithPositiveLabels(self):
-        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.75, n_jobs=-1)
+        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.75, n_jobs=-1) # for Random Forest
+        #c = DBSCAN(metric="precomputed", min_samples=30, eps=0.9, n_jobs=-1) # for ExtraTrees
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
+
+        # Print cluster information
         print "Unique cluster ids : %s" % np.unique(cluster)
         print "Total number of positive samples : %s" % len(self.df_X_pos)
         for c_id in np.unique(cluster):
@@ -125,6 +131,14 @@ class Interpreter(object):
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
         if self.out_p is not None:
             self.plotClusters(cluster, self.out_p)
+        
+        # Merge clusters
+        print "Merge clusters..."
+        cluster[cluster>0] = 0
+
+        # Evaluate the quality of the cluster
+        qc = silhouette_score(dist, cluster, metric="precomputed")
+        print "Silhouette Coefficient: %0.3f" % qc
         return cluster
 
     def plotClusters(self, cluster, out_p):
@@ -263,11 +277,18 @@ class Interpreter(object):
         return dp_rules, dp_samples, df, df_idx.values
 
     def reportPerformance(self, model):
+        print "Report performance for all data..."
         metric = computeMetric(self.df_Y, model.predict(self.df_X), False)
-        for m in metric:
-            self.log(metric[m])
+        for m in metric: self.log(metric[m])
 
-    def reportFeatureImportance(self, model, thr=0.8):
+        print "Report performance for daytime data..."
+        hd_start, hd_end = 8, 18
+        hd = self.df_X["HourOfDay"]
+        dt_idx = (hd>=hd_start)&(hd<=hd_end)
+        metric = computeMetric(self.df_Y[dt_idx], model.predict(self.df_X[dt_idx]), False)
+        for m in metric: self.log(metric[m])
+
+    def reportFeatureImportance(self, model, thr=0.9):
         feat_ims = np.array(model.feature_importances_)
         sorted_ims_idx = np.argsort(feat_ims)[::-1]
         feat_ims = np.round(feat_ims[sorted_ims_idx], 5)

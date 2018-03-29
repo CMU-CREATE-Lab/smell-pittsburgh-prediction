@@ -17,6 +17,9 @@ from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.manifold import SpectralEmbedding
 from copy import deepcopy
 from crossValidation import *
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import grangercausalitytests
+from scipy.stats import pearsonr
 
 # Analyze data
 def analyzeData(
@@ -45,15 +48,88 @@ def analyzeData(
 
 # Interpret the model
 def interpretModel(in_p, out_p, logger):
-    df_X, df_Y, df_C = computeFeatures(in_p=in_p, f_hr=8, b_hr=1, thr=40, is_regr=False,
-        add_inter=False, add_roll=False, add_diff=False, logger=logger)
+    # Load time series data
+    df_esdr = pd.read_csv(in_p[0], parse_dates=True, index_col="DateTime")
+    df_smell = pd.read_csv(in_p[1], parse_dates=True, index_col="DateTime")
+
+    # Select variables based on prior knowledge
+    print "Select variables based on prior knowledge..."
+    want = [
+        #"3.feed_1.SO2_PPM", # Avalon ACHD
+        #"3.feed_1.H2S_PPM", # Avalon ACHD
+        #"3.feed_1.SIGTHETA_DEG",
+        #"3.feed_1.SONICWD_DEG",
+        #"3.feed_1.SONICWS_MPH",
+        "3.feed_26.OZONE_PPM", # Lawrenceville ACHD
+        "3.feed_27.SO2_PPB", # Lawrenceville 2 ACHD
+        "3.feed_28.H2S_PPM", # Liberty ACHD
+        #"3.feed_28.SO2_PPM",
+        "3.feed_28.SIGTHETA_DEG",
+        "3.feed_28.SONICWD_DEG",
+        "3.feed_28.SONICWS_MPH",
+        "3.feed_23.PM10_UG_M3", # Flag Plaza ACHD
+        "3.feed_11067.NO2_PPB..3.feed_43.NO2_PPB", # Parkway East ACHD
+        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG",
+        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG",
+        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH",
+        "3.feed_3506.PM2_5", # BAPC 301 39TH STREET BLDG #7 AirNow
+        "3.feed_3506.OZONE"
+    ]
+    df_esdr_cp = df_esdr
+    df_esdr = pd.DataFrame()
+    for col in df_esdr_cp.columns:
+        if col in want:
+            df_esdr[col] = df_esdr_cp[col]
+    
+    # Check if time series variables are stationary using Dickey-Fuller test
+    if False:
+        for col in df_esdr.columns:
+            r = adfuller(df_esdr[col], regression="ctt")
+            print "p-value: %.3f -- %s" % (r[1], col)
+
+    # Compute cross-correlation between variables
+    if False:
+        L = len(df_esdr.columns)
+        for i in range(0, L-1):
+            col_i = df_esdr.columns[i]
+            for j in range(i+1, L):
+                col_j = df_esdr.columns[j]
+                x_i, x_j = df_esdr[col_i], df_esdr[col_j]
+                pair = col_i + " === " + col_j
+                max_lag = 3
+                cc = computeCrossCorrelation(x_i, x_j, max_lag=max_lag)
+                all_lag = np.array(range(0, max_lag*2 + 1)) - max_lag
+                max_cr_idx = np.argmax(abs(cc))
+                max_cr_val = cc[max_cr_idx]
+                max_cr_lag = all_lag[max_cr_idx]
+                pair = col_i + " === " + col_j
+                print "(max_corr=%.3f, lag=%d)  %s" % (max_cr_val, max_cr_lag, pair)
+                #r = grangercausalitytests(df_esdr[[col_i, col_j]], maxlag=max_lag, verbose=False)
+                #for key in r.keys(): print "\t (ts, p_value, dof, lag) = %.2f, %.3f, %d, %d" % r[key][0]['params_ftest']
+                #print "\t(corr, p_value) = %.2f, %.2f" % pearsonr(x_i, x_j)
+    
+    # Interpret data
+    df_esdr = df_esdr.reset_index()
+    df_smell = df_smell.reset_index()
+    df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=8, b_hr=2, thr=40, is_regr=False,
+        add_inter=True, add_roll=False, add_diff=False, logger=logger)
     model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
     df_Y = model.getFilteredLabels()
     df_X = model.getSelectedFeatures()
-    for m in ["DT", "LG"]:
+    for m in ["LG", "DT"]:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
         lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
         crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg)
+
+def computeCrossCorrelation(x, y, max_lag=None):
+    n = len(x)
+    xo = x - x.mean()
+    yo = y - y.mean()
+    cv = np.correlate(xo, yo, "full") / n
+    cc = cv / (np.std(x) * np.std(y))
+    if max_lag > 0:
+        cc = cc[n-1-max_lag:n+max_lag]
+    return cc
 
 # Correlational study
 def corrStudy(in_p, out_p, logger):
@@ -61,6 +137,7 @@ def corrStudy(in_p, out_p, logger):
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=True,
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
     Y = df_Y.squeeze()
+    Y = Y - Y.mean()
     max_t_lag = 25 # the maximum time lag
     df_corr = pd.DataFrame()
     for c in df_X.columns:
