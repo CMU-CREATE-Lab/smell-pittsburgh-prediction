@@ -55,6 +55,8 @@ def interpretModel(in_p, out_p, logger):
     # Select variables based on prior knowledge
     print "Select variables based on prior knowledge..."
     want = [
+        #"3.feed_3506.PM2_5", # BAPC 301 39TH STREET BLDG #7 AirNow
+        #"3.feed_3506.OZONE",
         #"3.feed_1.SO2_PPM", # Avalon ACHD
         #"3.feed_1.H2S_PPM", # Avalon ACHD
         #"3.feed_1.SIGTHETA_DEG",
@@ -71,9 +73,7 @@ def interpretModel(in_p, out_p, logger):
         "3.feed_11067.NO2_PPB..3.feed_43.NO2_PPB", # Parkway East ACHD
         "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG",
         "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG",
-        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH",
-        "3.feed_3506.PM2_5", # BAPC 301 39TH STREET BLDG #7 AirNow
-        "3.feed_3506.OZONE"
+        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH"
     ]
     df_esdr_cp = df_esdr
     df_esdr = pd.DataFrame()

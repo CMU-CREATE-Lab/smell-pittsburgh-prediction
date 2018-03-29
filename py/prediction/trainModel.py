@@ -80,7 +80,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "DT":
-            model = DecisionTreeRegressor(random_state=0, min_samples_split=20, max_depth=5)
+            model = DecisionTreeRegressor(random_state=0, min_samples_split=20, max_depth=6)
         else:
             if method[:2] in ["RF", "ET"]:
                 # parse tuning parameters
@@ -105,7 +105,7 @@ def trainModel(
         elif method == "KN":
             model = KNeighborsClassifier(n_neighbors=10, weights="uniform")
         elif method == "LG":
-            model = LogisticRegression(random_state=0, penalty="l1", C=0.01)
+            model = LogisticRegression(random_state=0, penalty="l1", C=1)
         elif method == "DMLP":
             model = DmlpLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "CRNN":

@@ -82,7 +82,7 @@ class Interpreter(object):
         
         # Train a L1 logistic regression on the selected cluster
         print "Train a logistic regression model..."
-        lr = LogisticRegression(random_state=0, penalty="l1", C=0.01)
+        lr = LogisticRegression(random_state=0, penalty="l1", C=1)
         lr.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(lr)
         self.reportCoefficient(lr)
@@ -137,7 +137,8 @@ class Interpreter(object):
         cluster[cluster>0] = 0
 
         # Evaluate the quality of the cluster
-        qc = silhouette_score(dist, cluster, metric="precomputed")
+        #qc = silhouette_score(dist, cluster, metric="precomputed")
+        qc = silhouette_score(self.df_X_pos, cluster) # on the original space
         print "Silhouette Coefficient: %0.3f" % qc
         return cluster
 
