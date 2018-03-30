@@ -24,7 +24,7 @@ def main(argv):
         compute_features = True
         cross_validation = True
     else:
-        #get_data = True
+        get_data = True
         analyze_data = True
         #compute_features = True
         #cross_validation = True
@@ -65,14 +65,15 @@ def main(argv):
 
 def genMethodSet():
     m_all = []
-    m = "RF"
+    methods = ["RF", "ET"]
     n_estimators = [1000]
-    max_features = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,None]
+    max_features = range(15,200,5) + [None]
     min_samples_split = [2]
     for n in n_estimators:
         for mf in max_features:
             for mss in min_samples_split:
-                m_all.append(m + "-" + str(n) + "-" + str(mf) + "-" + str(mss))
+                for m in methods:
+                    m_all.append(m + "-" + str(n) + "-" + str(mf) + "-" + str(mss))
     return m_all
 
 if __name__ == "__main__":

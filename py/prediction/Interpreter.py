@@ -32,8 +32,8 @@ class Interpreter(object):
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            F = RandomForestClassifier(n_estimators=100, max_features="sqrt", min_samples_split=2, random_state=0, n_jobs=-1)
-            #F = ExtraTreesClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            F = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
+            #F = ExtraTreesClassifier(n_estimators=100, random_state=0, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
 
             # Build the decision paths of samples with label 1

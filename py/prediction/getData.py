@@ -23,6 +23,7 @@ def getData(
         ],
         [{"feed": "1", "channel": "SO2_PPM,H2S_PPM,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"}],
         [{"feed": "26", "channel": "OZONE_PPM,PM25B_UG_M3,PM10B_UG_M3"}],
+        #[{"feed": "26", "channel": "OZONE_PPM,PM25B_UG_M3,PM10B_UG_M3,SONICWS_MPH,SONICWD_DEG,SIGTHETA_DEG"}],
         [{"feed": "27", "channel": "NO_PPB,NOY_PPB,CO_PPB,SO2_PPB"}],
         [{"feed": "28", "channel": "H2S_PPM,SO2_PPM,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"}],
         [{"feed": "29", "channel": "PM10_UG_M3,PM25_UG_M3"}],

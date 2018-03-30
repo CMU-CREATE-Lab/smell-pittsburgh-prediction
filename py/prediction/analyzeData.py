@@ -63,6 +63,9 @@ def interpretModel(in_p, out_p, logger):
         #"3.feed_1.SONICWD_DEG",
         #"3.feed_1.SONICWS_MPH",
         "3.feed_26.OZONE_PPM", # Lawrenceville ACHD
+        #"3.feed_26.SONICWS_MPH",
+        #"3.feed_26.SONICWD_DEG",
+        #"3.feed_26.SIGTHETA_DEG",
         "3.feed_27.SO2_PPB", # Lawrenceville 2 ACHD
         "3.feed_28.H2S_PPM", # Liberty ACHD
         #"3.feed_28.SO2_PPM",
