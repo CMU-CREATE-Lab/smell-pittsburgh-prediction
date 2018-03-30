@@ -22,12 +22,12 @@ def crossValidation(
     df_C=None, # crowd feature, total smell values for the previous hour
     in_p=None, # input path of features and labels
     out_p_root=None, # root directory for outputing files
-    method="SVM", # see trainModel.py
+    method="RF", # see trainModel.py
     is_regr=False, # regression or classification,
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=75, # number of folds for validation
+    num_folds=77, # number of folds for validation TODO: one fold means one week, need to compute this automatically
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features

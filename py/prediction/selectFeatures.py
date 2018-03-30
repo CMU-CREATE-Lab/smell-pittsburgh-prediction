@@ -25,12 +25,11 @@ def selectFeatures(
     method="RFE", # method for selecting features
     balance=False, # oversample or undersample the original features or not
     out_p=None, # the path for saving features,
-    num_rfe_feat=30, # number of features to select for RFE
-    num_rfe_loop=10, # number of loops for RFE
+    num_feat_rfe=30, # number of features to select for RFE
+    step_rfe=10, # step for RFE
     logger=None):
 
     log("Select features using method: " + method, logger)
-    RFE_step = len(df_X.columns) / num_rfe_loop
 
     # Select model
     if is_regr:
@@ -45,7 +44,7 @@ def selectFeatures(
             model = SelectFromModel(base)
         elif method == "RFE":
             base = Lasso(alpha=0.1, max_iter=1000)
-            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_rfe_feat)
+            model = RFE(base, step=step_rfe, verbose=1, n_features_to_select=num_feat_rfe)
     else:
         if method == "percent":
             model = SelectPercentile(score_func=f_classif, percentile=10)
@@ -59,7 +58,7 @@ def selectFeatures(
         elif method == "RFE":
             #base = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
             base = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
-            model = RFE(base, step=RFE_step, verbose=1, n_features_to_select=num_rfe_feat)
+            model = RFE(base, step=step_rfe, verbose=1, n_features_to_select=num_feat_rfe)
 
     # If method is None or not supported, just return the original features
     if model is None:
@@ -96,7 +95,7 @@ def selectFeatures(
     m.fit(df_X,df_Y.squeeze())
     feat_names = df_X.columns.copy()
     feat_ims = np.array(m.feature_importances_)
-    sorted_ims_idx = np.argsort(feat_ims)
+    sorted_ims_idx = np.argsort(feat_ims)[::-1]
     feat_names = feat_names[sorted_ims_idx]
     feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
     for k in zip(feat_ims, feat_names):

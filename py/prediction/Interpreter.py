@@ -35,6 +35,8 @@ class Interpreter(object):
             F = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
             #F = ExtraTreesClassifier(n_estimators=100, random_state=0, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
+            self.reportPerformance(F)
+            self.reportFeatureImportance(F, thr=0.3)
 
             # Build the decision paths of samples with label 1
             # self.dp_rules contains all decision paths of positive labels
@@ -51,6 +53,8 @@ class Interpreter(object):
             # Cluster samples with label 1 based on the similarity matrix
             self.log("Cluster samples with label 1...")
             self.cluster = self.clusterSamplesWithPositiveLabels()
+
+            # TODO: Refine the cluster by using k-means on the original feature space
         else:
             df_X_pos = df_X[df_Y["smell"]==1]
             df_X_pos_idx = df_X_pos.index.values
@@ -78,7 +82,7 @@ class Interpreter(object):
 
         # Feature selection
         self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y,
-            method="RFE", is_regr=False, num_rfe_feat=30, num_rfe_loop=10)
+            method="RFE", is_regr=False, num_feat_rfe=30, step_rfe=90)
         
         # Train a L1 logistic regression on the selected cluster
         print "Train a logistic regression model..."

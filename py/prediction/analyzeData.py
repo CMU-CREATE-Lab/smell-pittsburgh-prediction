@@ -55,26 +55,16 @@ def interpretModel(in_p, out_p, logger):
     # Select variables based on prior knowledge
     print "Select variables based on prior knowledge..."
     want = [
-        #"3.feed_3506.PM2_5", # BAPC 301 39TH STREET BLDG #7 AirNow
-        #"3.feed_3506.OZONE",
-        #"3.feed_1.SO2_PPM", # Avalon ACHD
-        #"3.feed_1.H2S_PPM", # Avalon ACHD
-        #"3.feed_1.SIGTHETA_DEG",
-        #"3.feed_1.SONICWD_DEG",
-        #"3.feed_1.SONICWS_MPH",
         "3.feed_26.OZONE_PPM", # Lawrenceville ACHD
-        #"3.feed_26.SONICWS_MPH",
-        #"3.feed_26.SONICWD_DEG",
-        #"3.feed_26.SIGTHETA_DEG",
-        "3.feed_27.SO2_PPB", # Lawrenceville 2 ACHD
+        "3.feed_26.SONICWS_MPH",
+        "3.feed_26.SONICWD_DEG",
+        "3.feed_26.SIGTHETA_DEG",
         "3.feed_28.H2S_PPM", # Liberty ACHD
-        #"3.feed_28.SO2_PPM",
         "3.feed_28.SIGTHETA_DEG",
         "3.feed_28.SONICWD_DEG",
         "3.feed_28.SONICWS_MPH",
         "3.feed_23.PM10_UG_M3", # Flag Plaza ACHD
-        "3.feed_11067.NO2_PPB..3.feed_43.NO2_PPB", # Parkway East ACHD
-        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG",
+        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG", # Parkway East ACHD
         "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG",
         "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH"
     ]
@@ -82,6 +72,7 @@ def interpretModel(in_p, out_p, logger):
     df_esdr = pd.DataFrame()
     for col in df_esdr_cp.columns:
         if col in want:
+            print "\t" + col
             df_esdr[col] = df_esdr_cp[col]
     
     # Check if time series variables are stationary using Dickey-Fuller test
