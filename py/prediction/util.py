@@ -680,7 +680,7 @@ def getSmellReports(**options):
     api_para = "smell_reports?"
     api_para += "zipcodes=15221,15218,15222,15219,15201,15224,15213,15232,15206,15208,15217,15207,15260,15104"
     #api_para += "allegheny_county_only=True"
-    api_para += "prediction_query=true" # this returns the user hash for identifying unique users
+    api_para += "&prediction_query=true" # this returns the user hash for identifying unique users
     if "start_time" in options:
         api_para += "&start_time=" + str(options["start_time"])
     if "end_time" in options:
