@@ -52,10 +52,14 @@ def analyzeData(
     #interpretModel(in_p, out_p, logger=logger)
 
 def plotRawSmell(in_p, out_p, logger):
-    df_smell_raw = pd.read_csv(in_p[2], parse_dates=True, index_col="created_at")
+    df_smell_raw = pd.read_csv(in_p[2], parse_dates=True, index_col="created_at",
+            date_parser=lambda epoch: pd.to_datetime(epoch, unit="s"))
     
     # Process the symptoms and descriptions
-    processWords(df_smell_raw, out_p, logger)
+    #processWords(df_smell_raw, out_p, logger)
+    
+    # Plot distribution of smell reports over over month
+    plotSmellDistribution(df_smell_raw, out_p, logger)
 
     # Plot histogram of smell reports over ratings
     #plotSmellRatings(df_smell_raw, out_p, logger)
@@ -74,7 +78,31 @@ def pandasSeriesToText(s):
     return s
 
 def plotSmellDistribution(df_smell_raw, out_p, logger):
-    return
+    month_txt = np.array(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
+    df = deepcopy(df_smell_raw)
+    smell = df["smell_value"]
+    fig = plt.figure(figsize=(10, 12))
+    y_all = None
+    for i in range(0,5):
+        s = smell[smell==i+1].resample("1M", label="right").count()
+        x = map("\n".join, zip(month_txt[s.index.month.values - 1], s.index.year.astype(str).values))
+        y = s.values
+        if y_all is None: y_all = y
+        else: y_all += y
+        plt.subplot(5, 1, i+1)
+        plt.title("Number of smell reports with rating " + str(i+1), fontsize=14)
+        plt.bar(range(0,len(x)), y, 0.6, color=(0.4,0.4,0.4), align="center")
+        plt.xticks(range(0,len(x)), x)
+    
+    plt.subplot(5, 1, i+1)
+    plt.title("Number of all smell reports" + str(i+1), fontsize=14)
+    plt.bar(range(0,len(x)), y_all, 0.6, color=(0.4,0.4,0.4), align="center")
+    plt.xticks(range(0,len(x)), x)
+
+    plt.tight_layout()
+    fig.savefig(out_p + "smell_reports_dis.png", dpi=150)
+    fig.clf()
+    plt.close()
 
 def plotSmellRatings(df_smell_raw, out_p, logger):
     c = Counter()
