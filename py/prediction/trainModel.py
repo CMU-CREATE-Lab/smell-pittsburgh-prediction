@@ -51,9 +51,9 @@ def trainModel(
     multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
     if is_regr:
         if method == "RF":
-            model = RandomForestRegressor(n_estimators=200, max_features=None, min_samples_split=5, random_state=0, n_jobs=-1)
+            model = RandomForestRegressor(n_estimators=200,max_features=None,min_samples_split=5,random_state=0,n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesRegressor(n_estimators=200, max_features=None, min_samples_split=5, random_state=0, n_jobs=-1)
+            model = ExtraTreesRegressor(n_estimators=200,max_features=None,min_samples_split=5,random_state=0,n_jobs=-1)
         elif method == "SVM":
             model = SVR(max_iter=5000)
             if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
@@ -82,22 +82,29 @@ def trainModel(
         elif method == "DT":
             model = DecisionTreeRegressor(random_state=0, min_samples_split=20, max_depth=7)
         else:
-            if method[:2] in ["RF", "ET"]:
+            m = method[:2]
+            if m in ["RF", "ET"]:
                 # parse tuning parameters
                 p = method.split("-")
                 log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", min_samples_split=" + p[3], logger)
                 for i in range(1, len(p)):
                     if p[i] == "None": p[i] = None
+                    elif p[i] == "auto": p[i] = "auto"
                     else: p[i] = int(p[i])
-                model = ExtraTreesRegressor(n_estimators=p[1], max_features=p[2], min_samples_split=p[3], random_state=0, n_jobs=-1)
+                if m == "RF":
+                    model = RandomForestRegressor(n_estimators=p[1],max_features=p[2],min_samples_split=p[3],
+                        random_state=0,n_jobs=-1)
+                elif m == "ET":
+                    model = ExtraTreesRegressor(n_estimators=p[1],max_features=p[2],min_samples_split=p[3],
+                        random_state=0,n_jobs=-1)
             else:
                 log("ERROR: method " + method + " is not supported", logger)
                 return None
     else:
         if method == "RF":
-            model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=1000,max_features=30,min_samples_split=2,random_state=0,n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,random_state=0,n_jobs=-1)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", random_state=0, probability=True)
         elif method == "MLP":
@@ -113,21 +120,28 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HCR":
-            model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, random_state=0, n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=1000,max_features=30,min_samples_split=2,random_state=0,n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)
         elif method == "DT":
             model = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=7)
         else:
-            if method[:2] in ["RF", "ET"]:
+            m = method[:2]
+            if m in ["RF", "ET"]:
                 # parse tuning parameters
                 p = method.split("-")
                 log(p[0] + ", n_estimators=" + p[1] + ", max_features=" + p[2] + ", min_samples_split=" + p[3], logger)
                 for i in range(1, len(p)):
                     if p[i] == "None": p[i] = None
+                    elif p[i] == "auto": p[i] = "auto"
                     else: p[i] = int(p[i])
-                model = ExtraTreesClassifier(n_estimators=p[1], max_features=p[2], min_samples_split=p[3], random_state=0, n_jobs=-1)
+                if m == "RF":
+                    model = RandomForestClassifier(n_estimators=p[1],max_features=p[2],min_samples_split=p[3],
+                        random_state=0,n_jobs=-1)
+                elif m == "ET":
+                    model = ExtraTreesClassifier(n_estimators=p[1],max_features=p[2],min_samples_split=p[3],
+                        random_state=0,n_jobs=-1)
             else:
                 log("ERROR: method " + method + " is not supported", logger)
                 return None

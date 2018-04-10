@@ -489,6 +489,11 @@ def saveJson(content, fpath):
     with open(fpath, "w") as f:
         json.dump(content, f)
 
+# Save text file
+def saveText(content, fpath):
+    with open(fpath, "w") as f:
+        f.write(content)
+
 # Get the access token from ESDR, need the auth.json file
 # See https://github.com/CMU-CREATE-Lab/esdr/blob/master/HOW_TO.md
 def getEsdrAccessToken(auth_json_path):

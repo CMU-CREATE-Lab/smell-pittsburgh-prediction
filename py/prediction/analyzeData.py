@@ -21,6 +21,7 @@ from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.stattools import grangercausalitytests
 from scipy.stats import pearsonr
 from collections import Counter
+import re
 
 # Analyze data
 def analyzeData(
@@ -33,7 +34,7 @@ def analyzeData(
     checkAndCreateDir(out_p)
 
     # Plot raw smell data
-    #plotRawSmell(in_p, out_p, logger)
+    plotRawSmell(in_p, out_p, logger)
 
     # Plot features
     #plotFeatures(in_p, out_p_root, logger)
@@ -48,17 +49,40 @@ def analyzeData(
     #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    interpretModel(in_p, out_p, logger=logger)
+    #interpretModel(in_p, out_p, logger=logger)
 
 def plotRawSmell(in_p, out_p, logger):
-    df_smell_raw = pd.read_csv(in_p[2])
+    df_smell_raw = pd.read_csv(in_p[2], parse_dates=True, index_col="created_at")
+    
+    # Process the symptoms and descriptions
+    processWords(df_smell_raw, out_p, logger)
+
+    # Plot histogram of smell reports over ratings
+    #plotSmellRatings(df_smell_raw, out_p, logger)
+
+def processWords(df_smell_raw, out_p, logger):
+    symptom = pandasSeriesToText(df_smell_raw["feelings_symptoms"])
+    description = pandasSeriesToText(df_smell_raw["smell_description"])
+    saveText(symptom, out_p + "symptom.txt")
+    saveText(description, out_p + "description.txt")
+
+def pandasSeriesToText(s):
+    s = s.dropna().values
+    s = " ".join(map(str, s))
+    s = re.sub("[^0-9a-zA-Z]+", " ", s)
+    s = " ".join([k for k in s.split(" ") if k != ""])
+    return s
+
+def plotSmellDistribution(df_smell_raw, out_p, logger):
+    return
+
+def plotSmellRatings(df_smell_raw, out_p, logger):
     c = Counter()
     for n in df_smell_raw["smell_value"].values:
         c[n] += 1
     x = [1, 2, 3, 4, 5]
     y = [c[key] for key in x]
     fig, ax1 = plt.subplots(1, 1, figsize=(6, 6))
-    #g = sns.barplot(x, y, color=(0.4,0.4,0.4), ax=ax1)
     plt.bar(x, y, 0.6, color=(0.4,0.4,0.4))
     ax1.set_ylabel("Number of smell reports", fontsize=14)
     ax1.set_xlabel("Smell rating", fontsize=14)

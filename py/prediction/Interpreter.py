@@ -33,7 +33,6 @@ class Interpreter(object):
             # Fit the predictive model
             self.log("Fit predictive model..")
             F = RandomForestClassifier(n_estimators=500, random_state=0, n_jobs=-1)
-            #F = ExtraTreesClassifier(n_estimators=100, random_state=0, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
             self.reportPerformance(F)
             self.reportFeatureImportance(F, thr=0.3)
@@ -121,7 +120,6 @@ class Interpreter(object):
 
     def clusterSamplesWithPositiveLabels(self):
         c = DBSCAN(metric="precomputed", min_samples=30, eps=0.77, n_jobs=-1) # for Random Forest
-        #c = DBSCAN(metric="precomputed", min_samples=30, eps=0.9, n_jobs=-1) # for ExtraTrees
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
 
