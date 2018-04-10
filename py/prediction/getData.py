@@ -10,7 +10,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 def getData(
     out_p=None, # output file path
     start_dt=datetime(2016, 10, 6, 0), # starting date for the data
-    end_dt=datetime(2018, 1, 25, 0), # ending data for the data
+    end_dt=datetime(2018, 3, 29, 0), # ending data for the data
     logger=None):
 
     log("Get data...", logger)
@@ -43,8 +43,8 @@ def getData(
     df_esdr = mergeEsdrData(esdr_data)
     
     # Get smell reports (datetime object in "DateTime" column is in UTC tzinfo)
-    df_smell = getSmellReports(start_time=start_time, end_time=end_time)
-    df_smell = aggregateSmellData(df_smell)
+    df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time)
+    df_smell = aggregateSmellData(df_smell_raw)
     
     # Sync DateTime column in esdr and smell data
     if df_smell is not None:
@@ -56,8 +56,10 @@ def getData(
         for p in out_p: checkAndCreateDir(p)
         df_esdr.to_csv(out_p[0], index=False)
         df_smell.to_csv(out_p[1], index=False)
+        df_smell_raw.to_csv(out_p[2], index=True)
         log("ESDR data created at " + out_p[0], logger)
         log("Smell data created at " + out_p[1], logger)
+        log("Raw smell reports created at " + out_p[2], logger)
     return df_esdr, df_smell
 
 def mergeEsdrData(data):

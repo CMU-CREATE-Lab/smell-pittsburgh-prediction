@@ -80,7 +80,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "DT":
-            model = DecisionTreeRegressor(random_state=0, min_samples_split=20, max_depth=6)
+            model = DecisionTreeRegressor(random_state=0, min_samples_split=20, max_depth=7)
         else:
             if method[:2] in ["RF", "ET"]:
                 # parse tuning parameters
@@ -118,7 +118,7 @@ def trainModel(
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)
         elif method == "DT":
-            model = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=6)
+            model = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=7)
         else:
             if method[:2] in ["RF", "ET"]:
                 # parse tuning parameters

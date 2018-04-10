@@ -15,6 +15,8 @@ def main(argv):
     # Parameters
     is_regr = False # is classification
     #is_regr = True # is regression
+    start_dt = datetime(2016, 10, 6, 0)
+    end_dt = datetime(2018, 4, 5, 0)
     get_data, analyze_data, compute_features, cross_validation = False, False, False, False
     if mode == "run_all":
         get_data = True
@@ -24,7 +26,7 @@ def main(argv):
         compute_features = True
         cross_validation = True
     else:
-        get_data = True
+        #get_data = True
         analyze_data = True
         #compute_features = True
         #cross_validation = True
@@ -32,11 +34,11 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=datetime(2016, 10, 6, 0), end_dt=datetime(2018, 3, 29, 0))
+        getData(out_p=[p+"esdr.csv",p+"smell.csv",p+"raw_smell.csv"], start_dt=start_dt, end_dt=end_dt)
 
     # Analyze data
     if analyze_data:
-        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
+        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv",p+"raw_smell.csv"], out_p_root=p)
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -52,23 +54,26 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["RF"]
-        #methods = genMethodSet()
+        #methods = ["RF", "ET"]
+        methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
         checkAndCreateDir(p_log)
+        num_folds = (end_dt - start_dt).days / 7 # one fold represents a week
         for m in methods:
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
             lg = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
-            crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p, method=m, is_regr=is_regr, logger=lg)
+            crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p,
+                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds)
 
 def genMethodSet():
     m_all = []
     methods = ["RF", "ET"]
     n_estimators = [1000]
-    max_features = range(15,200,5) + [None]
-    min_samples_split = [2]
+    #max_features = range(5,200,5) + [None]
+    max_features = [30,60,90,120]
+    min_samples_split = [2,4,8,16,32]
     for n in n_estimators:
         for mf in max_features:
             for mss in min_samples_split:

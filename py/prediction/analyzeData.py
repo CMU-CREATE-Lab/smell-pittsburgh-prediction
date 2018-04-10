@@ -20,6 +20,7 @@ from crossValidation import *
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.stattools import grangercausalitytests
 from scipy.stats import pearsonr
+from collections import Counter
 
 # Analyze data
 def analyzeData(
@@ -31,11 +32,14 @@ def analyzeData(
     out_p = out_p_root + "analysis/"
     checkAndCreateDir(out_p)
 
+    # Plot raw smell data
+    #plotRawSmell(in_p, out_p, logger)
+
     # Plot features
     #plotFeatures(in_p, out_p_root, logger)
 
-    # Plot the distribution of smell reports by days of week and hours of day
-    #plotDayHour(in_p, out_p, logger)
+    # Plot aggregated smell data
+    #plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
     #plotLowDimensions(in_p, out_p, logger)
@@ -46,7 +50,30 @@ def analyzeData(
     # Interpret model
     interpretModel(in_p, out_p, logger=logger)
 
-# Interpret the model
+def plotRawSmell(in_p, out_p, logger):
+    df_smell_raw = pd.read_csv(in_p[2])
+    c = Counter()
+    for n in df_smell_raw["smell_value"].values:
+        c[n] += 1
+    x = [1, 2, 3, 4, 5]
+    y = [c[key] for key in x]
+    fig, ax1 = plt.subplots(1, 1, figsize=(6, 6))
+    #g = sns.barplot(x, y, color=(0.4,0.4,0.4), ax=ax1)
+    plt.bar(x, y, 0.6, color=(0.4,0.4,0.4))
+    ax1.set_ylabel("Number of smell reports", fontsize=14)
+    ax1.set_xlabel("Smell rating", fontsize=14)
+    plt.suptitle("Histogram of smell report ratings", fontsize=18)
+    
+    # Add values on each bar
+    for key in c:
+        ax1.text(key, c[key]+20, c[key], color=(0.2,0.2,0.2), ha="center", fontsize=14) 
+
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.92)
+    fig.savefig(out_p + "smell_reports_hist.png", dpi=150)
+    fig.clf()
+    plt.close()
+
 def interpretModel(in_p, out_p, logger):
     # Load time series data
     df_esdr = pd.read_csv(in_p[0], parse_dates=True, index_col="DateTime")
@@ -156,9 +183,14 @@ def corrStudy(in_p, out_p, logger):
     fig.clf()
     plt.close()
 
-def plotDayHour(in_p, out_p, logger):
+def plotAggrSmell(in_p, out_p, logger):
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=None, b_hr=0, thr=40, is_regr=True,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
+    
+    # Plot the distribution of smell values by days of week and hours of day
+    plotDayHour(df_X, df_Y, out_p, logger)
+
+def plotDayHour(df_X, df_Y, out_p, logger):
     log("Plot the distribution of smell over day and hour...", logger)
     df = pd.DataFrame()
     df["HourOfDay"] = df_X["HourOfDay"]
@@ -258,11 +290,11 @@ def plotTime(df_v, title_head, out_p):
     plt.close()
     gc.collect()
 
-def plotHist(df_v, title_head, out_p):
+def plotHist(df_v, title_head, out_p, bins=30):
     v = df_v.name
     print title_head + v
     fig = plt.figure(figsize=(8, 8), dpi=150)
-    df_v.plot.hist(alpha=0.5, bins=30, title=title_head)
+    df_v.plot.hist(alpha=0.5, bins=bins, title=title_head)
     plt.xlabel(v)
     fig.tight_layout()
     fig.savefig(out_p + v + ".png")
@@ -301,8 +333,8 @@ def plotCorrMatirx(df, out_p):
     plt.close()
 
 def plotLowDimensions(in_p, out_p, logger):
-    plot_PCA = False
-    plot_RTE = False
+    plot_PCA = True
+    plot_RTE = True
     plot_SE = True
 
     is_regr = False
