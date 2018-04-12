@@ -120,7 +120,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HCR":
-            model = RandomForestClassifier(n_estimators=1000,max_features=30,min_samples_split=2,random_state=0,n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,random_state=0,n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)

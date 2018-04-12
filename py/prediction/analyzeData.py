@@ -37,42 +37,32 @@ def analyzeData(
     plotRawSmell(in_p, out_p, logger)
 
     # Plot features
-    #plotFeatures(in_p, out_p_root, logger)
+    plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    #plotAggrSmell(in_p, out_p, logger)
+    plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    #plotLowDimensions(in_p, out_p, logger)
+    plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    #corrStudy(in_p, out_p, logger=logger)
+    corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    #interpretModel(in_p, out_p, logger=logger)
+    interpretModel(in_p, out_p, logger=logger)
 
 def plotRawSmell(in_p, out_p, logger):
     df_smell_raw = pd.read_csv(in_p[2], parse_dates=True, index_col="created_at",
             date_parser=lambda epoch: pd.to_datetime(epoch, unit="s"))
 
     # Process the symptoms and descriptions
-    #processWords(df_smell_raw, out_p, logger)
+    processWords(df_smell_raw, out_p, logger)
     
     # Plot histogram of smell reports over ratings
-    #plotSmellRatings(df_smell_raw, out_p, logger)
+    plotSmellRatings(df_smell_raw, out_p, logger)
     
     # Plot distribution of smell reports and users over month
-    #plotDistribution(df_smell_raw, out_p, logger)
-
-    # Plot user contributions
-    plotUserContribution(df_smell_raw, out_p, logger)
-
-def plotUserContribution(df_smell_raw, out_p, logger):
-    df = deepcopy(df_smell_raw)
-    user = df["anonymized_user_hash"]
-    count = user.value_counts()
-    
-    # For each month, find how many new users and how many old users
+    plotDistribution(df_smell_raw, out_p, logger)
 
 # Plot bar charts
 # Note that x, y, title are all arrays

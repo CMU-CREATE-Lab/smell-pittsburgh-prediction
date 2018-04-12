@@ -31,6 +31,8 @@ def crossValidation(
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
+    hd_start = 6, # definition of the starting time of "daytime", e.g. 6 means 6am
+    hd_end = 11, # definition of the ending time of "daytime", e.g. 14 means 2pm
     logger=None):
 
     log("================================================================================", logger)
@@ -56,8 +58,6 @@ def crossValidation(
 
     # Check if using day time only
     daytime_idx = None
-    hd_start = 8
-    hd_end = 18
     if only_day_time:
         df_hd = df_X["HourOfDay"]
         daytime_idx = ((df_hd>=hd_start)&(df_hd<=hd_end)).values

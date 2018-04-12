@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from util import *
 from sklearn import preprocessing
+import pytz
 
 # Merge all data together and compute features
 # OUTPUT: pandas dataframe containing features
@@ -40,6 +41,10 @@ def computeFeatures(
     else:
         df_esdr = df_esdr.set_index("DateTime")
         df_smell = df_smell.set_index("DateTime")
+
+    # Convert datetime to local time zone
+    df_esdr.index = df_esdr.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+    df_smell.index = df_smell.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
 
     # Replace -1 values in esdr data to NaN
     df_esdr[df_esdr==-1] = np.nan
@@ -94,7 +99,7 @@ def computeFeatures(
     else:
         df_Y = None
         df_C = None
-
+    
     # Write dataframe into a csv file
     if out_p:
         for p in out_p: checkAndCreateDir(p)

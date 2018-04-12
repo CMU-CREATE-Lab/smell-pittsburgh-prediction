@@ -691,7 +691,7 @@ def getSmellReports(**options):
         api_para += "&min_smell_value=" + str(options["min_smell_value"])
     if "max_smell_value" in options:
         api_para += "&max_smell_value=" + str(options["max_smell_value"])
-    print api_para
+    
     # Load smell reports
     df = pd.read_json(api_url + api_para, convert_dates=False)
     
