@@ -25,6 +25,8 @@ def main(argv):
     elif mode == "test":
         compute_features = True
         cross_validation = True
+    elif mode == "analyze":
+        analyze_data = True
     else:
         #get_data = True
         analyze_data = True
