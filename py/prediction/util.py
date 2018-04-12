@@ -678,8 +678,10 @@ def getSmellReports(**options):
     # Url
     api_url = smellPghRootUrl() + "api/v1/"
     api_para = "smell_reports?"
-    api_para += "zipcodes=15221,15218,15222,15219,15201,15224,15213,15232,15206,15208,15217,15207,15260,15104"
-    #api_para += "allegheny_county_only=True"
+    if "allegheny_county_only" in options and options["allegheny_county_only"] == True:
+        api_para += "allegheny_county_only=True"
+    else:
+        api_para += "zipcodes=15221,15218,15222,15219,15201,15224,15213,15232,15206,15208,15217,15207,15260,15104"
     api_para += "&prediction_query=true" # this returns the user hash for identifying unique users
     if "start_time" in options:
         api_para += "&start_time=" + str(options["start_time"])
@@ -689,7 +691,7 @@ def getSmellReports(**options):
         api_para += "&min_smell_value=" + str(options["min_smell_value"])
     if "max_smell_value" in options:
         api_para += "&max_smell_value=" + str(options["max_smell_value"])
-
+    print api_para
     # Load smell reports
     df = pd.read_json(api_url + api_para, convert_dates=False)
     
