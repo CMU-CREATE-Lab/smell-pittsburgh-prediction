@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 import time
+import re
 
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
@@ -755,12 +756,15 @@ def getGA(
         file_name = "tracker-from-" + k["startDate"] + "-to-" + k["endDate"] + ".csv"
         with open(out_path + file_name, 'w') as out_file:
             out_file.write(",".join(dimensions_col_names) + "," + ",".join(metrics_col_names) + "\n")
-            rows = r["reports"][0]["data"]["rows"]
-            for p in rows:
-                line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
-                out_file.write(line + "\n")
-            print str(len(rows)) + " rows from " + k["startDate"] + " to " + k["endDate"]
-            print "Google Analytics file created at " + out_path + file_name
+            if "rows" not in r["reports"][0]["data"]:
+                print "Error: no rows"
+            else:
+                rows = r["reports"][0]["data"]["rows"]
+                print str(len(rows)) + " rows from " + k["startDate"] + " to " + k["endDate"]
+                for p in rows:
+                    line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
+                    out_file.write(line + "\n")
+                print "Google Analytics file created at " + out_path + file_name
         # Pause for some time
         time.sleep(1)
 
@@ -808,3 +812,97 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
     fig.savefig(out_p)
     fig.clf()
     plt.close()
+
+# Plot bar charts
+# Note that x, y, title are all arrays
+def plotBar(x, y, h, w, title, out_p):
+    fig = plt.figure(figsize=(w*12, h*2))
+    c = 1
+    for i in range(0, h*w):
+        plt.subplot(h, w, i+1)
+        plt.title(title[i], fontsize=14)
+        plt.bar(range(0,len(x[i])), y[i], 0.6, color=(0.4,0.4,0.4), align="center")
+        plt.xticks(range(0,len(x[i])), x[i])
+    plt.tight_layout()
+    fig.savefig(out_p, dpi=150)
+    fig.clf()
+    plt.close()
+
+def pandasSeriesToText(s):
+    s = s.dropna().values
+    s = " ".join(map(str, s))
+    s = re.sub("[^0-9a-zA-Z]+", " ", s)
+    s = " ".join([k for k in s.split(" ") if k != ""])
+    return s
+
+def dateIndexToMonthYear(index):
+    month_txt = np.array(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
+    return map("\n".join, zip(month_txt[index.month.values - 1], index.year.astype(str).values))
+
+# This function converts a date object to epoch time
+def dateToEpochtime(d):
+    dt = datetime.combine(d, datetime.min.time())
+    return datetimeToEpochtime(dt)
+
+# This function groups a numpy array containing epoch time by date
+def groupTime(epochtime, unit):
+    raw_time = pd.to_datetime(epochtime, unit=unit)
+
+    # Convert to US Eastern time
+    raw_time = raw_time.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+    #raw_time = raw_time.tz_localize(pytz.timezone("US/Eastern"), ambiguous="infer")
+
+    # Group by date
+    raw_time_df = pd.DataFrame(raw_time)
+    raw_time_df["date"] = raw_time_df[0].apply(lambda x: x.date())
+    gb = raw_time_df.groupby("date").groups
+
+    # Format data
+    data = {"data": [], "row_names": [], "index": [], "epochtime": []}
+    sort_base = []
+    for key in gb.keys():
+        if key.year != 2018: continue
+        sort_base.append(key)
+        data["epochtime"].append(int(key.strftime('%s')))
+        data["row_names"].append(key.strftime("%d %b %Y (%a)"))
+        data["data"].append(epochtime[gb[key]].tolist())
+        data["index"].append(gb[key].tolist())
+
+    # Sort by epoch time
+    idx = np.array(sort_base).argsort()
+    data["epochtime"] = np.array(data["epochtime"])[idx].tolist()
+    data["row_names"] = np.array(data["row_names"])[idx].tolist()
+    data["data"] = np.array(data["data"])[idx].tolist()
+
+    return data
+
+# This function aggregates a numpy array containing epoch time
+def aggregateTime(epochtime, unit, resample_method, format_method, **options):
+    raw_time = pd.to_datetime(epochtime, unit=unit)
+
+    # Convert to US Eastern time
+    raw_time = raw_time.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+    #raw_time = raw_time.tz_localize(pytz.timezone("US/Eastern"), ambiguous="infer")
+
+    if "only_count_unique" in options:
+        raw_time_series = pd.Series(options["only_count_unique"], index=raw_time)
+        aggr = raw_time_series.resample(resample_method).apply(lambda x: x.nunique())
+    else:
+        raw_time_series = pd.Series(np.ones(len(epochtime), dtype=np.int), index=raw_time)
+        aggr = raw_time_series.resample(resample_method).count()
+
+    # Reindex the bins to involve the entire day
+    d = raw_time[0].date()
+    all_day_idx = pd.date_range(d, periods=24, freq=resample_method, tz="US/Eastern")
+    aggr = aggr.reindex(all_day_idx, fill_value=0)
+
+    # Format data
+    keys = [d.strftime(format_method) for d in aggr.index]
+    vals = aggr.values
+
+    if "remove_zero_val" in options and options["remove_zero_val"] == True:
+        idx = np.nonzero(vals)[0]
+        keys = np.array(keys)[idx].tolist()
+        vals = vals[idx]
+
+    return {"data": map(list, zip(keys, vals.tolist())), "val_argmax": vals.argmax(), "val_max": vals.max()}

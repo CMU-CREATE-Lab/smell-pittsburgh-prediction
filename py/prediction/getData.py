@@ -57,10 +57,8 @@ def getData(
         for p in out_p: checkAndCreateDir(p)
         df_esdr.to_csv(out_p[0], index=False)
         df_smell.to_csv(out_p[1], index=False)
-        df_smell_raw.to_csv(out_p[2], index=True)
         log("ESDR data created at " + out_p[0], logger)
         log("Smell data created at " + out_p[1], logger)
-        log("Raw smell reports created at " + out_p[2], logger)
     return df_esdr, df_smell
 
 def mergeEsdrData(data):
