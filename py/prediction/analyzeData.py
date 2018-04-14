@@ -33,36 +33,112 @@ def analyzeData(
     out_p = out_p_root + "analysis/"
     checkAndCreateDir(out_p)
 
-    # Plot raw smell data
-    plotRawSmell(in_p, out_p, logger)
+    # Plot raw data
+    plotRawData(in_p, out_p, logger)
 
     # Plot features
-    plotFeatures(in_p, out_p_root, logger)
+    #plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    plotAggrSmell(in_p, out_p, logger)
+    #plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    plotLowDimensions(in_p, out_p, logger)
+    #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    corrStudy(in_p, out_p, logger=logger)
+    #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    interpretModel(in_p, out_p, logger=logger)
+    #interpretModel(in_p, out_p, logger=logger)
 
-def plotRawSmell(in_p, out_p, logger):
+def plotRawData(in_p, out_p, logger):
     df_smell_raw = pd.read_csv(in_p[2], parse_dates=True, index_col="created_at",
             date_parser=lambda epoch: pd.to_datetime(epoch, unit="s"))
-
+    df_smell_raw.index = df_smell_raw.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+    
     # Process the symptoms and descriptions
-    processWords(df_smell_raw, out_p, logger)
+    #processWords(df_smell_raw, out_p, logger)
     
     # Plot histogram of smell reports over ratings
-    plotSmellRatings(df_smell_raw, out_p, logger)
+    #plotSmellHistogram(df_smell_raw, out_p, logger)
     
     # Plot distribution of smell reports and users over month
-    plotDistribution(df_smell_raw, out_p, logger)
+    plotSmellReports(df_smell_raw, out_p, logger)
+
+    # Plot distribution of google analytics events and users over month
+    plotGoogleAnalytics(in_p[3], out_p, logger)
+
+def plotGoogleAnalytics(in_p, out_p, logger):
+    x = []
+    y = []
+    title = []
+
+    # Merge google analytics
+    df_all = []
+    for fn in getAllFileNamesInFolder(in_p):
+        df_raw = pd.read_csv(in_p + fn, parse_dates=True, index_col="Hit Timestamp",
+            date_parser=lambda epoch: pd.to_datetime(epoch, unit="ms"))
+        df_raw.index = df_raw.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+        df_all.append(df_raw)
+    df = pd.concat(df_all)
+    df.sort_index(inplace=True)
+    df = df["User ID"]
+
+    # Compute events
+    y_ga = df.resample("1M", label="right").count()
+    y_ga = y_ga[y_ga>10]
+    x_ga = dateIndexToMonthYear(y_ga.index)
+    x.append(x_ga)
+    y.append(y_ga)
+    title.append("Number of Google Analytics events")
+    
+    # Compute users
+    y_user = df.resample("1M", label="right").nunique()
+    y_user = y_user[y_user>10]
+    x_user = dateIndexToMonthYear(y_user.index)
+    x.append(x_user)
+    y.append(y_user)
+    title.append("Number of unique users")
+    
+    # Computer events per user
+    y_epu = y_ga.astype(float) / y_user
+    x.append(x_ga)
+    y.append(y_epu)
+    title.append("Number of Google Analytics events per user")
+
+    # Plot
+    plotBar(x, y, 3, 1, title, out_p+"ga.png", logger)
+
+def plotSmellReports(df_smell_raw, out_p, logger):
+    df = deepcopy(df_smell_raw)
+    x = []
+    y = []
+    title = []
+
+    # Compute smell reports
+    smell = df["smell_value"]
+    y_smell = smell.resample("1M", label="right").count()
+    x_smell = dateIndexToMonthYear(y_smell.index)
+    x.append(x_smell)
+    y.append(y_smell)
+    title.append("Number of smell reports")
+
+    # Compute users
+    user = df["anonymized_user_hash"]
+    y_user = user.resample("1M", label="right").nunique()
+    x_user = dateIndexToMonthYear(y_user.index)
+    x.append(x_user)
+    y.append(y_user)
+    title.append("Number of unique users")
+    
+    # Compute smell reports per user
+    y_spu = y_smell.astype(float) / y_user
+    x.append(x_smell)
+    y.append(y_spu)
+    title.append("Number of smell reports per user")
+
+    # Plot
+    plotBar(x, y, 3, 1, title, out_p+"smell.png", logger)
 
 # Plot bar charts
 # Note that x, y, title are all arrays
@@ -78,36 +154,6 @@ def plotBar(x, y, h, w, title, out_p, logger):
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
-
-def plotDistribution(df_smell_raw, out_p, logger):
-    df = deepcopy(df_smell_raw)
-
-    # Plot users
-    user = df["anonymized_user_hash"]
-    s = user.resample("1M", label="right").nunique()
-    y_user = s.values
-    x_user = dateIndexToMonthYear(s.index)
-    plotBar([x_user], [y_user], 1, 1, ["Number of unique users"], out_p+"user.png", logger)
-    
-    # Plot smell reports
-    smell = df["smell_value"]
-    smell_all = None
-    y_smell = []
-    x_smell = None
-    title = []
-    for i in range(0,5):
-        s = smell[smell==i+1].resample("1M", label="right").count()
-        y_smell.append(s.values)
-        if x_smell is None: x_smell = [dateIndexToMonthYear(s.index)]*6
-        if smell_all is None: smell_all = y_smell[-1]
-        else: smell_all += y_smell[-1]
-        title.append("Number of smell reports with rating " + str(i+1))
-    y_smell.append(smell_all)
-    title.append("Number of all smell reports")
-    plotBar(x_smell, y_smell, 6, 1, title, out_p+"smell.png", logger)
-
-    # Plot smell reports per user
-    plotBar([x_smell[0]], [smell_all.astype(float)/y_user], 1, 1, ["Smell reports per user"], out_p+"smell_user.png", logger)
 
 def processWords(df_smell_raw, out_p, logger):
     symptom = pandasSeriesToText(df_smell_raw["feelings_symptoms"])
@@ -126,7 +172,7 @@ def dateIndexToMonthYear(index):
     month_txt = np.array(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
     return map("\n".join, zip(month_txt[index.month.values - 1], index.year.astype(str).values))
 
-def plotSmellRatings(df_smell_raw, out_p, logger):
+def plotSmellHistogram(df_smell_raw, out_p, logger):
     c = Counter()
     for n in df_smell_raw["smell_value"].values:
         c[n] += 1

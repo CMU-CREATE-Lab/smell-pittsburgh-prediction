@@ -15,8 +15,8 @@ def main(argv):
     # Parameters
     is_regr = False # is classification
     #is_regr = True # is regression
-    start_dt = datetime(2016, 10, 8, 0)
-    end_dt = datetime(2018, 3, 31, 0)
+    start_dt = datetime(2016, 10, 9, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2018, 4, 1, 0, tzinfo=pytz.timezone("US/Eastern"))
     get_data, analyze_data, compute_features, cross_validation = False, False, False, False
     if mode == "run_all":
         get_data = True
@@ -37,10 +37,11 @@ def main(argv):
     # OUTPUT: raw esdr and smell data
     if get_data:
         getData(out_p=[p+"esdr.csv",p+"smell.csv",p+"raw_smell.csv"], start_dt=start_dt, end_dt=end_dt)
+        #getGoogleAnalytics()
 
     # Analyze data
     if analyze_data:
-        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv",p+"raw_smell.csv"], out_p_root=p)
+        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv",p+"raw_smell.csv",p+"/GA/"], out_p_root=p)
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -82,6 +83,45 @@ def genMethodSet():
                 for m in methods:
                     m_all.append(m + "-" + str(n) + "-" + str(mf) + "-" + str(mss))
     return m_all
+
+def getGoogleAnalytics():
+    getGA(date_info=[
+        {"startDate":"2016-10-08", "endDate":"2016-10-31"},
+        {"startDate":"2016-11-01", "endDate":"2016-11-15"},
+        {"startDate":"2016-11-16", "endDate":"2016-11-30"},
+        {"startDate":"2016-12-01", "endDate":"2016-12-15"},
+        {"startDate":"2016-12-16", "endDate":"2016-12-31"},
+        {"startDate":"2017-01-01", "endDate":"2017-01-15"},
+        {"startDate":"2017-01-16", "endDate":"2017-01-31"},
+        {"startDate":"2017-02-01", "endDate":"2017-02-15"},
+        {"startDate":"2017-02-16", "endDate":"2017-02-28"},
+        {"startDate":"2017-03-01", "endDate":"2017-03-15"},
+        {"startDate":"2017-03-16", "endDate":"2017-03-31"},
+        {"startDate":"2017-04-01", "endDate":"2017-04-15"},
+        {"startDate":"2017-04-16", "endDate":"2017-04-30"},
+        {"startDate":"2017-05-01", "endDate":"2017-05-15"},
+        {"startDate":"2017-05-16", "endDate":"2017-05-31"},
+        {"startDate":"2017-06-01", "endDate":"2017-06-15"},
+        {"startDate":"2017-06-16", "endDate":"2017-06-30"},
+        {"startDate":"2017-07-01", "endDate":"2017-07-15"},
+        {"startDate":"2017-07-16", "endDate":"2017-07-31"},
+        {"startDate":"2017-08-01", "endDate":"2017-08-15"},
+        {"startDate":"2017-08-16", "endDate":"2017-08-31"},
+        {"startDate":"2017-09-01", "endDate":"2017-09-15"},
+        {"startDate":"2017-09-16", "endDate":"2017-09-30"},
+        {"startDate":"2017-10-01", "endDate":"2017-10-15"},
+        {"startDate":"2017-10-16", "endDate":"2017-10-31"},
+        {"startDate":"2017-11-01", "endDate":"2017-11-15"},
+        {"startDate":"2017-11-16", "endDate":"2017-11-30"},
+        {"startDate":"2017-12-01", "endDate":"2017-12-15"},
+        {"startDate":"2017-12-16", "endDate":"2017-12-31"},
+        {"startDate":"2018-01-01", "endDate":"2018-01-15"},
+        {"startDate":"2018-01-16", "endDate":"2018-01-31"},
+        {"startDate":"2018-02-01", "endDate":"2018-02-15"},
+        {"startDate":"2018-02-16", "endDate":"2018-02-28"},
+        {"startDate":"2018-03-01", "endDate":"2018-03-15"},
+        {"startDate":"2018-03-16", "endDate":"2018-03-31"}
+    ])
 
 if __name__ == "__main__":
     main(sys.argv)

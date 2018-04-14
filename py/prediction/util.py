@@ -16,6 +16,7 @@ import pytz
 import pandas as pd
 import numpy as np
 from collections import Counter
+import time
 
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
@@ -719,8 +720,8 @@ def getGA(
     view_id="ga:131141811", # obtain this ID from Google Analytics dashboard
     metrics=[{"expression": "ga:pageviews"}],
     metrics_col_names=["Pageviews"], # pretty names for metrics
-    dimensions=[{"name": "ga:dimension1"}, {"name": "ga:dimension4"}, {"name": "ga:dimension5"}],
-    dimensions_col_names=["UserID", "HitTimestamp", "DataTimestamp"] # pretty names for dimensions
+    dimensions=[{"name": "ga:dimension1"},{"name": "ga:dimension4"},{"name": "ga:dimension5"},{"name": "ga:eventCategory"}],
+    dimensions_col_names=["User ID","Hit Timestamp","Data Timestamp","Event Category"] # pretty names for dimensions
     ):
     
     print "Get Google Analytics..."
@@ -758,7 +759,10 @@ def getGA(
             for p in rows:
                 line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
                 out_file.write(line + "\n")
+            print str(len(rows)) + " rows from " + k["startDate"] + " to " + k["endDate"]
             print "Google Analytics file created at " + out_path + file_name
+        # Pause for some time
+        time.sleep(1)
 
 # Plot a grid of scatter plot pairs in X, with point colors representing binary labels
 def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
