@@ -147,7 +147,7 @@ class Interpreter(object):
     def plotClusters(self, cluster, out_p):
         # Visualize the clusters using PCA
         print "Plot PCA of positive labels..."
-        pca = PCA(n_components=4)
+        pca = PCA(n_components=3)
         X = pca.fit_transform(deepcopy(self.df_X_pos.values))
         r = np.round(pca.explained_variance_ratio_, 3)
         title = "PCA of positive labels, eigenvalue = " + str(r)
@@ -155,17 +155,17 @@ class Interpreter(object):
         c_ls = [(0.5, 0.5, 0.5), (1, 0, 0), (0, 0, 1)]
         c_alpha = [0.1, 0.2, 0.1]
         c_bin=[0]
-        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 2, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
+        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
         # Visualize the clusters using kernel PCA
         print "Plot Kernel PCA of positive labels..."
-        pca = KernelPCA(n_components=4, kernel="rbf", n_jobs=-1)
+        pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
         X = pca.fit_transform(deepcopy(self.df_X_pos.values))
         r = pca.lambdas_
         r = np.round(r/sum(r), 3)
         title = "Kernel PCA of positive labels, eigenvalue = " + str(r)
         out_p_tmp = out_p + "kernel_pca_positive_labels.png"
-        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 2, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
+        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
     def computeSampleSimilarity(self):
         L = len(self.df_X_pos)

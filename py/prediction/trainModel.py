@@ -51,9 +51,9 @@ def trainModel(
     multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
     if is_regr:
         if method == "RF":
-            model = RandomForestRegressor(n_estimators=200,max_features=None,min_samples_split=5,random_state=0,n_jobs=-1)
+            model = RandomForestRegressor(n_estimators=200,min_samples_split=5,n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesRegressor(n_estimators=200,max_features=None,min_samples_split=5,random_state=0,n_jobs=-1)
+            model = ExtraTreesRegressor(n_estimators=200,min_samples_split=5,n_jobs=-1)
         elif method == "SVM":
             model = SVR(max_iter=5000)
             if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
@@ -80,7 +80,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "DT":
-            model = DecisionTreeRegressor(random_state=0, min_samples_split=20, max_depth=7)
+            model = DecisionTreeRegressor(min_samples_split=20, max_depth=7)
         else:
             m = method[:2]
             if m in ["RF", "ET"]:
@@ -102,17 +102,17 @@ def trainModel(
                 return None
     else:
         if method == "RF":
-            model = RandomForestClassifier(n_estimators=1000,max_features=30,min_samples_split=2,random_state=0,n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=1000,max_features=30,min_samples_split=2,n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,random_state=0,n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,n_jobs=-1)
         elif method == "SVM":
-            model = SVC(max_iter=5000, kernel="rbf", random_state=0, probability=True)
+            model = SVC(max_iter=5000, kernel="rbf", probability=True)
         elif method == "MLP":
             model = MLPClassifier(hidden_layer_sizes=(128, 64))
         elif method == "KN":
             model = KNeighborsClassifier(n_neighbors=10, weights="uniform")
         elif method == "LG":
-            model = LogisticRegression(random_state=0, penalty="l1", C=1)
+            model = LogisticRegression(penalty="l1", C=1)
         elif method == "DMLP":
             model = DmlpLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "CRNN":
@@ -120,12 +120,12 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HCR":
-            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,random_state=0,n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)
         elif method == "DT":
-            model = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=7)
+            model = DecisionTreeClassifier(min_samples_split=20, max_depth=7)
         else:
             m = method[:2]
             if m in ["RF", "ET"]:

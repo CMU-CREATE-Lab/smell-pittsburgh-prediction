@@ -34,16 +34,16 @@ def analyzeData(
     checkAndCreateDir(out_p)
 
     # Plot features
-    plotFeatures(in_p, out_p_root, logger)
+    #plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    plotAggrSmell(in_p, out_p, logger)
+    #plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    plotLowDimensions(in_p, out_p, logger)
+    #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    corrStudy(in_p, out_p, logger=logger)
+    #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
     interpretModel(in_p, out_p, logger=logger)
@@ -78,6 +78,7 @@ def interpretModel(in_p, out_p, logger):
     
     # Check if time series variables are stationary using Dickey-Fuller test
     if False:
+        print "Check if time series variables are stationary using Dickey-Fuller test..."
         for col in df_esdr.columns:
             r = adfuller(df_esdr[col], regression="ctt")
             print "p-value: %.3f -- %s" % (r[1], col)
@@ -133,7 +134,7 @@ def corrStudy(in_p, out_p, logger):
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
     Y = df_Y.squeeze()
     Y = Y - Y.mean()
-    max_t_lag = 25 # the maximum time lag
+    max_t_lag = 6 # the maximum time lag
     df_corr = pd.DataFrame()
     for c in df_X.columns:
         if c in ["Day", "DayOfWeek", "HourOfDay"]: continue
@@ -142,17 +143,35 @@ def corrStudy(in_p, out_p, logger):
         for i in range(0, max_t_lag+1):
             s.append(np.round(Y.corr(X.shift(i)), 3))
         df_corr[c] = pd.Series(data=s)
-    df_corr = df_corr.round(3)
+    df_corr = df_corr.round(2)
     df_corr.to_csv(out_p + "corr_with_time_lag.csv")
 
     # Plot graph
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(df_corr, cmap=plt.get_cmap("RdBu"), interpolation="nearest",vmin=-0.6, vmax=0.6)
-    plt.ylabel("Time lag (hours)")
-    fig.colorbar(im)
+    tick_font_size = 16
+    label_font_size = 20
+    title_font_size = 32
+    #fig, ax = plt.subplots(figsize=(18, 4))
+    #im = ax.imshow(df_corr, cmap=plt.get_cmap("RdBu"), interpolation="nearest",vmin=-0.6, vmax=0.6)
+    #fig.colorbar(im, orientation="horizontal", aspect=10)
+    #plt.ylabel("Time lag (hours)", fontsize=label_font_size)
+    #plt.xlabel("Predictors (sensors from different monitoring stations)", fontsize=label_font_size)
+    #plt.xticks(fontsize=tick_font_size)
+    #plt.yticks(fontsize=tick_font_size)
+    
+    fig, ax1 = plt.subplots(1, 1, figsize=(28, 5))
+    divider = make_axes_locatable(ax1)
+    ax2 = divider.append_axes("right", size="2%", pad=0.4)
+    sns.heatmap(df_corr, ax=ax1, cbar_ax=ax2, cmap="RdBu", vmin=-0.6, vmax=0.6,
+        linewidths=0.1, annot=False, fmt="g", xticklabels=False, yticklabels="auto")
+    
+    ax1.tick_params(labelsize=tick_font_size)
+    ax2.tick_params(labelsize=tick_font_size)
+    ax1.set_ylabel("Time lag (hours)", fontsize=label_font_size)
+    ax1.set_xlabel("Predictors (sensors from different monitoring stations)", fontsize=label_font_size)
+    plt.suptitle("Time-lagged correlation of sensor readings and smell values", fontsize=title_font_size)
+
     fig.tight_layout()
-    plt.suptitle("Correlation with time lag", fontsize=18)
-    fig.subplots_adjust(top=0.92)
+    fig.subplots_adjust(top=0.88)
     fig.savefig(out_p + "corr_with_time_lag.png", dpi=150)
     fig.clf()
     plt.close()
@@ -200,7 +219,7 @@ def plotDayHour(df_X, df_Y, out_p, logger):
 
     ax1.set_ylabel("Day of week", fontsize=14)
     ax1.set_xlabel("Hour of day", fontsize=14)
-    plt.suptitle("Distribution of smell reports over Time", fontsize=20)
+    plt.suptitle("Average smell values over time", fontsize=24)
         
     plt.tight_layout()
     fig.subplots_adjust(top=0.92)
@@ -308,8 +327,8 @@ def plotCorrMatirx(df, out_p):
 
 def plotLowDimensions(in_p, out_p, logger):
     plot_PCA = True
-    plot_RTE = True
-    plot_SE = True
+    plot_RTE = False
+    plot_SE = False
 
     is_regr = False
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
@@ -337,37 +356,37 @@ def plotSpectralEmbedding(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
     pca = PCA(n_components=10)
     X = pca.fit_transform(X)
-    sm = SpectralEmbedding(n_components=4, eigen_solver="arpack", n_neighbors=10, n_jobs=-1)
+    sm = SpectralEmbedding(n_components=3, eigen_solver="arpack", n_neighbors=10, n_jobs=-1)
     X = sm.fit_transform(X)
     title = "Spectral Embedding"
     out_p += "spectral_embedding.png"
-    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+    plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
 def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
     hasher = RandomTreesEmbedding(n_estimators=1000, max_depth=5, min_samples_split=2, n_jobs=-1)
     X = hasher.fit_transform(X)
-    pca = TruncatedSVD(n_components=4)
+    pca = TruncatedSVD(n_components=3)
     X = pca.fit_transform(X)
     title = "Random Trees Embedding"
     out_p += "random_trees_embedding.png"
-    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+    plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
 def plotKernelPCA(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
-    pca = KernelPCA(n_components=4, kernel="rbf", n_jobs=-1)
+    pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
     X = pca.fit_transform(X)
     r = pca.lambdas_
     r = np.round(r/sum(r), 3)
     title = "Kernel PCA, eigenvalue = " + str(r)
     out_p += "kernel_pca.png"
-    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+    plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
 def plotPCA(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
-    pca = PCA(n_components=4)
+    pca = PCA(n_components=3)
     X = pca.fit_transform(X)
     r = np.round(pca.explained_variance_ratio_, 3)
     title = "PCA, eigenvalue = " + str(r)
     out_p += "pca.png"
-    plotClusterPairGrid(X, Y, out_p, 3, 2, title, is_regr)
+    plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)

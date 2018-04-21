@@ -16,7 +16,7 @@ def main(argv):
     is_regr = False # is classification
     #is_regr = True # is regression
     start_dt = datetime(2016, 10, 9, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2018, 4, 1, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2018, 4, 15, 0, tzinfo=pytz.timezone("US/Eastern"))
     get_data, analyze_data, compute_features, cross_validation = False, False, False, False
     if mode == "run_all":
         get_data = True
@@ -56,7 +56,7 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["ET"]
+        methods = ["RF", "ET"] * 30
         #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
