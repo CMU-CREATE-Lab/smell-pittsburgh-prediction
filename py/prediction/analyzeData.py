@@ -22,6 +22,7 @@ from statsmodels.tsa.stattools import grangercausalitytests
 from scipy.stats import pearsonr
 from collections import Counter
 import re
+from scipy.stats import pointbiserialr
 
 # Analyze data
 def analyzeData(
@@ -43,10 +44,10 @@ def analyzeData(
     #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    #corrStudy(in_p, out_p, logger=logger)
+    corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    interpretModel(in_p, out_p, logger=logger)
+    #interpretModel(in_p, out_p, logger=logger)
 
 def interpretModel(in_p, out_p, logger):
     # Load time series data
@@ -130,10 +131,9 @@ def computeCrossCorrelation(x, y, max_lag=None):
 # Correlational study
 def corrStudy(in_p, out_p, logger):
     log("Compute correlation of lagged X and current Y...", logger)
-    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=True,
+    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=False,
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    Y = df_Y.squeeze()
-    Y = Y - Y.mean()
+    Y = df_Y.squeeze().values
     max_t_lag = 6 # the maximum time lag
     df_corr = pd.DataFrame()
     for c in df_X.columns:
@@ -141,7 +141,9 @@ def corrStudy(in_p, out_p, logger):
         s = []
         X = df_X[c]
         for i in range(0, max_t_lag+1):
-            s.append(np.round(Y.corr(X.shift(i)), 3))
+            d = pd.DataFrame(data=[Y, X.shift(i)], columns=["y", "x"]).dropna()
+            r, p = pointbiserialr(d["y"], d["x"])
+            s.append(np.round(r, 3))
         df_corr[c] = pd.Series(data=s)
     df_corr = df_corr.round(2)
     df_corr.to_csv(out_p + "corr_with_time_lag.csv")
@@ -150,13 +152,6 @@ def corrStudy(in_p, out_p, logger):
     tick_font_size = 16
     label_font_size = 20
     title_font_size = 32
-    #fig, ax = plt.subplots(figsize=(18, 4))
-    #im = ax.imshow(df_corr, cmap=plt.get_cmap("RdBu"), interpolation="nearest",vmin=-0.6, vmax=0.6)
-    #fig.colorbar(im, orientation="horizontal", aspect=10)
-    #plt.ylabel("Time lag (hours)", fontsize=label_font_size)
-    #plt.xlabel("Predictors (sensors from different monitoring stations)", fontsize=label_font_size)
-    #plt.xticks(fontsize=tick_font_size)
-    #plt.yticks(fontsize=tick_font_size)
     
     fig, ax1 = plt.subplots(1, 1, figsize=(28, 5))
     divider = make_axes_locatable(ax1)
@@ -168,7 +163,7 @@ def corrStudy(in_p, out_p, logger):
     ax2.tick_params(labelsize=tick_font_size)
     ax1.set_ylabel("Time lag (hours)", fontsize=label_font_size)
     ax1.set_xlabel("Predictors (sensors from different monitoring stations)", fontsize=label_font_size)
-    plt.suptitle("Time-lagged correlation of sensor readings and smell values", fontsize=title_font_size)
+    plt.suptitle("Time-lagged correlation of predictors and response (smell events)", fontsize=title_font_size)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.88)
