@@ -37,6 +37,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
+import seaborn as sns
+
 # For Google Analytics
 # sudo pip install --upgrade google-api-python-client
 from apiclient.discovery import build
@@ -717,12 +721,21 @@ def getSmellReports(**options):
 def getGA(
     in_path="client_secrets.json", # client secret json file
     out_path="GA/", # the path to store CSV files
-    date_info=[{"startDate":"2017-12-11", "endDate":"2017-12-12"}, {"startDate":"2018-01-10", "endDate":"2018-01-11"}],
+    date_info=[{"startDate":"2017-12-11", "endDate":"2017-12-12"},
+        {"startDate":"2018-01-10", "endDate":"2018-01-11"}],
     view_id="ga:131141811", # obtain this ID from Google Analytics dashboard
     metrics=[{"expression": "ga:pageviews"}],
     metrics_col_names=["Pageviews"], # pretty names for metrics
-    dimensions=[{"name": "ga:dimension1"},{"name": "ga:dimension4"},{"name": "ga:dimension5"},{"name": "ga:eventCategory"}],
-    dimensions_col_names=["User ID","Hit Timestamp","Data Timestamp","Event Category"] # pretty names for dimensions
+    dimensions=[{"name": "ga:dimension1"},
+        {"name": "ga:dimension2"},
+        {"name": "ga:dimension4"},
+        {"name": "ga:dimension5"},
+        {"name": "ga:eventCategory"}],
+    dimensions_col_names=["User ID",
+        "Client ID",
+        "Hit Timestamp",
+        "Data Timestamp",
+        "Event Category"] # pretty names for dimensions
     ):
     
     print "Get Google Analytics..."
@@ -785,7 +798,7 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
             return
 
     dot_size = 15
-    title_font_size = 35
+    title_font_size = 24
     label_font_size = 16
     tick_font_size = 16
     alpha = 0.2
@@ -819,21 +832,37 @@ def plotBar(x, y, h, w, title, out_p):
     fig = plt.figure(figsize=(w*12, h*2))
     c = 1
     for i in range(0, h*w):
-        plt.subplot(h, w, i+1)
+        ax = plt.subplot(h, w, i+1)
         plt.title(title[i], fontsize=14)
         plt.bar(range(0,len(x[i])), y[i], 0.6, color=(0.4,0.4,0.4), align="center")
         plt.xticks(range(0,len(x[i])), x[i])
+        #for j in range(0, len(y[i])): ax.text(j, y[i][j], int(y[i][j]), color=(0.2,0.2,0.2), ha="center", fontsize=10)
+
     plt.tight_layout()
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
 
-def pandasSeriesToText(s):
+# The input is a pandas time series
+# replace is a dictionary, key is the original word, value is the replaced word
+# exclude is an array, indicating words that we do not want
+def textAnalysis(s, exclude=[], replace={}):
+    sw = stopwords.words("english")
+    s = s.str.lower()
     s = s.dropna().values
     s = " ".join(map(str, s))
     s = re.sub("[^0-9a-zA-Z]+", " ", s)
-    s = " ".join([k for k in s.split(" ") if k != ""])
-    return s
+    s = s.split(" ")
+    wnl = WordNetLemmatizer() # for lemmatisation
+    res = []
+    len_exclude = len(exclude)
+    for k in s:
+        k = wnl.lemmatize(wnl.lemmatize(k), "v")
+        if k is not None and k != "" and k not in sw and not hasNumbers(k):
+            if len_exclude > 0 and k in exclude: continue
+            if k in replace: k = replace[k]
+            res.append(k)
+    return res
 
 def dateIndexToMonthYear(index):
     month_txt = np.array(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
@@ -906,3 +935,56 @@ def aggregateTime(epochtime, unit, resample_method, format_method, **options):
         vals = vals[idx]
 
     return {"data": map(list, zip(keys, vals.tolist())), "val_argmax": vals.argmax(), "val_max": vals.max()}
+
+# Count the word frequency of a word array
+def countWords(A):
+    return Counter(A)
+
+# Find if a string contains numbers
+def hasNumbers(str):
+    return bool(re.search(r'\d', str))
+
+def plotScatter(df, x, y, title, out_p):
+    ax = df.plot.scatter(x=x, y=y, figsize=(6, 6))
+    fig = ax.get_figure()
+    plt.title(title, fontsize=14)
+    plt.tight_layout()
+    fig.savefig(out_p, dpi=150)
+    fig.clf()
+    plt.close()
+
+# Plot line charts
+# df_all and title_all are all arrays
+def plotLineCharts(df_all, title_all, h, w, out_p):
+    fig = plt.figure(figsize=(w*12, h*2))
+    c = 1
+    for i in range(0, h*w):
+        ax = plt.subplot(h, w, i+1)
+        plt.title(title_all[i], fontsize=14)
+        df_all[i].plot(ax=ax)
+        #for j in range(0, len(y[i])): ax.text(j, y[i][j], int(y[i][j]), color=(0.2,0.2,0.2), ha="center", fontsize=10)
+
+    plt.tight_layout()
+    fig.savefig(out_p, dpi=150)
+    fig.clf()
+    plt.close()
+
+# Plot box charts
+# df_all and title_all are all arrays
+def plotBoxCharts(df_all, title_all, h, w, out_p):
+    fig = plt.figure(figsize=(w*4, h*4))
+    medianprops = dict(linestyle="-", linewidth=2.5, color="firebrick")
+    meanpointprops = dict(marker="D", markeredgecolor="firebrick", markerfacecolor="firebrick", markersize=7)
+    c = 1
+    for i in range(0, h*w):
+        ax = plt.subplot(h, w, i+1)
+        plt.title(title_all[i], fontsize=14)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        ax.boxplot(df_all[i], sym="", widths=0.6, labels=[df.name for df in df_all[i]],
+            medianprops=medianprops, showmeans=True, meanprops=meanpointprops)
+
+    plt.tight_layout()
+    fig.savefig(out_p, dpi=150)
+    fig.clf()
+    plt.close()
