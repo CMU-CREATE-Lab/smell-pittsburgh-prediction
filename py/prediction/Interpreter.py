@@ -115,7 +115,8 @@ class Interpreter(object):
                 out_file=f,
                 feature_names=self.df_X.columns,
                 class_names=["no", "yes"],
-                max_depth=5,
+                max_depth=4,
+                precision=2,
                 filled=True)
 
     def clusterSamplesWithPositiveLabels(self):
@@ -316,6 +317,7 @@ class Interpreter(object):
             if tree_.feature[node] != _tree.TREE_UNDEFINED:
                 name = feature_name[node]
                 threshold = tree_.threshold[node]
+                threshold = np.round(threshold, 2)
                 print "{}if {} <= {}:".format(indent, name, threshold)
                 recurse(tree_.children_left[node], depth + 1)
                 print "{}else:  # if {} > {}".format(indent, name, threshold)

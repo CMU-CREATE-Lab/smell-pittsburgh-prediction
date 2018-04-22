@@ -46,6 +46,12 @@ def crossValidation(
     log("augment_data = " + str(augment_data), logger)
     log("select_feat = " + str(select_feat), logger)
 
+    # Ouput path
+    if out_p_root is not None:
+        part = "regression" if is_regr else "classification"
+        out_p = out_p_root + "result/" + part + "/method_" + method + "/"
+        checkAndCreateDir(out_p)
+
     # Read features
     if df_X is None or df_Y is None:
         if in_p is not None:
@@ -97,17 +103,17 @@ def crossValidation(
         tscv_pretrain_split = list(tscv_pretrain.split(X_pretrain))
 
     # Perform cross validation
-    counter = 0
+    fold = 0
     train_all = {"X": [], "Y": [], "Y_pred": [], "Y_score": [], "C": []}
     test_all = {"X": [], "Y": [], "Y_pred": [], "Y_score": [], "C": []}
     metric_all = {"train": [], "test": []}
     for train_idx, test_idx in tscv.split(X, Y):
-        if counter < skip_folds:
-            counter += 1
+        if fold < skip_folds:
+            fold += 1
             continue
-        counter += 1
+        fold += 1
         log("--------------------------------------------------------------", logger)
-        log("Processing fold " + str(counter) + " with method " + str(method) + ":", logger)
+        log("Processing fold " + str(fold) + " with method " + str(method) + ":", logger)
         if len(X.shape) == 2:
             # For non-CNN methods, we need to do feature selection and convert data to numpy format
             X_train, Y_train, C_train = X.iloc[train_idx], Y.iloc[train_idx], C.iloc[train_idx]
@@ -130,7 +136,7 @@ def crossValidation(
         train = {"X": X_train, "Y": Y_train, "Y_pred": None, "C": C_train}
         test = {"X": X_test, "Y": Y_test, "Y_pred": None, "C": C_test}
         if "ANCNN" in method:
-            tr_idx, te_idx = tscv_pretrain_split[counter]
+            tr_idx, te_idx = tscv_pretrain_split[fold]
             train["X_pretrain"] = X_pretrain[tr_idx]
             test["X_pretrain"] = X_pretrain[te_idx]
             #if augment_data:
@@ -174,6 +180,11 @@ def crossValidation(
             for m in metric_i_test:
                 log("Testing metrics: " + m, logger)
                 log(metric_i_test[m], logger)
+        # Plot graph
+        log("Print time series plots for fold " + str(fold), logger)
+        hd_val_test = test["X"][:,-1:].squeeze()
+        dt_idx_te = (hd_val_test>=hd_start)&(hd_val_test<=hd_end)
+        timeSeriesPlot(method, test["Y"], test["Y_pred"], out_p, dt_idx_te, fold=fold)
 
     # Merge all evaluation data
     test_all["Y"] = np.concatenate(test_all["Y"], axis=0)
@@ -287,33 +298,25 @@ def crossValidation(
     
     # Save plot
     if out_p_root is not None:
+        Y_true = test_all["Y"]
+        Y_pred = test_all["Y_pred"]
         if is_regr:
-            out_p = out_p_root + "result/regression/method_" + method + "/"
-            checkAndCreateDir(out_p)
             r2 = metric["test"]["r2"]
             mse = metric["test"]["mse"]
-            Y_true = test_all["Y"]
-            Y_pred = test_all["Y_pred"]
             r2_dt = metric_dt["test"]["r2"]
             mse_dt = metric_dt["test"]["mse"]
             log("Print prediction plots...", logger)
             predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
             log("Print residual plots...", logger)
             residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx_te, r2_dt, mse_dt)
-            log("Print time series plots...", logger)
-            timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
         else:
-            out_p = out_p_root + "result/classification/method_" + method + "/"
-            checkAndCreateDir(out_p)
-            Y_true = test_all["Y"]
-            Y_pred = test_all["Y_pred"]
             Y_score = test_all["Y_score"]
             log("Print prediction recall plots...", logger)
             prPlot(method, Y_true, Y_score, out_p)
             log("Print roc curve plots...", logger)
             rocPlot(method, Y_true, Y_score, out_p)
-            log("Print time series plots...", logger)
-            timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te)
+        #log("Print time series plots...", logger)
+        #timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te, w=40) # NOTE: this takes very long time
 
     # Release memory
     del df_X
@@ -404,40 +407,38 @@ def prPlot(method, Y_true, Y_score, out_p):
     plt.tight_layout()
     fig.savefig(out_p + method + "_clas_r_thr.png")
 
-def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx):
+def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx, fold="all", show_y_tick=False, w=18):
     if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
     if len(Y_pred.shape) > 1: Y_pred = np.sum(Y_pred, axis=1)
-    res = Y_true - Y_pred
-    # Time vs Prediction (or True)
-    fig = plt.figure(figsize=(200, 8), dpi=150)
-    plt.plot(range(0, len(Y_true)), Y_true, "-o", alpha=0.8, markersize=3, color=(0,0,1), lw=1)
-    plt.plot(range(0, len(Y_pred)), Y_pred, "-o", alpha=0.8, markersize=3, color=(1,0,0), lw=2)
+    fig = plt.figure(figsize=(w, 4), dpi=150)
+
+    # Time vs Ground Truth
+    plt.subplot(2, 1, 1)
+    plt.bar(range(0, len(Y_true)), Y_true, 1, alpha=0.8, color=(0.2, 0.53, 0.74), align="edge")
+    plt.title("Crowdsourced smell events", fontsize=18)
     for i in range(0, len(dt_idx)):
-        if dt_idx[i] == False:
-            plt.axvspan(i-0.5, i+0.5, facecolor="0.2", alpha=0.5)
-    plt.xlabel("Time")
-    plt.ylabel("Smell value (blue=true, red=pred)")
-    plt.title("Method=" + method, fontsize=18)
-    Y = list(Y_true) + list(Y_pred)
-    plt.xlim(-1, len(Y_true)+1)
-    plt.ylim(np.amin(Y)-0.5, np.amax(Y)+0.5)
-    plt.grid(True)
-    plt.tight_layout()
-    fig.savefig(out_p + method + "_regr_time_true_pred.png")
-    # Time vs Residuals (True - Pred)
-    fig = plt.figure(figsize=(200, 8), dpi=150)
-    plt.plot(range(0, len(res)), res, "-o", alpha=0.8, markersize=3, color=(0,0,0), lw=1)
+        if dt_idx[i] == False: plt.axvspan(i, i+1, facecolor="0.2", alpha=0.5)
+    if not show_y_tick: plt.yticks([], [])
+    plt.xlim(0, len(Y_true))
+    plt.ylim(np.amin(Y_true), np.amax(Y_true))
+    plt.grid(False)
+
+    # Time vs Prediction
+    plt.subplot(2, 1, 2)
+    plt.bar(range(0, len(Y_pred)), Y_pred, 1, alpha=0.8, color=(0.84, 0.24, 0.31), align="edge")
+    plt.title("Predicted smell events", fontsize=18)
     for i in range(0, len(dt_idx)):
-        if dt_idx[i] == False:
-            plt.axvspan(i-0.5, i+0.5, facecolor="0.2", alpha=0.5)
-    plt.xlabel("Time")
-    plt.ylabel("Residuals")
-    plt.title("Method=" + method, fontsize=18)
-    plt.xlim(-1, len(res)+1)
-    plt.ylim(np.amin(res)-0.5, np.amax(res)+0.5)
-    plt.grid(True)
+        if dt_idx[i] == False: plt.axvspan(i, i+1, facecolor="0.2", alpha=0.5)
+    if not show_y_tick: plt.yticks([], [])
+    plt.xlim(0, len(Y_pred))
+    plt.ylim(np.amin(Y_pred), np.amax(Y_pred))
+    plt.grid(False)
+    
+    # Save plot
     plt.tight_layout()
-    fig.savefig(out_p + method + "_regr_time_res.png")
+    fig.savefig(out_p + method + "_fold_" + str(fold) + "_regr_time.png")
+    fig.clf()
+    plt.close()
 
 def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)

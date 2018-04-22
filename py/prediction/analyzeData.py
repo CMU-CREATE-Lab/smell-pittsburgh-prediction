@@ -44,10 +44,10 @@ def analyzeData(
     #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    corrStudy(in_p, out_p, logger=logger)
+    #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    #interpretModel(in_p, out_p, logger=logger)
+    interpretModel(in_p, out_p, logger=logger)
 
 def interpretModel(in_p, out_p, logger):
     # Load time series data
@@ -56,27 +56,28 @@ def interpretModel(in_p, out_p, logger):
 
     # Select variables based on prior knowledge
     print "Select variables based on prior knowledge..."
-    want = [
-        "3.feed_26.OZONE_PPM", # Lawrenceville ACHD
-        "3.feed_26.SONICWS_MPH",
-        "3.feed_26.SONICWD_DEG",
-        "3.feed_26.SIGTHETA_DEG",
-        "3.feed_28.H2S_PPM", # Liberty ACHD
-        "3.feed_28.SIGTHETA_DEG",
-        "3.feed_28.SONICWD_DEG",
-        "3.feed_28.SONICWS_MPH",
-        "3.feed_23.PM10_UG_M3", # Flag Plaza ACHD
-        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG", # Parkway East ACHD
-        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG",
-        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH"
-    ]
+    want = {
+        "3.feed_26.OZONE_PPM": "LAo3", # Lawrenceville ACHD
+        "3.feed_26.SONICWS_MPH": "LAws",
+        "3.feed_26.SONICWD_DEG": "LAw@",
+        "3.feed_26.SIGTHETA_DEG": "LAwt",
+        "3.feed_28.H2S_PPM": "LIh2s", # Liberty ACHD
+        "3.feed_28.SIGTHETA_DEG": "LIwt",
+        "3.feed_28.SONICWD_DEG": "LIw@",
+        "3.feed_28.SONICWS_MPH": "LIws",
+        "3.feed_23.PM10_UG_M3": "FPpm", # Flag Plaza ACHD
+        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG": "PEwt", # Parkway East ACHD
+        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG": "PEw@",
+        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH": "PEws"
+    } # key is the desired variables, value is the replaced name, @ is the flag for computing sine and cosine
+    want_vars = want.keys()
     df_esdr_cp = df_esdr
     df_esdr = pd.DataFrame()
     for col in df_esdr_cp.columns:
-        if col in want:
+        if col in want_vars:
             print "\t" + col
-            df_esdr[col] = df_esdr_cp[col]
-    
+            df_esdr[want[col]] = df_esdr_cp[col]
+
     # Check if time series variables are stationary using Dickey-Fuller test
     if False:
         print "Check if time series variables are stationary using Dickey-Fuller test..."
@@ -131,8 +132,18 @@ def computeCrossCorrelation(x, y, max_lag=None):
 # Correlational study
 def corrStudy(in_p, out_p, logger):
     log("Compute correlation of lagged X and current Y...", logger)
+
+    # Compute features
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=False,
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
+   
+    # Compute daytime index
+    # For 8 hours prediction, 11am covers duration from 11am to 7pm
+    #h_start = 6
+    #h_end = 11
+    #idx = (df_X["HourOfDay"]>=h_start)&(df_X["HourOfDay"]<=h_end)
+    
+    # Compute point biserial correlation
     Y = df_Y.squeeze().values
     max_t_lag = 6 # the maximum time lag
     df_corr = pd.DataFrame()
@@ -141,7 +152,9 @@ def corrStudy(in_p, out_p, logger):
         s = []
         X = df_X[c]
         for i in range(0, max_t_lag+1):
-            d = pd.DataFrame(data=[Y, X.shift(i)], columns=["y", "x"]).dropna()
+            d = pd.DataFrame(data=[Y, X.shift(i)], columns=["y", "x"])
+            #d = d[idx] # select only daytime
+            d = d.dropna()
             r, p = pointbiserialr(d["y"], d["x"])
             s.append(np.round(r, 3))
         df_corr[c] = pd.Series(data=s)
@@ -163,7 +176,7 @@ def corrStudy(in_p, out_p, logger):
     ax2.tick_params(labelsize=tick_font_size)
     ax1.set_ylabel("Time lag (hours)", fontsize=label_font_size)
     ax1.set_xlabel("Predictors (sensors from different monitoring stations)", fontsize=label_font_size)
-    plt.suptitle("Time-lagged correlation of predictors and response (smell events)", fontsize=title_font_size)
+    plt.suptitle("Time-lagged point biserial correlation of predictors and response (smell events)", fontsize=title_font_size)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.88)

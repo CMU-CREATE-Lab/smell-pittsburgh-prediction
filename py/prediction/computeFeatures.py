@@ -128,12 +128,12 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     for b_hr in range(1, b_hr + 1):
         # Add the previous readings
         df_previous = df.shift(b_hr)
-        df_previous.columns += ".previous." + str(b_hr) + ".hour"
+        df_previous.columns += "_P" + str(b_hr)
         df_all.append(df_previous)
         if add_diff:
             # Add differential feature
             df_previous_diff = df_diff.shift(b_hr - 1).copy(deep=True)
-            df_previous_diff.columns += ".diff.of.previous." + str(b_hr-1) + ".and." + str(b_hr) + ".hour"
+            df_previous_diff.columns += "_DiffOfP" + str(b_hr-1) + "&" + str(b_hr)
             df_all.append(df_previous_diff)
         if add_roll:
             # Perform rolling mean and max (data is already resampled by hour)
@@ -141,13 +141,13 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
             df_roll = df.rolling(b_hr, min_periods=1)
             df_roll_max = df_roll.max()
             df_roll_mean = df_roll.mean()
-            df_roll_max.columns += ".max.of.last." + str(b_hr) + ".hours"
-            df_roll_mean.columns += ".mean.of.last." + str(b_hr) + ".hours"
+            df_roll_max.columns += "_MaxOfP" + str(b_hr)
+            df_roll_mean.columns += "_MeanOfP" + str(b_hr)
             df_all.append(df_roll_max)
             df_all.append(df_roll_mean)
     
     # Combine dataframes
-    df.columns += ".current"
+    #df.columns += ".Now"
     df_feat = df
     for d in df_all:
         df_feat = df_feat.join(d)
@@ -164,7 +164,7 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
                 if j > i:
                     c1 = df_feat.columns[i]
                     c2 = df_feat.columns[j]
-                    c = "interaction..." + c1 + "...and..." + c2
+                    c = c1 + "*" + c2
                     df_inte[c] = df_feat[c1] * df_feat[c2]
         df_feat = df_feat.join(df_inte)
     
@@ -193,12 +193,12 @@ def extractSmellResponse(df, f_hr, bins, labels, aggr_axis=False):
 def convertWindDirection(df):
     df_cp = df.copy(deep=True)
     for c in df.columns:
-        if "SONICWD_DEG" in c:
+        if "SONICWD_DEG" in c or "@" in c:
             df_c = df[c]
             df_c_cos = np.cos(np.deg2rad(df_c))
             df_c_sin = np.sin(np.deg2rad(df_c))
-            df_c_cos.name += ".cosine"
-            df_c_sin.name += ".sine"
+            df_c_cos.name += "_Cos"
+            df_c_sin.name += "_Sin"
             df_cp.drop([c], axis=1, inplace=True) 
             df_cp[df_c_cos.name] = df_c_cos
             df_cp[df_c_sin.name] = df_c_sin
