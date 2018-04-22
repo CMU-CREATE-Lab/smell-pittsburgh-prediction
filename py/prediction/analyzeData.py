@@ -57,18 +57,18 @@ def interpretModel(in_p, out_p, logger):
     # Select variables based on prior knowledge
     print "Select variables based on prior knowledge..."
     want = {
-        "3.feed_26.OZONE_PPM": "LAo3", # Lawrenceville ACHD
-        "3.feed_26.SONICWS_MPH": "LAws",
-        "3.feed_26.SONICWD_DEG": "LAw@",
-        "3.feed_26.SIGTHETA_DEG": "LAwt",
-        "3.feed_28.H2S_PPM": "LIh2s", # Liberty ACHD
-        "3.feed_28.SIGTHETA_DEG": "LIwt",
-        "3.feed_28.SONICWD_DEG": "LIw@",
-        "3.feed_28.SONICWS_MPH": "LIws",
-        "3.feed_23.PM10_UG_M3": "FPpm", # Flag Plaza ACHD
-        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG": "PEwt", # Parkway East ACHD
-        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG": "PEw@",
-        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH": "PEws"
+        #"3.feed_26.OZONE_PPM": "O3", # Lawrenceville ACHD
+        "3.feed_26.SONICWS_MPH": "Sa",
+        "3.feed_26.SONICWD_DEG": "@a",
+        "3.feed_26.SIGTHETA_DEG": "Ta",
+        "3.feed_28.H2S_PPM": "H2S", # Liberty ACHD
+        "3.feed_28.SIGTHETA_DEG": "Ti",
+        "3.feed_28.SONICWD_DEG": "@i",
+        "3.feed_28.SONICWS_MPH": "Si",
+        #"3.feed_23.PM10_UG_M3": "FPpm", # Flag Plaza ACHD
+        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG": "Tp", # Parkway East ACHD
+        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG": "@p",
+        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH": "Sp"
     } # key is the desired variables, value is the replaced name, @ is the flag for computing sine and cosine
     want_vars = want.keys()
     df_esdr_cp = df_esdr

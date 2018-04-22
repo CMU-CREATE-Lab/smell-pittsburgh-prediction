@@ -56,7 +56,6 @@ def selectFeatures(
             base = LogisticRegression(random_state=0, penalty="l1", C=0.1)
             model = SelectFromModel(base)
         elif method == "RFE":
-            #base = ExtraTreesClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
             base = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
             model = RFE(base, step=step_rfe, verbose=1, n_features_to_select=num_feat_rfe)
 

@@ -80,7 +80,7 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "DT":
-            model = DecisionTreeRegressor(min_samples_split=20, max_depth=7)
+            model = DecisionTreeRegressor()
         else:
             m = method[:2]
             if m in ["RF", "ET"]:
@@ -102,9 +102,9 @@ def trainModel(
                 return None
     else:
         if method == "RF":
-            model = RandomForestClassifier(n_estimators=1000,max_features=30,min_samples_split=2,n_jobs=-1)
+            model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000, max_features=90, min_samples_split=32, n_jobs=-1)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", probability=True)
         elif method == "MLP":
@@ -120,12 +120,12 @@ def trainModel(
         elif method == "ANCNN":
             model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HCR":
-            model = ExtraTreesClassifier(n_estimators=1000,max_features=90,min_samples_split=32,n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000, max_features=90, min_samples_split=32, n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)
         elif method == "DT":
-            model = DecisionTreeClassifier(min_samples_split=20,max_depth=7,random_state=0)
+            model = DecisionTreeClassifier(min_samples_split=20, max_depth=7, min_samples_leaf=5, random_state=0)
         else:
             m = method[:2]
             if m in ["RF", "ET"]:

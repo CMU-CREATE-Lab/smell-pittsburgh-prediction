@@ -32,7 +32,7 @@ class Interpreter(object):
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            F = RandomForestClassifier(n_estimators=500, random_state=0, n_jobs=-1)
+            F = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
             self.reportPerformance(F)
             self.reportFeatureImportance(F, thr=0.3)
@@ -85,14 +85,14 @@ class Interpreter(object):
         
         # Train a L1 logistic regression on the selected cluster
         print "Train a logistic regression model..."
-        lr = LogisticRegression(random_state=0, penalty="l1", C=1)
+        lr = LogisticRegression(penalty="l1", C=1, random_state=0)
         lr.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(lr)
         self.reportCoefficient(lr)
 
         # Train a decision tree classifier on the selected cluster
         print "Train a decision tree..."
-        dt = DecisionTreeClassifier(random_state=0, min_samples_split=20, max_depth=7)
+        dt = DecisionTreeClassifier(min_samples_split=20, max_depth=7, min_samples_leaf=5, random_state=0)
         dt.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(dt)
         self.reportFeatureImportance(dt)
@@ -117,12 +117,18 @@ class Interpreter(object):
                 class_names=["no", "yes"],
                 max_depth=4,
                 precision=2,
+                impurity=False,
+                rounded=True,
                 filled=True)
 
     def clusterSamplesWithPositiveLabels(self):
         c = DBSCAN(metric="precomputed", min_samples=30, eps=0.77, n_jobs=-1) # for Random Forest
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
+        
+        # Clean clusters
+        print "Select only the largest cluster"
+        cluster[cluster>0] = -1
 
         # Print cluster information
         print "Unique cluster ids : %s" % np.unique(cluster)
@@ -134,10 +140,6 @@ class Interpreter(object):
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
         if self.out_p is not None:
             self.plotClusters(cluster, self.out_p)
-        
-        # Merge clusters
-        print "Merge clusters..."
-        cluster[cluster>0] = 0
 
         # Evaluate the quality of the cluster
         #qc = silhouette_score(dist, cluster, metric="precomputed")
@@ -227,7 +229,7 @@ class Interpreter(object):
         m = np.round(m, 4)
         return m
 
-    def extractDecisionPath(self, model):
+    def extractDecisionPath(self, model, extract_rule=False):
         # Store all decision path rules
         # key: (tree_id, leaf_id), a tuple
         # value: decision rule of the path, a string
@@ -250,16 +252,17 @@ class Interpreter(object):
             tree = model[i]
             Y_pred = tree.predict(df)
             leave_id = tree.apply(df) # leaf node id for all samples
-            value = tree.tree_.value # class label of the leaf node
-            feature = tree.tree_.feature
-            threshold = tree.tree_.threshold
-            node_indicator = tree.decision_path(df)
+            if extract_rule:
+                value = tree.tree_.value # class label of the leaf node
+                feature = tree.tree_.feature
+                threshold = tree.tree_.threshold
+                node_indicator = tree.decision_path(df)
             # Loop all samples with label 1, j is the sample id
             for j in range(0, len(df)):
                 if Y_pred[j] != 1: continue # skip if the predicted label is not one
                 dp_id = (i, leave_id[j])
                 # Extract decision rules
-                if dp_id not in dp_rules: # onlt compute the path when it does not exist
+                if extract_rule and dp_id not in dp_rules: # onlt compute the path when it does not exist
                     node_index = node_indicator.indices[node_indicator.indptr[j]:node_indicator.indptr[j+1]]
                     rule = ""
                     for node_id in node_index:

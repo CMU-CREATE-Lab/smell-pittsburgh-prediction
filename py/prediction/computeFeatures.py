@@ -128,12 +128,12 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     for b_hr in range(1, b_hr + 1):
         # Add the previous readings
         df_previous = df.shift(b_hr)
-        df_previous.columns += "_P" + str(b_hr)
+        df_previous.columns += "_" + str(b_hr)
         df_all.append(df_previous)
         if add_diff:
             # Add differential feature
             df_previous_diff = df_diff.shift(b_hr - 1).copy(deep=True)
-            df_previous_diff.columns += "_DiffOfP" + str(b_hr-1) + "&" + str(b_hr)
+            df_previous_diff.columns += "_Diff" + str(b_hr-1) + "&" + str(b_hr)
             df_all.append(df_previous_diff)
         if add_roll:
             # Perform rolling mean and max (data is already resampled by hour)
@@ -141,8 +141,8 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
             df_roll = df.rolling(b_hr, min_periods=1)
             df_roll_max = df_roll.max()
             df_roll_mean = df_roll.mean()
-            df_roll_max.columns += "_MaxOfP" + str(b_hr)
-            df_roll_mean.columns += "_MeanOfP" + str(b_hr)
+            df_roll_max.columns += "_Max" + str(b_hr)
+            df_roll_mean.columns += "_Mean" + str(b_hr)
             df_all.append(df_roll_max)
             df_all.append(df_roll_mean)
     
@@ -197,8 +197,8 @@ def convertWindDirection(df):
             df_c = df[c]
             df_c_cos = np.cos(np.deg2rad(df_c))
             df_c_sin = np.sin(np.deg2rad(df_c))
-            df_c_cos.name += "_Cos"
-            df_c_sin.name += "_Sin"
+            df_c_cos.name += "C"
+            df_c_sin.name += "S"
             df_cp.drop([c], axis=1, inplace=True) 
             df_cp[df_c_cos.name] = df_c_cos
             df_cp[df_c_sin.name] = df_c_sin
