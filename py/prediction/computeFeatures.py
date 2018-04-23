@@ -128,7 +128,7 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
     for b_hr in range(1, b_hr + 1):
         # Add the previous readings
         df_previous = df.shift(b_hr)
-        df_previous.columns += "_" + str(b_hr)
+        df_previous.columns += "_" + str(b_hr) + "h"
         df_all.append(df_previous)
         if add_diff:
             # Add differential feature
@@ -164,7 +164,7 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
                 if j > i:
                     c1 = df_feat.columns[i]
                     c2 = df_feat.columns[j]
-                    c = c1 + "*" + c2
+                    c = c1 + "\n* " + c2
                     df_inte[c] = df_feat[c1] * df_feat[c2]
         df_feat = df_feat.join(df_inte)
     
@@ -195,10 +195,11 @@ def convertWindDirection(df):
     for c in df.columns:
         if "SONICWD_DEG" in c or "@" in c:
             df_c = df[c]
+            df_c.name = df_c.name.replace("@", "")
             df_c_cos = np.cos(np.deg2rad(df_c))
             df_c_sin = np.sin(np.deg2rad(df_c))
-            df_c_cos.name += "C"
-            df_c_sin.name += "S"
+            df_c_cos.name += "cosine"
+            df_c_sin.name += "sine"
             df_cp.drop([c], axis=1, inplace=True) 
             df_cp[df_c_cos.name] = df_c_cos
             df_cp[df_c_sin.name] = df_c_sin

@@ -100,8 +100,42 @@ class Interpreter(object):
         self.exportTreeGraph(dt)
 
     # Only select paths that lead to positive labels
-    def selectDecisionTreePaths(self, tree):
-        return tree
+    def selectDecisionTreePaths(self, dt):
+        tree = dt.tree_
+        self.dt_children_left = tree.children_left
+        self.dt_children_right = tree.children_right
+        #feature = tree.feature
+        #threshold = tree.threshold
+        self.dt_value = tree.value
+        self.dt_want_pruned = np.zeros(shape=tree.node_count, dtype=bool)
+
+        # Perform post-order DFS to mark nodes that need to be pruned
+        print "Pruning nodes..."
+        self.postorderTraversal(0, 0)
+        return dt
+    
+    # i is the current node id
+    # p is the parent node id
+    def postorderTraversal(self, i, depth):
+        if self.dt_children_left[i] != -1:
+            self.postorderTraversal(self.dt_children_left[i], depth+1)
+        if self.dt_children_right[i] != -1:
+            self.postorderTraversal(self.dt_children_right[i], depth+1)
+        # Check if this node want to be pruned (num_neg>num_pos or num_neg+num_pos<thr)
+        # num_neg>num_pos means number of negative labels larger than positive labels
+        # num_neg+num_pos<thr means sample size too small
+        left, right = self.dt_children_left[i], self.dt_children_right[i]
+        v = self.dt_value[i][0]
+        thr = 30
+        if v[0] > v[1] or v[0] + v[1] < thr:
+            if left != -1 and right != -1: # not a leaf node
+                # Only want to be pruned if all childs want to be pruned
+                if self.dt_want_pruned[left] and self.dt_want_pruned[right]:
+                    self.dt_want_pruned[i] = True
+                    self.dt_children_left[i] = -1
+                    self.dt_children_right[i] = -1
+            else: # a leaf node
+                self.dt_want_pruned[i] = True
 
     def reportCoefficient(self, model):
         for (c, fn) in zip(np.squeeze(model.coef_), self.df_X.columns.values):
@@ -120,7 +154,7 @@ class Interpreter(object):
                 out_file=f,
                 feature_names=self.df_X.columns,
                 class_names=["no", "yes"],
-                max_depth=8,
+                max_depth=4,
                 precision=2,
                 impurity=False,
                 rounded=True,
