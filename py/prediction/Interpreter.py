@@ -32,7 +32,7 @@ class Interpreter(object):
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            F = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
+            F = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
             self.reportPerformance(F)
             self.reportFeatureImportance(F, thr=0.3)
@@ -92,11 +92,16 @@ class Interpreter(object):
 
         # Train a decision tree classifier on the selected cluster
         print "Train a decision tree..."
-        dt = DecisionTreeClassifier(min_samples_split=20, max_depth=7, min_samples_leaf=5, random_state=0)
+        dt = DecisionTreeClassifier(min_samples_split=20, max_depth=8, min_samples_leaf=5, random_state=0)
         dt.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(dt)
         self.reportFeatureImportance(dt)
+        dt = self.selectDecisionTreePaths(dt)
         self.exportTreeGraph(dt)
+
+    # Only select paths that lead to positive labels
+    def selectDecisionTreePaths(self, tree):
+        return tree
 
     def reportCoefficient(self, model):
         for (c, fn) in zip(np.squeeze(model.coef_), self.df_X.columns.values):
@@ -115,7 +120,7 @@ class Interpreter(object):
                 out_file=f,
                 feature_names=self.df_X.columns,
                 class_names=["no", "yes"],
-                max_depth=4,
+                max_depth=8,
                 precision=2,
                 impurity=False,
                 rounded=True,

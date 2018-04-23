@@ -125,7 +125,7 @@ def trainModel(
         elif method == "CR":
             model = HybridCrowdClassifier(logger=logger)
         elif method == "DT":
-            model = DecisionTreeClassifier(min_samples_split=20, max_depth=7, min_samples_leaf=5, random_state=0)
+            model = DecisionTreeClassifier(min_samples_split=20, max_depth=8, min_samples_leaf=5, random_state=0)
         else:
             m = method[:2]
             if m in ["RF", "ET"]:
