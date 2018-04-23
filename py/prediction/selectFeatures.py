@@ -53,10 +53,10 @@ def selectFeatures(
         elif method == "fdr":
             model = SelectFdr(score_func=f_classif, alpha=0.01)
         elif method == "model":
-            base = LogisticRegression(random_state=0, penalty="l1", C=0.1)
+            base = LogisticRegression(penalty="l1", C=0.1)
             model = SelectFromModel(base)
         elif method == "RFE":
-            base = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+            base = RandomForestClassifier(n_estimators=1000, n_jobs=-1)
             model = RFE(base, step=step_rfe, verbose=1, n_features_to_select=num_feat_rfe)
 
     # If method is None or not supported, just return the original features
@@ -88,9 +88,9 @@ def selectFeatures(
     # Print feature importance
     log("Compute feature importance...", logger)
     if is_regr:
-        m = ExtraTreesRegressor(n_estimators=200, random_state=0, n_jobs=-1)
+        m = ExtraTreesRegressor(n_estimators=200, n_jobs=-1)
     else:
-        m = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+        m = RandomForestClassifier(n_estimators=1000, n_jobs=-1)
     m.fit(df_X,df_Y.squeeze())
     feat_names = df_X.columns.copy()
     feat_ims = np.array(m.feature_importances_)

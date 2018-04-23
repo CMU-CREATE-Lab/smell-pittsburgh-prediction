@@ -40,7 +40,8 @@ def main(argv):
 
     # Analyze data
     if analyze_data:
-        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
+        for i in range(0, 100):
+            analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
 
     # Compute features
     # INPUT: raw esdr and smell data

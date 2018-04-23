@@ -32,7 +32,7 @@ class Interpreter(object):
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            F = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+            F = RandomForestClassifier(n_estimators=1000, max_features=120, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
             self.reportPerformance(F)
             self.reportFeatureImportance(F, thr=0.3)
@@ -84,15 +84,15 @@ class Interpreter(object):
             method="RFE", is_regr=False, num_feat_rfe=30, step_rfe=50)
         
         # Train a L1 logistic regression on the selected cluster
-        print "Train a logistic regression model..."
-        lr = LogisticRegression(penalty="l1", C=1, random_state=0)
-        lr.fit(self.df_X, self.df_Y.squeeze())
-        self.reportPerformance(lr)
-        self.reportCoefficient(lr)
+        #print "Train a logistic regression model..."
+        #lr = LogisticRegression(penalty="l1", C=1)
+        #lr.fit(self.df_X, self.df_Y.squeeze())
+        #self.reportPerformance(lr)
+        #self.reportCoefficient(lr)
 
         # Train a decision tree classifier on the selected cluster
         print "Train a decision tree..."
-        dt = DecisionTreeClassifier(min_samples_split=20, max_depth=8, min_samples_leaf=5, random_state=0)
+        dt = DecisionTreeClassifier(min_samples_split=20, max_depth=8, min_samples_leaf=5)
         dt.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(dt)
         self.reportFeatureImportance(dt)
@@ -161,7 +161,7 @@ class Interpreter(object):
                 filled=True)
 
     def clusterSamplesWithPositiveLabels(self):
-        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.77, n_jobs=-1) # for Random Forest
+        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.7, n_jobs=-1) # for Random Forest
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
         

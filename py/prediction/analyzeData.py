@@ -114,7 +114,7 @@ def interpretModel(in_p, out_p, logger):
     model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
     df_Y = model.getFilteredLabels()
     df_X = model.getSelectedFeatures()
-    for m in ["LG", "DT"]:
+    for m in ["DT"]:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
         lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
         crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg)
