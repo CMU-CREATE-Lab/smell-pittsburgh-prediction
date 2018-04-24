@@ -58,17 +58,17 @@ def interpretModel(in_p, out_p, logger):
     print "Select variables based on prior knowledge..."
     want = {
         #"3.feed_26.OZONE_PPM": "O3", # Lawrenceville ACHD
-        "3.feed_26.SONICWS_MPH": "LAWR_wind_speed",
-        "3.feed_26.SONICWD_DEG": "LAWR_wind_direction_@",
-        "3.feed_26.SIGTHETA_DEG": "LAWR_wind_direction_std",
-        "3.feed_28.H2S_PPM": "LIBE_H2S", # Liberty ACHD
-        "3.feed_28.SIGTHETA_DEG": "LIBE_wind_direction_std",
-        "3.feed_28.SONICWD_DEG": "LIBE_wind_direction_@",
-        "3.feed_28.SONICWS_MPH": "LIBE_wind_speed",
+        "3.feed_26.SONICWS_MPH": "Lawrenceville_wind_speed",
+        "3.feed_26.SONICWD_DEG": "Lawrenceville_wind_direction_@",
+        "3.feed_26.SIGTHETA_DEG": "Lawrenceville_wind_direction_std",
+        "3.feed_28.H2S_PPM": "Liberty_H2S", # Liberty ACHD
+        "3.feed_28.SIGTHETA_DEG": "Liberty_wind_direction_std",
+        "3.feed_28.SONICWD_DEG": "Liberty_wind_direction_@",
+        "3.feed_28.SONICWS_MPH": "Liberty_wind_speed",
         #"3.feed_23.PM10_UG_M3": "FPpm", # Flag Plaza ACHD
-        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG": "PARK_wind_direction_std", # Parkway East ACHD
-        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG": "PARK_wind_direction_@",
-        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH": "PARK_wind_speed"
+        "3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG": "ParkwayEast_wind_direction_std", # Parkway East ACHD
+        "3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG": "ParkwayEast_wind_direction_@",
+        "3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH": "ParkwayEast_wind_speed"
     } # key is the desired variables, value is the replaced name, @ is the flag for computing sine and cosine
     want_vars = want.keys()
     df_esdr_cp = df_esdr

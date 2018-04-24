@@ -126,7 +126,7 @@ class Interpreter(object):
         # num_neg+num_pos<thr means sample size too small
         left, right = self.dt_children_left[i], self.dt_children_right[i]
         v = self.dt_value[i][0]
-        thr = 30
+        thr = 40
         if v[0] > v[1] or v[0] + v[1] < thr:
             if left != -1 and right != -1: # not a leaf node
                 # Only want to be pruned if all childs want to be pruned
@@ -153,7 +153,7 @@ class Interpreter(object):
             export_graphviz(tree,
                 out_file=f,
                 feature_names=self.df_X.columns,
-                class_names=["no", "yes"],
+                class_names=None,
                 max_depth=4,
                 precision=2,
                 impurity=False,
