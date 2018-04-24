@@ -829,7 +829,7 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
 # Plot bar charts
 # Note that x, y, title are all arrays
 def plotBar(x, y, h, w, title, out_p):
-    fig = plt.figure(figsize=(w*12, h*2))
+    fig = plt.figure(figsize=(w*12, h*1.5))
     c = 1
     for i in range(0, h*w):
         ax = plt.subplot(h, w, i+1)
