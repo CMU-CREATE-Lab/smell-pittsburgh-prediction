@@ -44,7 +44,7 @@ def analyzeData(
     #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    #corrStudy(in_p, out_p, logger=logger)
+    corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
     interpretModel(in_p, out_p, logger=logger)
@@ -136,7 +136,7 @@ def corrStudy(in_p, out_p, logger):
     # Compute features
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=False,
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
-   
+    
     # Compute daytime index
     # For 8 hours prediction, 11am covers duration from 11am to 7pm
     #h_start = 6
@@ -159,8 +159,12 @@ def corrStudy(in_p, out_p, logger):
             s.append(np.round(r, 3))
         df_corr[c] = pd.Series(data=s)
     df_corr = df_corr.round(2)
-    df_corr.to_csv(out_p + "corr_with_time_lag.csv")
+    df_corr.to_csv(out_p+"corr_with_time_lag.csv")
+    
+    # Plot
+    plotCorrelation(df_corr, out_p+"corr_with_time_lag.png")
 
+def plotCorrelation(df_corr, out_p):
     # Plot graph
     tick_font_size = 16
     label_font_size = 20
@@ -180,7 +184,7 @@ def corrStudy(in_p, out_p, logger):
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.88)
-    fig.savefig(out_p + "corr_with_time_lag.png", dpi=150)
+    fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
 

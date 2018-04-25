@@ -164,7 +164,7 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
                 if j > i:
                     c1 = df_feat.columns[i]
                     c2 = df_feat.columns[j]
-                    c = c1 + "\n* " + c2
+                    c = c1 + " * " + c2
                     df_inte[c] = df_feat[c1] * df_feat[c2]
         df_feat = df_feat.join(df_inte)
     

@@ -14,6 +14,8 @@ from sklearn.linear_model import LogisticRegression
 from selectFeatures import *
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import MeanShift
+from scipy.stats import pointbiserialr
+from analyzeData import *
 
 # This class builds and interprets the model
 class Interpreter(object):
@@ -82,7 +84,21 @@ class Interpreter(object):
         # Feature selection
         self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y,
             method="RFE", is_regr=False, num_feat_rfe=30, step_rfe=50)
-        
+
+        # Plot point biserial correlation
+        df_corr = pd.DataFrame()
+        Y = self.df_Y.squeeze().values
+        for c in self.df_X.columns:
+            if c in ["Day", "DayOfWeek", "HourOfDay"]: continue
+            s = []
+            r, p = pointbiserialr(Y, self.df_X[c])
+            df_corr[c] = pd.Series(data=np.round(r, 2))
+        df_corr.to_csv(out_p+"corr_inference.csv")
+        self.plotCorrelation(df_corr, out_p+"corr_inference.png")
+
+        # Format feature names
+        self.df_X.columns = [c.replace("*", "\n*") for c in self.df_X.columns]
+
         # Train a L1 logistic regression on the selected cluster
         #print "Train a logistic regression model..."
         #lr = LogisticRegression(penalty="l1", C=1)
@@ -98,6 +114,30 @@ class Interpreter(object):
         self.reportFeatureImportance(dt)
         dt = self.selectDecisionTreePaths(dt)
         self.exportTreeGraph(dt)
+
+    def plotCorrelation(self, df_corr, out_p):
+        # Plot graph
+        tick_font_size = 16
+        label_font_size = 20
+        title_font_size = 32
+
+        fig, ax1 = plt.subplots(1, 1, figsize=(28, 5))
+        divider = make_axes_locatable(ax1)
+        ax2 = divider.append_axes("right", size="2%", pad=0.4)
+        sns.heatmap(df_corr, ax=ax1, cbar_ax=ax2, cmap="RdBu", vmin=-0.6, vmax=0.6,
+            linewidths=0.1, annot=True, fmt="g", xticklabels=False, yticklabels="auto")
+
+        ax1.tick_params(labelsize=tick_font_size)
+        ax2.tick_params(labelsize=tick_font_size)
+        ax1.set_ylabel("", fontsize=label_font_size)
+        ax1.set_xlabel("Selected predictors", fontsize=label_font_size)
+        plt.suptitle("Biserial correlation of predictors and response (smell events)", fontsize=title_font_size)
+
+        fig.tight_layout()
+        fig.subplots_adjust(top=0.88)
+        fig.savefig(out_p, dpi=150)
+        fig.clf()
+        plt.close()
 
     # Only select paths that lead to positive labels
     def selectDecisionTreePaths(self, dt):

@@ -17,6 +17,18 @@ def getData(
     log("Get data...", logger)
 
     # Get and save ESDR data
+    # Feed 26: Lawrenceville ACHD
+    # Feed 28: Liberty ACHD
+    # Feed 23: Flag Plaza ACHD
+    # Feed 43 and 11067: Parkway East ACHD
+    # Feed 1: Avalon ACHD
+    # Feed 27: Lawrenceville 2 ACHD
+    # Feed 29: Liberty 2 ACHD
+    # Feed 3: North Braddock ACHD
+    # Feed 3506: BAPC 301 39TH STREET BLDG AirNow
+    # Feed 5975: Parkway East AirNow
+    # Feed 3508: South Allegheny High School AirNow
+    # Feed 24: Glassport High Street ACHD
     source = [
         [
             {"feed": "1", "channel": "PM25B_UG_M3"},
