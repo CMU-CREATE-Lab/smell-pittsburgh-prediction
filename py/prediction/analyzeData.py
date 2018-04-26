@@ -44,7 +44,7 @@ def analyzeData(
     #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    corrStudy(in_p, out_p, logger=logger)
+    #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
     interpretModel(in_p, out_p, logger=logger)
@@ -146,9 +146,11 @@ def corrStudy(in_p, out_p, logger):
     # Compute point biserial correlation
     Y = df_Y.squeeze().values
     max_t_lag = 6 # the maximum time lag
+    df_corr_info = pd.DataFrame()
     df_corr = pd.DataFrame()
     for c in df_X.columns:
         if c in ["Day", "DayOfWeek", "HourOfDay"]: continue
+        s_info = []
         s = []
         X = df_X[c]
         for i in range(0, max_t_lag+1):
@@ -156,12 +158,14 @@ def corrStudy(in_p, out_p, logger):
             #d = d[idx] # select only daytime
             d = d.dropna()
             r, p = pointbiserialr(d["y"], d["x"])
+            s_info.append((np.round(r, 3), np.round(p, 5), len(d)))
             s.append(np.round(r, 3))
+        df_corr_info[c] = pd.Series(data=s_info)
         df_corr[c] = pd.Series(data=s)
-    df_corr = df_corr.round(2)
-    df_corr.to_csv(out_p+"corr_with_time_lag.csv")
+    df_corr_info.to_csv(out_p+"corr_with_time_lag.csv")
     
     # Plot
+    df_corr = df_corr.round(2)
     plotCorrelation(df_corr, out_p+"corr_with_time_lag.png")
 
 def plotCorrelation(df_corr, out_p):

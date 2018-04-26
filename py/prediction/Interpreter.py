@@ -86,14 +86,17 @@ class Interpreter(object):
             method="RFE", is_regr=False, num_feat_rfe=30, step_rfe=50)
 
         # Plot point biserial correlation
+        df_corr_info = pd.DataFrame()
         df_corr = pd.DataFrame()
         Y = self.df_Y.squeeze().values
+        n = len(self.df_X)
         for c in self.df_X.columns:
             if c in ["Day", "DayOfWeek", "HourOfDay"]: continue
             s = []
             r, p = pointbiserialr(Y, self.df_X[c])
-            df_corr[c] = pd.Series(data=np.round(r, 2))
-        df_corr.to_csv(out_p+"corr_inference.csv")
+            df_corr_info[c] = pd.Series(data=(np.round(r,3), np.round(p,5), n))
+            df_corr[c] = pd.Series(data=np.round(r,3))
+        df_corr_info.to_csv(out_p+"corr_inference.csv")
         self.plotCorrelation(df_corr, out_p+"corr_inference.png")
 
         # Format feature names
