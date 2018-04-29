@@ -40,7 +40,8 @@ def main(argv):
 
     # Analyze data
     if analyze_data:
-        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
+       for i in range(0,10):
+            analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -56,7 +57,7 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["RF", "ET"] * 30
+        methods = ["ET", "RF"] * 30
         #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
@@ -67,7 +68,7 @@ def main(argv):
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
             lg = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
             crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p,
-                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48)
+                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
 
 def genMethodSet():
     m_all = []

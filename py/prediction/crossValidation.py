@@ -27,12 +27,13 @@ def crossValidation(
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=77, # number of folds for validation
+    num_folds=79, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
-    hd_start = 6, # definition of the starting time of "daytime", e.g. 6 means 6am
-    hd_end = 11, # definition of the ending time of "daytime", e.g. 14 means 2pm
+    hd_start=6, # definition of the starting time of "daytime", e.g. 6 means 6am
+    hd_end=11, # definition of the ending time of "daytime", e.g. 14 means 2pm
+    train_size=8000, # number of samples for training data
     logger=None):
 
     log("================================================================================", logger)
@@ -93,13 +94,13 @@ def crossValidation(
     # Validation folds
     # Notice that this is time-series prediction, we cannot use traditional cross-validation folds
     if only_day_time:
-        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=4000)
+        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=train_size/2)
     else:
-        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=8000)
+        tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=train_size)
 
     # For pretraining the autoencoder, we always want to use all data
     if "ANCNN" in method:
-        tscv_pretrain = TimeSeriesSplit(n_splits=num_folds, max_train_size=8000)
+        tscv_pretrain = TimeSeriesSplit(n_splits=num_folds, max_train_size=train_size)
         tscv_pretrain_split = list(tscv_pretrain.split(X_pretrain))
 
     # Perform cross validation

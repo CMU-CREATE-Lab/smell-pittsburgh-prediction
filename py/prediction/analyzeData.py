@@ -117,7 +117,8 @@ def interpretModel(in_p, out_p, logger):
     for m in ["DT"]:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
         lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
-        crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg)
+        crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg,
+            num_folds=79, skip_folds=48, train_size=8000)
 
 def computeCrossCorrelation(x, y, max_lag=None):
     n = len(x)
