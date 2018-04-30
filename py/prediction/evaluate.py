@@ -34,7 +34,7 @@ def main1():
     print df_rf.describe()
 
 def main2():
-    path = "data_main/analysis/log/8000_samples/"
+    path = "data_main/analysis/log/result/"
     cols = ["TP","FP","FN","precision","recall","fscore"]
     dt = []
     for name in getAllFileNamesInFolder(path):

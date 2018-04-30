@@ -34,7 +34,7 @@ class Interpreter(object):
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            F = RandomForestClassifier(n_estimators=1000, max_features=120, n_jobs=-1)
+            F = RandomForestClassifier(n_estimators=1000, max_features=0.15, n_jobs=-1)
             F.fit(df_X, df_Y.squeeze())
             self.reportPerformance(F)
             self.reportFeatureImportance(F, thr=0.3)

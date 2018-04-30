@@ -56,7 +56,7 @@ def selectFeatures(
             base = LogisticRegression(penalty="l1", C=0.1)
             model = SelectFromModel(base)
         elif method == "RFE":
-            base = RandomForestClassifier(n_estimators=1000, n_jobs=-1)
+            base = RandomForestClassifier(n_estimators=1000, max_features=0.15, n_jobs=-1)
             model = RFE(base, step=step_rfe, verbose=1, n_features_to_select=num_feat_rfe)
 
     # If method is None or not supported, just return the original features
