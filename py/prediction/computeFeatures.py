@@ -20,6 +20,7 @@ def computeFeatures(
     add_roll=False, # add rolling features
     add_diff=False, # add differential features
     add_inter=False, # add variable interaction (X1*X2) terms in the features or not
+    add_sqa=False, # include the squared terms (X1^2)
     in_p_mean=None, # the path of mean values in pandas dataframe for scaling features
     in_p_std=None, # the path of std in pandas dataframe for scaling features
     aggr_axis=True, # whether we want to sum all smell reports together for all zipcodes
@@ -55,7 +56,7 @@ def computeFeatures(
     # Extract features (X) from ESDR data
     # For models that do not have time-series structure, we want to add time-series features
     # For models that do have time-series structure (e.g. RNN), we want to use original features
-    df_X = extractFeatures(df_esdr, b_hr, add_inter, add_roll, add_diff)
+    df_X = extractFeatures(df_esdr, b_hr, add_inter, add_roll, add_diff, add_sqa)
     df_X[df_X < 1e-6] = 0 # prevent extreme small values 
 
     # Transform features
@@ -119,7 +120,7 @@ def computeFeatures(
         log("Original std created at " + out_p_std, logger)
     return df_X, df_Y, df_C 
 
-def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
+def extractFeatures(df, b_hr, add_inter, add_roll, add_diff, add_sqa):
     df = df.copy(deep=True)
     df_all = []
 
@@ -166,7 +167,21 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff):
                     c2 = df_feat.columns[j]
                     c = c1 + " * " + c2
                     df_inte[c] = df_feat[c1] * df_feat[c2]
+
+    # Add squared terms
+    if add_sqa:
+        df_sqa = pd.DataFrame()
+        L = len(df_feat.columns)
+        for i in range(0, L):
+            c1 = df_feat.columns[i]
+            c = c1 + "_sqare"
+            df_sqa[c] = df_feat[c1]**2
+
+    # Merge dataframes
+    if add_inter:
         df_feat = df_feat.join(df_inte)
+    if add_sqa:
+        df_feat = df_feat.join(df_sqa)
     
     return df_feat
 

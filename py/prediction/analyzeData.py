@@ -110,7 +110,7 @@ def interpretModel(in_p, out_p, logger):
     df_esdr = df_esdr.reset_index()
     df_smell = df_smell.reset_index()
     df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=8, b_hr=2, thr=40, is_regr=False,
-        add_inter=True, add_roll=False, add_diff=False, logger=logger)
+        add_inter=True, add_roll=False, add_diff=False, add_sqa=True, logger=logger)
     model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
     df_Y = model.getFilteredLabels()
     df_X = model.getSelectedFeatures()
