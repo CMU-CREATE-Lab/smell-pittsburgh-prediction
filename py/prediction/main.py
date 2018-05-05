@@ -56,7 +56,7 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["ET", "RF"] * 100
+        methods = ["ET", "RF"]
         #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"

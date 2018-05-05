@@ -783,9 +783,9 @@ def getGA(
 
 # Plot a grid of scatter plot pairs in X, with point colors representing binary labels
 def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
-    c_ls=[(0.5, 0.5, 0.5), (0, 0, 1), (1, 0, 0), (0, 1, 0)], # color list
+    c_ls=[(0.5, 0.5, 0.5), (0.2275, 0.298, 0.7529), (0.702, 0.0118, 0.149), (0, 1, 0)], # color
     c_alpha=[0.1, 0.1, 0.2, 0.1], # color opacity
-    c_bin=[0, 1], # color is mapped to index [Y<c_bin[0], Y==c_bin[1], Y==c_bin[2], Y>c_bin[3]]
+    c_bin=[0, 1], # color is mapped to index [Y<c_bin[0], Y==c_bin[0], Y==c_bin[1], Y>c_bin[1]]
     logger=None):
 
     if not is_Y_continuous:
@@ -801,10 +801,10 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
     title_font_size = 24
     label_font_size = 16
     tick_font_size = 16
-    alpha = 0.2
+    alpha = 0.3
     fig = plt.figure(figsize=(6*w, 5*h+1), dpi=150)
     num_cols = X.shape[1]
-    cmap = "RdBu"
+    cmap = "coolwarm"
     c = 1
     for i in range(0, num_cols-1):
         for j in range(i+1, num_cols):
@@ -813,7 +813,7 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
                 plt.scatter(X[:,i], X[:,j], c=Y, s=dot_size, alpha=alpha, cmap=cmap)
             else:
                 for k in range(0, len(c_idx)):
-                    plt.scatter(X[c_idx[k],i], X[c_idx[k],j], c=c_ls[k], s=dot_size, alpha=alpha, cmap=cmap)
+                    plt.scatter(X[c_idx[k],i], X[c_idx[k],j], c=c_ls[k], s=dot_size, alpha=c_alpha[k])
             plt.xlabel("Component " + str(i), fontsize=label_font_size)
             plt.ylabel("Component " + str(j), fontsize=label_font_size)
             plt.xticks(fontsize=tick_font_size)

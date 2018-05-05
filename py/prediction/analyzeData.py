@@ -343,32 +343,17 @@ def plotCorrMatirx(df, out_p):
     plt.close()
 
 def plotLowDimensions(in_p, out_p, logger):
-    plot_binned = True
-    plot_original = False
-
-    # Plot the binned dataset
-    if plot_binned:
-        is_regr = False
-        df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
-            add_inter=False, add_roll=False, add_diff=False, logger=logger)
-        X = df_X.values
-        Y = df_Y.squeeze().values
-        log("Plot PCA (binned dataset)...", logger)
-        plotPCA(X, Y, out_p, is_regr=is_regr)
-        log("Plot Kernel PCA (binned dataset)...", logger)
-        plotKernelPCA(X, Y, out_p, is_regr=is_regr)
-
-    # Plot the original dataset
-    if plot_original:
-        is_regr = True
-        df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
-            add_inter=False, add_roll=False, add_diff=False, logger=logger)
-        X = df_X.values
-        Y = df_Y.squeeze().values
-        log("Plot PCA (original dataset)...", logger)
-        plotPCA(X, Y, out_p, is_regr=is_regr)
-        log("Plot Kernel PCA (original  dataset)...", logger)
-        plotKernelPCA(X, Y, out_p, is_regr=is_regr)
+    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
+        add_inter=False, add_roll=False, add_diff=False, logger=logger)
+    X = df_X.values
+    Y = df_Y.squeeze().values
+    _, df_Y_regr, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=True,
+        add_inter=False, add_roll=False, add_diff=False, logger=logger)
+    Y_regr = df_Y_regr.squeeze().values
+    log("Plot PCA...", logger)
+    plotPCA(X, Y, Y_regr, out_p)
+    log("Plot Kernel PCA...", logger)
+    plotKernelPCA(X, Y, Y_regr, out_p)
 
     log("Finished plotting dimensions", logger)
 
@@ -392,21 +377,25 @@ def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
     out_p += "random_trees_embedding.png"
     plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
-def plotKernelPCA(X, Y, out_p, is_regr=False):
-    X, Y = deepcopy(X), deepcopy(Y)
+# Y is the binned dataset
+# Y_regr is the original dataset
+def plotKernelPCA(X, Y, Y_regr, out_p):
+    X, Y, Y_regr = deepcopy(X), deepcopy(Y), deepcopy(Y_regr)
     pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
     X = pca.fit_transform(X)
     r = pca.lambdas_
     r = np.round(r/sum(r), 3)
     title = "Kernel PCA, eigenvalue = " + str(r)
-    out_p += "kernel_pca.png"
-    plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
+    plotClusterPairGrid(X, Y, out_p+"kernel_pca.png", 3, 1, title, False)
+    plotClusterPairGrid(X, Y_regr, out_p+"kernel_pca_regr.png", 3, 1, title, True)
 
-def plotPCA(X, Y, out_p, is_regr=False):
-    X, Y = deepcopy(X), deepcopy(Y)
+# Y is the binned dataset
+# Y_rege is the original dataset
+def plotPCA(X, Y, Y_regr, out_p):
+    X, Y, Y_regr = deepcopy(X), deepcopy(Y), deepcopy(Y_regr)
     pca = PCA(n_components=3)
     X = pca.fit_transform(X)
     r = np.round(pca.explained_variance_ratio_, 3)
     title = "PCA, eigenvalue = " + str(r)
-    out_p += "pca.png"
-    plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
+    plotClusterPairGrid(X, Y, out_p+"pca.png", 3, 1, title, False)
+    plotClusterPairGrid(X, Y_regr, out_p+"pca_regr.png", 3, 1, title, True)
