@@ -343,30 +343,33 @@ def plotCorrMatirx(df, out_p):
     plt.close()
 
 def plotLowDimensions(in_p, out_p, logger):
-    plot_PCA = True
-    plot_RTE = False
-    plot_SE = False
+    plot_binned = True
+    plot_original = False
 
-    is_regr = False
-    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
-        add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    X = df_X.values
-    Y = df_Y.squeeze().values
-
-    if plot_PCA:
-        log("Plot PCA...", logger)
+    # Plot the binned dataset
+    if plot_binned:
+        is_regr = False
+        df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
+            add_inter=False, add_roll=False, add_diff=False, logger=logger)
+        X = df_X.values
+        Y = df_Y.squeeze().values
+        log("Plot PCA (binned dataset)...", logger)
         plotPCA(X, Y, out_p, is_regr=is_regr)
-        log("Plot Kernel PCA...", logger)
+        log("Plot Kernel PCA (binned dataset)...", logger)
         plotKernelPCA(X, Y, out_p, is_regr=is_regr)
 
-    if plot_RTE:
-        log("Plot Random Trees Embedding...", logger)
-        plotRandomTreesEmbedding(X, Y, out_p, is_regr=is_regr)
-    
-    if plot_SE:
-        log("Plot Spectral Embedding...", logger)
-        plotSpectralEmbedding(X, Y, out_p, is_regr=is_regr)
-    
+    # Plot the original dataset
+    if plot_original:
+        is_regr = True
+        df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=is_regr,
+            add_inter=False, add_roll=False, add_diff=False, logger=logger)
+        X = df_X.values
+        Y = df_Y.squeeze().values
+        log("Plot PCA (original dataset)...", logger)
+        plotPCA(X, Y, out_p, is_regr=is_regr)
+        log("Plot Kernel PCA (original  dataset)...", logger)
+        plotKernelPCA(X, Y, out_p, is_regr=is_regr)
+
     log("Finished plotting dimensions", logger)
 
 def plotSpectralEmbedding(X, Y, out_p, is_regr=False):
