@@ -46,4 +46,5 @@ def main2():
     print "Decision Tree"
     print df_dt.describe()
 
+main1()
 main2()

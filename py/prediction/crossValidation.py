@@ -31,7 +31,7 @@ def crossValidation(
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
-    hd_start=6, # definition of the starting time of "daytime", e.g. 6 means 6am
+    hd_start=5, # definition of the starting time of "daytime", e.g. 6 means 6am
     hd_end=11, # definition of the ending time of "daytime", e.g. 14 means 2pm
     train_size=8000, # number of samples for training data
     logger=None):

@@ -40,8 +40,7 @@ def main(argv):
 
     # Analyze data
     if analyze_data:
-       for i in range(0,100):
-            analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
+        analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
 
     # Compute features
     # INPUT: raw esdr and smell data
@@ -57,7 +56,7 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["ET", "RF"] * 30
+        methods = ["ET", "RF"] * 100
         #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
