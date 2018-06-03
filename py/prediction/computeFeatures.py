@@ -96,9 +96,6 @@ def computeFeatures(
     if df_smell is not None:
         if df_Y is not None:
             df_Y = df_Y.drop("DateTime", axis=1)
-            if is_regr:
-                # Transform to log scale if using regression
-                df_Y = np.log2(df_Y).replace(to_replace=[np.inf, -np.inf], value=0)
         df_C = df_C.drop("DateTime", axis=1)
     else:
         df_Y = None

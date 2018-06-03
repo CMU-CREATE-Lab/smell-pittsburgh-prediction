@@ -38,10 +38,10 @@ def analyzeData(
     #plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    #plotAggrSmell(in_p, out_p, logger)
+    plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    plotLowDimensions(in_p, out_p, logger)
+    #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
     #corrStudy(in_p, out_p, logger=logger)
@@ -217,25 +217,29 @@ def plotDayHour(df_X, df_Y, out_p, logger):
         mat[(dw, hd)] = c
 
     y_l = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    x_l = ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00",
-        "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
-        "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"]
+    x_l = ["0", "1", "2", "3", "4", "5", "6", "7",
+        "8", "9", "10", "11", "12", "13", "14", "15",
+        "16", "17", "18", "19", "20", "21", "22", "23"]
     df_day_hour = pd.DataFrame(data=mat, columns=x_l, index=y_l)
     df_day_hour.to_csv(out_p + "smell_day_hour.csv")
 
     fig, ax1 = plt.subplots(1, 1, figsize=(19, 6))
+    #fig, ax1 = plt.subplots(1, 1, figsize=(14, 6))
     divider = make_axes_locatable(ax1)
-    ax2 = divider.append_axes("right", size="2%", pad=0.4)
-    sns.heatmap(df_day_hour, ax=ax1, cbar_ax=ax2, cmap="Blues", vmin=0, vmax=7,
-        linewidths=0.1, annot=True, fmt="g", xticklabels=x_l, yticklabels=y_l)
+    ax2 = divider.append_axes("right", size="2%", pad=0.2)
+    sns.heatmap(df_day_hour, ax=ax1, cbar_ax=ax2, cmap="Blues", vmin=0, vmax=7, linewidths=0.1,
+        annot=False, fmt="g", xticklabels=x_l, yticklabels=y_l, cbar_kws={"ticks":[0,2,4,6]})
 
     for item in ax1.get_yticklabels():
         item.set_rotation(0)
     for item in ax1.get_xticklabels():
         item.set_rotation(0)
 
-    ax1.set_ylabel("Day of week", fontsize=14)
-    ax1.set_xlabel("Hour of day", fontsize=14)
+    ax1.set_ylabel("Day of week", fontsize=18)
+    ax1.set_xlabel("Hour of day", fontsize=18)
+    ax1.tick_params(axis="x", labelsize=18)
+    ax1.tick_params(axis="y", labelsize=18)
+    ax2.tick_params(axis="y", labelsize=18)
     plt.suptitle("Average smell values over time", fontsize=24)
         
     plt.tight_layout()

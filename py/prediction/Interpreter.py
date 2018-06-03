@@ -72,13 +72,16 @@ class Interpreter(object):
                 else:
                     print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
             if self.out_p is not None:
-                self.plotClusters(cluster, self.out_p)
+                self.plotClusters(self.df_X_pos, cluster, self.out_p)
             qc = silhouette_score(X, cluster)
             print "Silhouette Coefficient: %0.3f" % qc
 
         # Set the label for samples outside the cluster to zero
         df_X_pos_idx_c0 = self.df_X_pos_idx[self.cluster==0] # select the largest cluster
         df_X_neg_idx_c0 = ~self.df_X.index.isin(df_X_pos_idx_c0) # select samples that are not in the cluster
+        self.df_Y["smell"].astype(int).iloc[df_X_neg_idx_c0] = -1 # select labels of samples that are not in the cluster to 2
+        if self.out_p is not None:
+            self.plotClusters(self.df_X, self.df_Y, self.out_p)
         self.df_Y["smell"].iloc[df_X_neg_idx_c0] = 0 # select labels of samples that are not in the cluster to zero
 
         # Feature selection
@@ -220,8 +223,8 @@ class Interpreter(object):
                 print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
             else:
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
-        if self.out_p is not None:
-            self.plotClusters(cluster, self.out_p)
+        #if self.out_p is not None:
+        #    self.plotClusters(self.df_X_pos, cluster, self.out_p)
 
         # Evaluate the quality of the cluster
         #qc = silhouette_score(dist, cluster, metric="precomputed")
@@ -229,28 +232,28 @@ class Interpreter(object):
         print "Silhouette Coefficient: %0.3f" % qc
         return cluster
 
-    def plotClusters(self, cluster, out_p):
+    def plotClusters(self, df_X, df_Y, out_p):
         # Visualize the clusters using PCA
         print "Plot PCA of positive labels..."
         pca = PCA(n_components=3)
-        X = pca.fit_transform(deepcopy(self.df_X_pos.values))
+        X = pca.fit_transform(deepcopy(df_X.values))
         r = np.round(pca.explained_variance_ratio_, 3)
         title = "PCA of positive labels, eigenvalue = " + str(r)
         out_p_tmp = out_p + "pca_positive_labels.png"
-        c_ls = [(0.5, 0.5, 0.5), (1, 0, 0), (0, 0, 1)]
+        c_ls = [(0.5, 0.5, 0.5), (0, 0, 1), (1, 0, 0)]
         c_alpha = [0.1, 0.2, 0.1]
         c_bin=[0]
-        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
+        plotClusterPairGrid(X, df_Y, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
         # Visualize the clusters using kernel PCA
         print "Plot Kernel PCA of positive labels..."
         pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
-        X = pca.fit_transform(deepcopy(self.df_X_pos.values))
+        X = pca.fit_transform(deepcopy(df_X.values))
         r = pca.lambdas_
         r = np.round(r/sum(r), 3)
         title = "Kernel PCA of positive labels, eigenvalue = " + str(r)
         out_p_tmp = out_p + "kernel_pca_positive_labels.png"
-        plotClusterPairGrid(X, cluster, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
+        plotClusterPairGrid(X, df_Y, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
     def computeSampleSimilarity(self):
         L = len(self.df_X_pos)
