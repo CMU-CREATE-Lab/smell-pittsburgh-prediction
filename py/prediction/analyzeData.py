@@ -38,10 +38,10 @@ def analyzeData(
     #plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    plotAggrSmell(in_p, out_p, logger)
+    #plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    #plotLowDimensions(in_p, out_p, logger)
+    plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
     #corrStudy(in_p, out_p, logger=logger)
@@ -351,6 +351,8 @@ def plotLowDimensions(in_p, out_p, logger):
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
     X = df_X.values
     Y = df_Y.squeeze().values
+    print "Number of positive samples: " + str(len(Y[Y==1])) + " (" + str(float(len(Y[Y==1]))/len(Y)) + ")"
+    print "Number of negative samples: " + str(len(Y[Y==0])) + " (" + str(float(len(Y[Y==0]))/len(Y)) + ")"
     _, df_Y_regr, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=True,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
     Y_regr = df_Y_regr.squeeze().values

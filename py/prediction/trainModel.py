@@ -28,6 +28,7 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import LinearSVC
 from HybridCrowdClassifier import HybridCrowdClassifier
+from sklearn.dummy import DummyClassifier
 
 from CRnnLearner import CRnnLearner
 from ANCnnLearner import ANCnnLearner
@@ -126,6 +127,12 @@ def trainModel(
             model = HybridCrowdClassifier(logger=logger)
         elif method == "DT":
             model = DecisionTreeClassifier(min_samples_split=20, max_depth=8, min_samples_leaf=5)
+        elif method == "Base1":
+            model = DummyClassifier(strategy="stratified")
+        elif method == "Base1":
+            model = DummyClassifier(strategy="stratified")
+        elif method == "Base1":
+            model = DummyClassifier(strategy="stratified")
         else:
             m = method[:2]
             if m in ["RF", "ET"]:
