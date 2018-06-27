@@ -988,3 +988,7 @@ def plotBoxCharts(df_all, title_all, h, w, out_p):
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
+
+# Find if the datetime object is timezone aware
+def isDatetimeObjTzAware(dt):
+    return dt.tzinfo is not None and dt.tzinfo.utcoffset(dt) is not None

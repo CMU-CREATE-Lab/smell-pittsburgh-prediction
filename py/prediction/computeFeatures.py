@@ -44,8 +44,15 @@ def computeFeatures(
         df_smell = df_smell.set_index("DateTime")
 
     # Convert datetime to local time zone
-    df_esdr.index = df_esdr.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
-    df_smell.index = df_smell.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+    if isDatetimeObjTzAware(df_esdr.index):
+        df_esdr.index = df_esdr.index.tz_convert(pytz.timezone("US/Eastern"))
+    else:
+        df_esdr.index = df_esdr.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
+    if df_smell is not None:
+        if isDatetimeObjTzAware(df_smell.index):
+            df_smell.index = df_smell.index.tz_convert(pytz.timezone("US/Eastern"))
+        else:
+            df_smell.index = df_smell.index.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
 
     # Replace -1 values in esdr data to NaN
     df_esdr[df_esdr==-1] = np.nan

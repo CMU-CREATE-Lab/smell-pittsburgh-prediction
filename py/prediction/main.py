@@ -16,7 +16,7 @@ def main(argv):
     is_regr = False # is classification
     #is_regr = True # is regression
     start_dt = datetime(2016, 10, 9, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2018, 4, 15, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2018, 6, 24, 0, tzinfo=pytz.timezone("US/Eastern"))
     get_data, analyze_data, compute_features, cross_validation = False, False, False, False
     if mode == "run_all":
         get_data = True
@@ -28,10 +28,10 @@ def main(argv):
     elif mode == "analyze":
         analyze_data = True
     else:
-        #get_data = True
-        analyze_data = True
-        #compute_features = True
-        #cross_validation = True
+        get_data = True
+        #analyze_data = True
+        compute_features = True
+        cross_validation = True
 
     # Get data
     # OUTPUT: raw esdr and smell data
