@@ -130,10 +130,8 @@ def trainModel(
         elif method == "Base1":
             model = DummyClassifier(strategy="stratified")
         elif method == "Base2":
-            model = DummyClassifier(strategy="most_frequent")
-        elif method == "Base3":
             model = DummyClassifier(strategy="uniform")
-        elif method == "Base4":
+        elif method == "Base3":
             model = DummyClassifier(strategy="constant", constant=1)
         else:
             m = method[:2]
