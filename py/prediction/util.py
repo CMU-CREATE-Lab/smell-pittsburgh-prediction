@@ -711,6 +711,7 @@ def getSmellReports(**options):
 
     # Set index and drop columns
     df.set_index("created_at", inplace=True)
+    df.index.names = ["EpochTime"]
     df.drop(["latitude", "longitude"], axis=1, inplace=True)
 
     # Return

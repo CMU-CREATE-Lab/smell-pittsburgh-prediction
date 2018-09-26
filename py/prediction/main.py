@@ -2,6 +2,7 @@ import sys
 import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
+from preprocessData import *
 from analyzeData import *
 from computeFeatures import *
 from crossValidation import *
@@ -17,34 +18,46 @@ def main(argv):
     #is_regr = True # is regression
     start_dt = datetime(2016, 10, 9, 0, tzinfo=pytz.timezone("US/Eastern"))
     end_dt = datetime(2018, 6, 24, 0, tzinfo=pytz.timezone("US/Eastern"))
-    get_data, analyze_data, compute_features, cross_validation = False, False, False, False
+    get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False
     if mode == "run_all":
         get_data = True
+        preprocess_data = True
         compute_features = True
         cross_validation = True
-    elif mode == "test":
+    elif mode == "data":
+        get_data = True
+    elif mode == "preprocess":
+        preprocess_data = True
+    elif mode == "feature":
         compute_features = True
+    elif mode == "test":
         cross_validation = True
     elif mode == "analyze":
         analyze_data = True
     else:
         get_data = True
-        #analyze_data = True
+        preprocess_data = True
         compute_features = True
         cross_validation = True
 
     # Get data
-    # OUTPUT: raw esdr and smell data
+    # OUTPUT: raw esdr and raw smell data
     if get_data:
-        getData(out_p=[p+"esdr.csv",p+"smell.csv"], start_dt=start_dt, end_dt=end_dt)
+        getData(out_p=[p+"esdr_raw/",p+"smell_raw.csv"], start_dt=start_dt, end_dt=end_dt)
+
+    # Preprocess data
+    # INPUT: raw esdr and raw smell data
+    # OUTPUT: preprocessed esdr and smell data
+    if preprocess_data:
+        preprocessData(in_p=[p+"esdr_raw/",p+"smell_raw.csv"], out_p=[p+"esdr.csv",p+"smell.csv"])
 
     # Analyze data
     if analyze_data:
         analyzeData(in_p=[p+"esdr.csv",p+"smell.csv"], out_p_root=p)
 
     # Compute features
-    # INPUT: raw esdr and smell data
-    # OUTPUT: features and label
+    # INPUT: preprocessed esdr and smell data
+    # OUTPUT: features and labels
     if compute_features:
         computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv",p+"C.csv"],
             is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
@@ -56,7 +69,7 @@ def main(argv):
         #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["ET", "RF"]
+        methods = ["ET"]
         #methods = genMethodSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"

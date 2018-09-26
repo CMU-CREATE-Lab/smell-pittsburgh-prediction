@@ -2,6 +2,7 @@ import sys
 import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
+from preprocessData import *
 from computeFeatures import *
 from selectFeatures import *
 from trainModel import *
@@ -45,7 +46,8 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     end_dt = datetime.now() - timedelta(hours=24)
     start_dt = end_dt - timedelta(hours=8000)
     log("Get data from " + str(start_dt) + " to " + str(end_dt), logger)
-    df_esdr, df_smell = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
+    df_esdr_array_raw, df_smell_raw = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
+    df_esdr, df_smell = preprocessData(df_esdr_array_raw=df_esdr_array_raw, df_smell_raw=df_smell_raw, logger=logger)
 
     # Compute features
     df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr, is_regr=False,
@@ -73,7 +75,8 @@ def predict(f_hr=8, b_hr=3, thr=40):
     end_dt = datetime.now()
     start_dt = end_dt - timedelta(hours=b_hr+1)
     log("Get data from " + str(start_dt) + " to " + str(end_dt), logger)
-    df_esdr, df_smell = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
+    df_esdr_array_raw, df_smell_raw = getData(start_dt=start_dt, end_dt=end_dt, logger=logger)
+    df_esdr, df_smell = preprocessData(df_esdr_array_raw=df_esdr_array_raw, df_smell_raw=df_smell_raw, logger=logger)
     if len(df_esdr) < b_hr+1:
         log("ERROR: Length of esdr is less than " + str(b_hr+1) + " hours", logger)
         log("Length of esdr = " + str(len(df_esdr)), logger)

@@ -29,7 +29,22 @@ def getData(
     # Feed 5975: Parkway East AirNow
     # Feed 3508: South Allegheny High School AirNow
     # Feed 24: Glassport High Street ACHD
-    source = [
+    esdr_source_names = [
+        "Feed_1_Avalon_ACHD_PM",
+        "Feed_1_Avalon_ACHD_others",
+        "Feed_26_Lawrenceville_ACHD",
+        "Feed_27_Lawrenceville_2_ACHD",
+        "Feed_28_Liberty_ACHD",
+        "Feed_29_Liberty_2_ACHD",
+        "Feed_3_North_Braddock_ACHD",
+        "Feed_23_Flag_Plaza_ACHD",
+        "Feed_43_and_Feed_11067_Parkway_East_ACHD",
+        "Feed_3506_BAPC_301_39TH_STREET_BLDG_AirNow",
+        "Feed_5975_Parkway_East_AirNow",
+        "Feed_3508_South_Allegheny_High_School_AirNow",
+        "Feed_24_Glassport_High_Street_ACHD"
+    ]
+    esdr_source = [
         [
             {"feed": "1", "channel": "PM25B_UG_M3"},
             {"feed": "1", "channel": "PM25T_UG_M3"}
@@ -52,98 +67,17 @@ def getData(
     ]
     start_time = datetimeToEpochtime(start_dt) / 1000 # ESDR uses seconds
     end_time = datetimeToEpochtime(end_dt) / 1000 # ESDR uses seconds
-    esdr_data = getEsdrData(source, start_time=start_time, end_time=end_time)
-    df_esdr = mergeEsdrData(esdr_data)
+    df_esdr_array_raw = getEsdrData(esdr_source, start_time=start_time, end_time=end_time)
     
-    # Get smell reports (datetime object in "DateTime" column is in UTC tzinfo)
+    # Get smell reports
     df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time)
-    df_smell = aggregateSmellData(df_smell_raw)
-    
-    # Sync DateTime column in esdr and smell data
-    if df_smell is not None:
-        df_smell = pd.merge_ordered(df_esdr["DateTime"].to_frame(), df_smell, on="DateTime", how="left", fill_method=None)
-        df_smell = df_smell.fillna(0)
     
     # Check directory and save file
     if out_p is not None:
         for p in out_p: checkAndCreateDir(p)
-        df_esdr.to_csv(out_p[0], index=False)
-        df_smell.to_csv(out_p[1], index=False)
-        log("ESDR data created at " + out_p[0], logger)
-        log("Smell data created at " + out_p[1], logger)
-    return df_esdr, df_smell
-
-def mergeEsdrData(data):
-    # Resample data
-    df = resampleData(data.pop(0)).reset_index()
-    while len(data) != 0:
-        df = pd.merge_ordered(df, resampleData(data.pop(0)).reset_index(), on="DateTime", how="outer", fill_method=None)
-
-    # Fill NaN with -1
-    df = df.fillna(-1)
-    return df
-
-def aggregateSmellData(df):
-    if df is None: return None
-
-    # Bag of words
-    #bow = bagOfWords(df["smell_description"])
-    
-    # Select only the reports that are related to industrial smell
-    #keywords_exclude = [
-    #    "car","Car","trash","Trash","vehicle","Vehicle","paint",
-    #    "Paint","garbage","Garbage","sewer","Sewer","sewage","Sewage"]
-    #select_smell = ~df["smell_description"].str.contains("|".join(keywords_exclude)).fillna(False)
-    #df = df[select_smell]
-    
-    # Select only the reports within the range of 3 and 5
-    df = df[(df["smell_value"]>=3)&(df["smell_value"]<=5)]
-    
-    # If empty, return None
-    if df.empty:
-        return None
-
-    # Group by zipcode and output a vector with zipcodes
-    # TODO: need to merge the reports submitted by the same user in an hour
-    data = []
-    for z, df_z in df.groupby("zipcode"):
-        # Select only smell values
-        df_z = df_z["smell_value"]
-        # Resample data
-        df_z = resampleData(df_z, method="sum")
-        df_z.name = z
-        data.append(df_z)
-    
-    # Merge all
-    df = data.pop(0).reset_index()
-    while len(data) != 0:
-        df = pd.merge_ordered(df, data.pop(0).reset_index(), on="DateTime", how="outer", fill_method=None)
-
-    # Fill NaN with 0
-    df = df.fillna(0)
-    
-    return df
-
-def resampleData(df, method=None):
-    df = df.copy(deep=True)
-    # Because we want data from the past, so label need to be "right"
-    df = epochtimeIdxToDatetime(df).resample("1h", label="right")
-    if method == "sum":
-        return df.sum()
-    elif method == "count":
-        return df.count()
-    else:
-        return df.mean()
-
-# Convert a pandas dataframe to bag of words
-def bagOfWords(df):
-    # Preprocessing
-    line = " ".join(df.fillna(""))
-    line = re.sub("[^a-zA-Z]", " ", line) # replace non-letters
-    line = re.sub("[ ]+", " ", line) # replace multiple white space
-    line = [line.lower()] # to lower case
-
-    # Bag of words
-    model = CountVectorizer(stop_words="english")
-    model.fit_transform(line)
-    return model.vocabulary_
+        for i in range(len(df_esdr_array_raw)):
+            df_esdr_array_raw[i].to_csv(out_p[0] + esdr_source_names[i] + ".csv")
+        df_smell_raw.to_csv(out_p[1])
+        log("Raw ESDR data created at " + out_p[0], logger)
+        log("Raw smell data created at " + out_p[1], logger)
+    return df_esdr_array_raw, df_smell_raw

@@ -7,8 +7,8 @@ import pytz
 # Merge all data together and compute features
 # OUTPUT: pandas dataframe containing features
 def computeFeatures(
-    df_esdr=None, # the pandas dataframe that contains the predictors (esdr data)
-    df_smell=None, # the pandas dataframe that contains the responses (smell data)
+    df_esdr=None, # the pandas dataframe that contains the predictors (preprocessed esdr data)
+    df_smell=None, # the pandas dataframe that contains the responses (preprocessed smell data)
     in_p=None, # input path for raw esdr and smell data
     out_p=None, # output path for features and labels
     out_p_mean=None, # output path for the mean of features
@@ -28,7 +28,7 @@ def computeFeatures(
     
     log("Compute features...", logger)
 
-    # Read ESDR and smell report data
+    # Read preprocessed ESDR and smell report data
     if df_esdr is None or df_smell is None:
         if in_p is not None:
             df_esdr = pd.read_csv(in_p[0], parse_dates=True, index_col="DateTime")
