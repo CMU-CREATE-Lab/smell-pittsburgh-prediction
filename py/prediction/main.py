@@ -83,8 +83,7 @@ def main(argv):
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
             lg = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
             crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p, event_thr=smell_thr,
-                #method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
-                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=98, train_size=8000)
+                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
 
 def genMethodSet(is_regr):
     m_all = []

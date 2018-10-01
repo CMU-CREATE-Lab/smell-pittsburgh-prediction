@@ -49,9 +49,9 @@ def analyzeData(
     #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    interpretModel(in_p, out_p, logger=logger)
+    interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
 
-def interpretModel(in_p, out_p, logger):
+def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     # Load time series data
     df_esdr = pd.read_csv(in_p[0], parse_dates=True, index_col="DateTime")
     df_smell = pd.read_csv(in_p[1], parse_dates=True, index_col="DateTime")
@@ -116,6 +116,7 @@ def interpretModel(in_p, out_p, logger):
     model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
     df_Y = model.getFilteredLabels()
     df_X = model.getSelectedFeatures()
+    #for m in ["DT"]*100:
     for m in ["DT"]:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
         lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
