@@ -16,8 +16,9 @@ def main(argv):
     # Parameters
     is_regr = False # is classification
     #is_regr = True # is regression
-    start_dt = datetime(2016, 12, 1, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2018, 9, 27, 0, tzinfo=pytz.timezone("US/Eastern"))
+    smell_thr = 40 # threshold to define a smell event
+    start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2018, 9, 30, 0, tzinfo=pytz.timezone("US/Eastern"))
     get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False
     if mode == "run_all":
         get_data = True
@@ -60,7 +61,7 @@ def main(argv):
     # OUTPUT: features and labels
     if compute_features:
         computeFeatures(in_p=[p+"esdr.csv",p+"smell.csv"], out_p=[p+"X.csv",p+"Y.csv",p+"C.csv"],
-            is_regr=is_regr, f_hr=8, b_hr=3, thr=40, add_inter=False, add_roll=False, add_diff=False)
+            is_regr=is_regr, f_hr=8, b_hr=3, thr=smell_thr, add_inter=False, add_roll=False, add_diff=False)
 
     # Cross validation
     # INPUT: features
@@ -70,9 +71,9 @@ def main(argv):
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
         #methods = ["DMLP"]
-        methods = ["ET", "RF"]
+        #methods = ["ET", "RF"]
         #methods = ["ET", "RF"] * 100
-        #methods = genMethodSet()
+        methods = genMethodSet(is_regr)
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
@@ -81,16 +82,19 @@ def main(argv):
         for m in methods:
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
             lg = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)
-            crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p,
-                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
+            crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p, event_thr=smell_thr,
+                #method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
+                method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=98, train_size=8000)
 
-def genMethodSet():
+def genMethodSet(is_regr):
     m_all = []
     methods = ["ET", "RF"]
-    n_estimators = [1000]
-    #max_features = range(5,200,5) + [None]
-    max_features = [30,60,90,120]
-    min_samples_split = [2,4,8,16,32]
+    if is_regr:
+        n_estimators = [200]
+    else:
+        n_estimators = [1000]
+    max_features = [30,60,90,120,150,180]
+    min_samples_split = [2,4,8,16,32,64,128]
     for n in n_estimators:
         for mf in max_features:
             for mss in min_samples_split:

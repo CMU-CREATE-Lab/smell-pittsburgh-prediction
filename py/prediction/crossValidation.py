@@ -22,12 +22,12 @@ def crossValidation(
     df_C=None, # crowd feature, total smell values for the previous hour
     in_p=None, # input path of features and labels
     out_p_root=None, # root directory for outputing files
-    method="RF", # see trainModel.py
+    method="ET", # see trainModel.py
     is_regr=False, # regression or classification,
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=79, # number of folds for validation
+    num_folds=99, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
@@ -323,7 +323,10 @@ def crossValidation(
             log("Print prediction recall plots...", logger)
             prPlot(method, Y_true, Y_score, out_p)
             log("Print roc curve plots...", logger)
-            rocPlot(method, Y_true, Y_score, out_p)
+            try:
+                rocPlot(method, Y_true, Y_score, out_p)
+            except Exception as e:
+                log(str(type(e).__name__) + ": " + str(e), logger)
         #log("Print time series plots...", logger)
         #timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx_te, w=40) # NOTE: this takes very long time
 

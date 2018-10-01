@@ -102,7 +102,7 @@ def aggregateSmellData(df):
     
     return df
 
-def resampleData(df, method="mean", rule="30Min"):
+def resampleData(df, method="mean", rule="60Min"):
     df = df.copy(deep=True)
     # Because we want data from the past, so label need to be "right"
     df = epochtimeIdxToDatetime(df).resample(rule, label="right")
