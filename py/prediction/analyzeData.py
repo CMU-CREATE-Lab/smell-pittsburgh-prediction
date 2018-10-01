@@ -28,6 +28,8 @@ from scipy.stats import pointbiserialr
 def analyzeData(
     in_p=None, # input path for raw esdr and smell data
     out_p_root=None, # root directory for outputing files
+    start_dt=None, # starting date for the data
+    end_dt=None, # ending data for the data
     logger=None):
 
     log("Analyze data...", logger)
@@ -41,13 +43,13 @@ def analyzeData(
     #plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    plotLowDimensions(in_p, out_p, logger)
+    #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
     #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    #interpretModel(in_p, out_p, logger=logger)
+    interpretModel(in_p, out_p, logger=logger)
 
 def interpretModel(in_p, out_p, logger):
     # Load time series data
@@ -117,8 +119,9 @@ def interpretModel(in_p, out_p, logger):
     for m in ["DT"]:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
         lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
+        num_folds = (end_dt - start_dt).days / 7 # one fold represents a week
         crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg,
-            num_folds=79, skip_folds=48, train_size=8000)
+            num_folds=num_folds, skip_folds=48, train_size=8000)
 
 def computeCrossCorrelation(x, y, max_lag=None):
     n = len(x)

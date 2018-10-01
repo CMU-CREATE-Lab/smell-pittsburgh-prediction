@@ -71,18 +71,16 @@ class Interpreter(object):
                     print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
                 else:
                     print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
-            if self.out_p is not None:
-                self.plotClusters(self.df_X_pos, cluster, self.out_p)
             qc = silhouette_score(X, cluster)
             print "Silhouette Coefficient: %0.3f" % qc
 
         # Set the label for samples outside the cluster to zero
         df_X_pos_idx_c0 = self.df_X_pos_idx[self.cluster==0] # select the largest cluster
         df_X_neg_idx_c0 = ~self.df_X.index.isin(df_X_pos_idx_c0) # select samples that are not in the cluster
-        self.df_Y["smell"].astype(int).iloc[df_X_neg_idx_c0] = -1 # select labels of samples that are not in the cluster to 2
-        if self.out_p is not None:
-            self.plotClusters(self.df_X, self.df_Y, self.out_p)
-        self.df_Y["smell"].iloc[df_X_neg_idx_c0] = 0 # select labels of samples that are not in the cluster to zero
+        self.df_Y["smell"].astype(int).iloc[df_X_neg_idx_c0] = -1 # set labels of samples that are not in the cluster to -1
+        #if self.out_p is not None:
+        #    self.plotClusters(self.df_X, self.df_Y, self.out_p)
+        self.df_Y["smell"].iloc[df_X_neg_idx_c0] = 0 # set labels of samples that are not in the cluster to zero
 
         # Feature selection
         self.df_X, self.df_Y = selectFeatures(df_X=self.df_X, df_Y=self.df_Y,
@@ -103,7 +101,7 @@ class Interpreter(object):
         self.plotCorrelation(df_corr, out_p+"corr_inference.png")
 
         # Format feature names
-        self.df_X.columns = [c.replace("*", "\n*") for c in self.df_X.columns]
+        #self.df_X.columns = [c.replace("*", "\n*") for c in self.df_X.columns]
 
         # Train a L1 logistic regression on the selected cluster
         #print "Train a logistic regression model..."
@@ -223,8 +221,6 @@ class Interpreter(object):
                 print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
             else:
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
-        #if self.out_p is not None:
-        #    self.plotClusters(self.df_X_pos, cluster, self.out_p)
 
         # Evaluate the quality of the cluster
         #qc = silhouette_score(dist, cluster, metric="precomputed")

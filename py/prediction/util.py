@@ -341,13 +341,14 @@ def binary2Interval(Y):
 # - Y_true: the true values of Y
 # - Y_pred: the predicted values of Y
 # - is_regr: is regression or classification
+# - event_thr: the threshold for defining an event, used when applying regression to detect events
 # OUTPUT:
 # - r2: r-squared (for regression)
 # - mse: mean squared error (for regression)
 # - prf: precision, recall, and f-score (for classification) in pandas dataframe format
 # - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
-        round_to_decimal=3, labels=[0,1], aggr_axis=False, only_binary=True):
+        round_to_decimal=3, labels=[0,1], aggr_axis=False, only_binary=True, event_thr=40):
     Y_true, Y_pred = deepcopy(Y_true), deepcopy(Y_pred)
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
@@ -363,7 +364,7 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
     metric = {}
     # Compute the precision, recall, and f-score for smoke events 
     if not simple:
-        thr = 40 if is_regr else 1
+        thr = event_thr if is_regr else 1
         event_prf = evalEventDetection(Y_true_origin, Y_pred_origin, thr=thr)
         metric["event_prf"] = event_prf 
     if is_regr:

@@ -56,7 +56,7 @@ def trainModel(
         elif method == "ET":
             model = ExtraTreesRegressor(n_estimators=200, min_samples_split=5, n_jobs=-1)
         elif method == "SVM":
-            model = SVR(max_iter=1000)
+            model = SVR(max_iter=1000, C=100, gamma=0.01)
             if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
         elif method == "RLR":
             model = HuberRegressor(max_iter=1000)

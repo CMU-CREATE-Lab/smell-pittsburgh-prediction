@@ -10,8 +10,8 @@ import pytz
 # OUTPUT: raw esdr and smell data
 def getData(
     out_p=None, # output file path
-    start_dt=datetime(2016, 10, 9, 0), # starting date for the data
-    end_dt=datetime(2018, 4, 15, 0), # ending data for the data
+    start_dt=None, # starting date for the data
+    end_dt=None, # ending data for the data
     logger=None):
 
     log("Get data...", logger)

@@ -34,6 +34,8 @@ def crossValidation(
     hd_start=5, # definition of the starting time of "daytime", e.g. 6 means 6am
     hd_end=11, # definition of the ending time of "daytime", e.g. 14 means 2pm
     train_size=8000, # number of samples for training data
+    event_thr=40, # the threshold of smell values to define an event, only used for is_regr=True
+    pos_out=True, # always output positive values for regression or not
     logger=None):
 
     log("================================================================================", logger)
@@ -152,13 +154,17 @@ def crossValidation(
         else:
             test["Y_pred"] = model.predict(test["X"])
             train["Y_pred"] = model.predict(train["X"])
+        # For regression, check if want to always output positive values
+        if is_regr and pos_out:
+            test["Y_pred"][test["Y_pred"]<0] = 0
+            train["Y_pred"][train["Y_pred"]<0] = 0
         test_all["Y"].append(test["Y"]) 
         test_all["Y_pred"].append(test["Y_pred"])
-        metric_i_test = computeMetric(test["Y"], test["Y_pred"], is_regr, aggr_axis=True)
+        metric_i_test = computeMetric(test["Y"], test["Y_pred"], is_regr, aggr_axis=True, event_thr=event_thr)
         metric_all["test"].append(metric_i_test)
         train_all["Y"].append(train["Y"])
         train_all["Y_pred"].append(train["Y_pred"])
-        metric_i_train = computeMetric(train["Y"], train["Y_pred"], is_regr, aggr_axis=True)
+        metric_i_train = computeMetric(train["Y"], train["Y_pred"], is_regr, aggr_axis=True, event_thr=event_thr)
         metric_all["train"].append(metric_i_train)
         if not is_regr:
             if method == "HCR" or method == "CR": # the hybrid crowd classifier requires Y
@@ -255,13 +261,13 @@ def crossValidation(
     metric = {"train": [], "test": []}
     log("--------------------------------------------------------------", logger)
     log("For all training data:", logger)
-    metric["train"] = computeMetric(train_all["Y"], train_all["Y_pred"], is_regr, aggr_axis=True)
+    metric["train"] = computeMetric(train_all["Y"], train_all["Y_pred"], is_regr, aggr_axis=True, event_thr=event_thr)
     for m in metric["train"]:
         log("Metric: " + m, logger)
         log(metric["train"][m], logger)
     log("--------------------------------------------------------------", logger)
     log("For all testing data:", logger)
-    metric["test"] = computeMetric(test_all["Y"], test_all["Y_pred"], is_regr, aggr_axis=True)
+    metric["test"] = computeMetric(test_all["Y"], test_all["Y_pred"], is_regr, aggr_axis=True, event_thr=event_thr)
     for m in metric["test"]:
         log("Metric: " + m, logger)
         log(metric["test"][m], logger)
@@ -286,13 +292,15 @@ def crossValidation(
     test_all_dt["Y_pred"][~dt_idx_te] = None
     log("--------------------------------------------------------------", logger)
     log("(Daytime only) For all training data with method " + str(method) +  ":", logger)
-    metric_dt["train"] = computeMetric(train_all_dt["Y"], train_all_dt["Y_pred"], is_regr, aggr_axis=True)
+    metric_dt["train"] = computeMetric(train_all_dt["Y"], train_all_dt["Y_pred"],
+            is_regr, aggr_axis=True, event_thr=event_thr)
     for m in metric_dt["train"]:
         log("Metric: " + m, logger)
         log(metric_dt["train"][m], logger)
     log("--------------------------------------------------------------", logger)
     log("(Daytime only) For all testing data with method " + str(method) + ":", logger)
-    metric_dt["test"] = computeMetric(test_all_dt["Y"], test_all_dt["Y_pred"], is_regr, aggr_axis=True)
+    metric_dt["test"] = computeMetric(test_all_dt["Y"], test_all_dt["Y_pred"],
+            is_regr, aggr_axis=True, event_thr=event_thr)
     for m in metric_dt["test"]:
         log("Metric: " + m, logger)
         log(metric_dt["test"][m], logger)

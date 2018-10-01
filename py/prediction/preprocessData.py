@@ -52,7 +52,7 @@ def preprocessData(
 
 def mergeEsdrData(data):
     # Resample data
-    df = resampleData(data.pop(0)).reset_index()
+    df = resampleData(data.pop(0), method="mean").reset_index()
     while len(data) != 0:
         df = pd.merge_ordered(df, resampleData(data.pop(0), method="mean").reset_index(),
             on="DateTime", how="outer", fill_method=None)
@@ -102,7 +102,7 @@ def aggregateSmellData(df):
     
     return df
 
-def resampleData(df, method="mean", rule="1h"):
+def resampleData(df, method="mean", rule="30Min"):
     df = df.copy(deep=True)
     # Because we want data from the past, so label need to be "right"
     df = epochtimeIdxToDatetime(df).resample(rule, label="right")
