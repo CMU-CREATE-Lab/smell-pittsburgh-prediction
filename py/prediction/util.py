@@ -42,7 +42,8 @@ from nltk.stem.wordnet import WordNetLemmatizer
 import seaborn as sns
 
 # For Google Analytics
-# sudo pip install --upgrade google-api-python-client
+#sudo pip install --upgrade google-api-python-client
+#sudo pip install --upgrade oauth2client
 from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
