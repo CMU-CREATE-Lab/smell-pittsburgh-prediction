@@ -52,9 +52,9 @@ def trainModel(
     multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
     if is_regr:
         if method == "RF":
-            model = RandomForestRegressor(n_estimators=200, min_samples_split=5, n_jobs=-1)
+            model = RandomForestRegressor(n_estimators=200, max_features=90, min_samples_split=32, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesRegressor(n_estimators=200, min_samples_split=5, n_jobs=-1)
+            model = ExtraTreesRegressor(n_estimators=200, max_features=180, min_samples_split=32, n_jobs=-1)
         elif method == "SVM":
             model = SVR(max_iter=1000, C=100, gamma=0.01)
             if multi_output: model = MultiOutputRegressor(model, n_jobs=-1)
