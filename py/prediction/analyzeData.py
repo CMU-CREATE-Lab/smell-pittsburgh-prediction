@@ -40,7 +40,7 @@ def analyzeData(
     #plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    #plotAggrSmell(in_p, out_p, logger)
+    plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
     #plotLowDimensions(in_p, out_p, logger)
@@ -49,7 +49,7 @@ def analyzeData(
     #corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
+    #interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
 
 def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     # Load time series data
@@ -227,8 +227,7 @@ def plotDayHour(df_X, df_Y, out_p, logger):
     df_day_hour = pd.DataFrame(data=mat, columns=x_l, index=y_l)
     df_day_hour.to_csv(out_p + "smell_day_hour.csv")
 
-    fig, ax1 = plt.subplots(1, 1, figsize=(19, 6))
-    #fig, ax1 = plt.subplots(1, 1, figsize=(14, 6))
+    fig, ax1 = plt.subplots(1, 1, figsize=(14, 6))
     divider = make_axes_locatable(ax1)
     ax2 = divider.append_axes("right", size="2%", pad=0.2)
     sns.heatmap(df_day_hour, ax=ax1, cbar_ax=ax2, cmap="Blues", vmin=0, vmax=7, linewidths=0.1,
@@ -239,15 +238,15 @@ def plotDayHour(df_X, df_Y, out_p, logger):
     for item in ax1.get_xticklabels():
         item.set_rotation(0)
 
-    ax1.set_ylabel("Day of week", fontsize=18)
-    ax1.set_xlabel("Hour of day", fontsize=18)
-    ax1.tick_params(axis="x", labelsize=18)
-    ax1.tick_params(axis="y", labelsize=18)
-    ax2.tick_params(axis="y", labelsize=18)
-    plt.suptitle("Average smell values over time", fontsize=24)
+    #ax1.set_ylabel("Day of week", fontsize=22)
+    ax1.set_xlabel("Hour of day", fontsize=22)
+    ax1.tick_params(axis="x", labelsize=22)
+    ax1.tick_params(axis="y", labelsize=22)
+    ax2.tick_params(axis="y", labelsize=22)
+    plt.suptitle("Average smell values over time", fontsize=30)
         
     plt.tight_layout()
-    fig.subplots_adjust(top=0.92)
+    fig.subplots_adjust(top=0.89)
     fig.savefig(out_p + "smell_day_hour.png", dpi=150)
     fig.clf()
     plt.close()
