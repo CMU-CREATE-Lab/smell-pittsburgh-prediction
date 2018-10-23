@@ -15,6 +15,9 @@ from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 import gc
 
+import warnings
+warnings.filterwarnings("ignore") # "error", "ignore", "always", "default", "module", or "once"
+
 # Cross validation
 def crossValidation(
     df_X=None, # features

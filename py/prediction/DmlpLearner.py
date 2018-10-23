@@ -143,7 +143,7 @@ class DmlpLearner(object):
                 loss = criterion(outputs, y) # compute loss
                 loss.backward() # backward propagation
                 optimizer.step() # optimize
-                loss_all.append(loss.data[0]) # save loss for each step
+                loss_all.append(loss.data.item()) # save loss for each step
             # Print the result for the entire epoch
             T_tr, P_tr = self.train["Y"], self.predict(self.train["X"])
             m_train = computeMetric(T_tr, P_tr, self.is_regr, flatten=True, simple=True, aggr_axis=True)
@@ -192,7 +192,7 @@ class DmlpLearner(object):
 
     def predict_proba_torch(self, X):
         outputs = self.forward_from_numpy(X)
-        sm = nn.Softmax()
+        sm = nn.Softmax(dim=1)
         outputs = sm(outputs)
         return outputs.cpu().data
 
