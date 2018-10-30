@@ -5,18 +5,18 @@ A tool for predicting and interpreting smell data obtained from Smell Pittsburgh
 1. Install conda from https://conda.io/docs/user-guide/getting-started.html
 2. Clone this repository
 ```sh
-sudo git clone https://github.com/yenchiah/video-labeling-tool.git
-sudo chmod -R 777 video-labeling-tool/
+sudo git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
+sudo chmod -R 777 smell-pittsburgh-prediction/
 ```
 3. Create and activate conda environment
 ```sh
-conda create -n video-labeling-tool
+conda create -n smell-pittsburgh-prediction
 source ~/.bashrc
-conda activate video-labeling-tool
+conda activate smell-pittsburgh-prediction
 ```
 4. Install packages in the conda environment
 ```sh
-cd video-labeling-tool/
+cd smell-pittsburgh-prediction/
 sudo chmod 777 install_packages.sh
 ./install_packages.sh
 ```
