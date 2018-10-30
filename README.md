@@ -37,4 +37,4 @@ python production.py predict
 ```
 
 # Visualization
-The doc/ directory shows distribution of smell reports by zipcodes.
+The web/ directory shows distribution of smell reports by zipcodes.
