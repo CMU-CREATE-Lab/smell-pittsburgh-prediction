@@ -1,6 +1,5 @@
-# install pytorch from https://pytorch.org/
-#pip install http://download.pytorch.org/whl/cu92/torch-0.4.1-cp27-cp27mu-linux_x86_64.whl
-#pip install torchvision
+# For Mac and Linux
+while read requirement; do conda install --yes $requirement; done < requirements.txt
 
-# install requirements
-pip install -r requirements.txt
+# For Windows
+#FOR /F "delims=~" %f in (requirements.txt) DO conda install --yes "%f" || pip install "%f"

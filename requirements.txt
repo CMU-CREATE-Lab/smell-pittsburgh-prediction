@@ -1,12 +1,13 @@
-requests
-pytz
-pandas
-sklearn
-imblearn
-matplotlib
-nltk
-seaborn
-google-api-python-client
-oauth2client
-joblib
-statsmodels
+python=2.7
+requests=2.19.1
+pytz=2018.5
+pandas=0.23.2
+scikit-learn=0.20.0
+-c conda-forge imbalanced-learn
+matplotlib=2.2.2
+nltk=3.3.0
+seaborn=0.9.0
+-c conda-forge google-api-python-client
+-c conda-forge oauth2client
+joblib=0.12.5
+statsmodels=0.9.0
