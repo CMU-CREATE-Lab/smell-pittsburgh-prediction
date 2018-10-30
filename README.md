@@ -23,7 +23,7 @@ sudo chmod 777 install_packages.sh
 5. Train the classifier and perform cross validation
 ```sh
 cd py/prediction/
-python analysis.py run_all
+python main.py run_all
 ```
 6. Train the classifier for production
 ```sh
