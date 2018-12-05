@@ -7,3 +7,4 @@ screenlog*
 *.log
 *.swp
 client_secrets.json
+!dataset/
