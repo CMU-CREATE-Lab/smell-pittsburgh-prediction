@@ -14,13 +14,14 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
-    is_regr = False # is classification
-    #is_regr = True # is regression
+    is_regr = False # False for classification, True for regression
     smell_thr = 40 # threshold to define a smell event
     start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
     end_dt = datetime(2018, 9, 30, 0, tzinfo=pytz.timezone("US/Eastern"))
+
+    # Set mode
     get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False
-    if mode == "run_all":
+    if mode == "pipeline":
         get_data = True
         preprocess_data = True
         compute_features = True
@@ -31,7 +32,7 @@ def main(argv):
         preprocess_data = True
     elif mode == "feature":
         compute_features = True
-    elif mode == "test":
+    elif mode == "validation":
         cross_validation = True
     elif mode == "analyze":
         analyze_data = True
@@ -67,13 +68,9 @@ def main(argv):
     # INPUT: features
     # OUTPUT: plots or metrics
     if cross_validation:
-        #methods = ["ANCNN"]
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["DMLP", "ET"]
-        #methods = ["ET", "RF"]
-        #methods = ["ET", "RF"] * 100
-        #methods = genMethodSet(is_regr)
+        methods = ["RF", "ET"] # default for random forest and extra trees 
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
@@ -85,7 +82,7 @@ def main(argv):
             crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p, event_thr=smell_thr,
                 method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
 
-def genMethodSet(is_regr):
+def genModelSet(is_regr):
     m_all = []
     methods = ["ET", "RF"]
     if is_regr:

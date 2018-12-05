@@ -37,19 +37,19 @@ def analyzeData(
     checkAndCreateDir(out_p)
 
     # Plot features
-    #plotFeatures(in_p, out_p_root, logger)
+    plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
     plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    #plotLowDimensions(in_p, out_p, logger)
+    plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    #corrStudy(in_p, out_p, logger=logger)
+    corrStudy(in_p, out_p, logger=logger)
 
     # Interpret model
-    #interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
+    interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
 
 def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     # Load time series data
