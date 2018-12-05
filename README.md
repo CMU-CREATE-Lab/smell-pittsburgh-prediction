@@ -23,7 +23,6 @@ cd smell-pittsburgh-prediction/
 sudo chmod 777 install_packages.sh
 ./install_packages.sh
 ```
-5. Install pytorch from https://pytorch.org/ (this is a testing feature)
 5. Get data, preprocess data, extract features, train the classifier, and perform cross validation
 ```sh
 cd py/prediction/
