@@ -20,7 +20,7 @@ conda activate smell-pittsburgh-prediction
 4. Install packages in the conda environment
 ```sh
 cd smell-pittsburgh-prediction/
-sudo chmod 777 install_packages.sh # only run this if cloning to a directory that belongs to root
+sudo chmod 777 install_packages.sh
 ./install_packages.sh
 ```
 5. Install pytorch from https://pytorch.org/ (this is a testing feature)
