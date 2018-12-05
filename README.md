@@ -5,6 +5,9 @@ A tool for predicting and interpreting smell data obtained from Smell Pittsburgh
 1. Install conda from https://conda.io/docs/user-guide/getting-started.html
 2. Clone this repository
 ```sh
+git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
+
+# For cloning to a directory that belongs to root, use the following:
 sudo git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 sudo chmod -R 777 smell-pittsburgh-prediction/
 ```
@@ -17,7 +20,7 @@ conda activate smell-pittsburgh-prediction
 4. Install packages in the conda environment
 ```sh
 cd smell-pittsburgh-prediction/
-sudo chmod 777 install_packages.sh
+sudo chmod 777 install_packages.sh # only run this if cloning to a directory that belongs to root
 ./install_packages.sh
 ```
 5. Install pytorch from https://pytorch.org/ (this is a testing feature)
