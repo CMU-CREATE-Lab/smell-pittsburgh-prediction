@@ -17,7 +17,7 @@ conda create -n smell-pittsburgh-prediction
 source ~/.bashrc # only run this for Linux-based operation systems
 conda activate smell-pittsburgh-prediction
 ```
-4. Install packages in the conda environment
+4. Install packages in the conda environment. The install_packages script is default for Mac and Linux. For Windows, please open the script with a text editor, comment out the first line, and uncomment the last line.
 ```sh
 cd smell-pittsburgh-prediction/
 sudo chmod 777 install_packages.sh # only run this if cannot run the next command
