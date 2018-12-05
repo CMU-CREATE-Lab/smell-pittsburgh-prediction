@@ -14,7 +14,7 @@ sudo chmod -R 777 smell-pittsburgh-prediction/
 3. Create and activate conda environment
 ```sh
 conda create -n smell-pittsburgh-prediction
-source ~/.bashrc
+source ~/.bashrc # only run this for Linux-based operation systems
 conda activate smell-pittsburgh-prediction
 ```
 4. Install packages in the conda environment
