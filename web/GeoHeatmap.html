@@ -32,17 +32,16 @@
 
     function loadData() {
       var data = {};
-      var path = "data/";
       // Start loading data simultaneously
       $.when(
         // Load the GeoJSON that contains the zipcode boundaries
-        $.getJSON(path + "zipcode_bound_geoJson_allegany_county_PA.json", function (json) {
+        $.getJSON("zipcode_bound_geoJson_allegany_county_PA.json", function (json) {
           data["zipcode_bound_geoJson"] = json;
         }).fail(function (response) {
           console.log("server error when loading zip code bound GeoJson: ", response);
         }),
         // Load the table that maps zipcodes, bounds, and center positions
-        $.getJSON(path + "zipcode_bound_info_allegany_county_PA.json", function (json) {
+        $.getJSON("zipcode_bound_info_allegany_county_PA.json", function (json) {
           data["zipcode_bound_info"] = json["data"];
         }).fail(function (response) {
           console.log("server error when loading zipcode bound information:", response);
