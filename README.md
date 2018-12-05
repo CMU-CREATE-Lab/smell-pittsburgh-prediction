@@ -20,7 +20,7 @@ conda activate smell-pittsburgh-prediction
 4. Install packages in the conda environment
 ```sh
 cd smell-pittsburgh-prediction/
-sudo chmod 777 install_packages.sh
+sudo chmod 777 install_packages.sh # only run this if cannot run the next command
 ./install_packages.sh
 ```
 5. Get data, preprocess data, extract features, train the classifier, and perform cross validation
