@@ -345,6 +345,7 @@ def crossValidation(
     del test_all_dt
     del test_all
     gc.collect()
+    log("Done", logger)
 
 def rocPlot(method, Y_true, Y_score, out_p):
     roc = round(roc_auc_score(Y_true, Y_score[:, -1]), 4)

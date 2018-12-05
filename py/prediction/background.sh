@@ -1,5 +1,12 @@
 sudo screen -X quit
 sudo rm screenlog.0
-sudo screen -dmSL "smell-pittsburgh-prediction" python main.py "pipeline"
-#sudo screen -dmSL "smell-pittsburgh-prediction" python main.py "analyze"
+
+# For python in conda env
+sudo screen -dmSL "smell-pittsburgh-prediction" bash -c ". '/home/yenchiah/anaconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; python main.py pipeline"
+#sudo screen -dmSL "smell-pittsburgh-prediction" bash -c ". '/home/yenchiah/anaconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; python main.py analyze"
+
+# For globally installed python
+#sudo screen -dmSL "smell-pittsburgh-prediction" python main.py pipeline
+#sudo screen -dmSL "smell-pittsburgh-prediction" python main.py analyze
+
 sudo screen -ls
