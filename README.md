@@ -1,5 +1,15 @@
 # smell-pittsburgh-prediction
-A tool for predicting and interpreting smell data obtained from Smell Pittsburgh.
+A tool for predicting and interpreting smell data obtained from Smell Pittsburgh. The design and evaluation are documented in the paper, [Community-Empowered Mobile Smell Reporting System](https://arxiv.org/abs/1810.11143). If you find this useful, please consider citing:<br/>
+
+Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2018. Community-Empowered Mobile Smell Reporting System. arXivpreprint arXiv:1810.11143. 
+```
+@article{hsu2018community,
+  title={Community-Empowered Mobile Smell Reporting System},
+  author={Hsu, Yen-Chia and Cross, Jennifer and Dille, Paul and Tasota, Michael and Dias, Beatrice and Sargent, Randy and Huang, Ting-Hao'Kenneth' and Nourbakhsh, Illah},
+  journal={arXiv preprint arXiv:1810.11143},
+  year={2018}
+}
+```
 
 # Usage
 1. Install conda from https://conda.io/docs/user-guide/getting-started.html
