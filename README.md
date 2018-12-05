@@ -47,4 +47,4 @@ python production.py predict
 ```
 
 # Visualization
-The web/ directory shows distribution of smell reports by zipcodes.
+The web/GeoHeatmap.html visualizes distribution of smell reports by zipcodes.
