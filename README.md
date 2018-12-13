@@ -33,7 +33,7 @@ cd smell-pittsburgh-prediction/
 sudo chmod 777 install_packages.sh # only run this if cannot run the next command
 ./install_packages.sh
 ```
-5. Get data, preprocess data, extract features, train the classifier, and perform cross validation. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
+5. Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
 ```sh
 cd py/prediction/
 python main.py pipeline
@@ -43,7 +43,7 @@ python main.py data # get data
 python main.py preprocess # preprocess data
 python main.py feature # extract features
 python main.py validation # perform cross validation
-python main.py analyze # analyze data
+python main.py analyze # analyze data and interpret model
 ```
 6. Train the classifier for production
 ```sh
