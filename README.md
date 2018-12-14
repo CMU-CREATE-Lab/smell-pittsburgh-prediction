@@ -19,7 +19,6 @@ git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 
 # For cloning to a directory that belongs to root, use the following:
 sudo git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
-sudo chmod -R 777 smell-pittsburgh-prediction/
 ```
 3. Create and activate conda environment
 ```sh
