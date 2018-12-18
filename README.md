@@ -16,9 +16,6 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 2. Clone this repository
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
-
-# For cloning to a directory that belongs to root, use the following:
-sudo git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 ```
 3. Create and activate conda environment
 ```sh
