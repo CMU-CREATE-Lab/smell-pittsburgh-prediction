@@ -26,8 +26,7 @@ conda activate smell-pittsburgh-prediction
 4. Install packages in the conda environment. The install_packages script is default for Mac and Linux. For Windows, please open the script with a text editor, comment out the first line, and uncomment the last line.
 ```sh
 cd smell-pittsburgh-prediction/
-sudo chmod 777 install_packages.sh # only run this if cannot run the next command
-./install_packages.sh
+sh install_packages.sh
 ```
 5. Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
 ```sh
