@@ -13,7 +13,7 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 # Usage
 Install conda. This assumes that a ubuntu server is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path. The following script install conda for all users:
 ```sh
-wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh # replace this with the desired path
+wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh
 sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
 # hold the “d” key on keyboard to go through agreement
 # when prompted to enter the installation location, use “/opt/anaconda3”
