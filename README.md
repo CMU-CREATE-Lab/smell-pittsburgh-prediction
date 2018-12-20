@@ -27,7 +27,7 @@ source /etc/profile
 conda update conda
 conda deactivate
 ```
-For Mac OS, I recommend installing via [Homebrew](https://brew.sh/)
+For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/)
 ```sh
 brew cask install anaconda
 echo 'export PATH="/usr/local/anaconda3/bin:$PATH"' >> ~/.bash_profile
