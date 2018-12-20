@@ -11,7 +11,7 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 }
 ```
 # Usage
-1. Install conda for all users. This assumes that a ubuntu server is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). To use the following script, first visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path.
+Install conda for all users. This assumes that a ubuntu server is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). To use the following script, first visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path.
 ```sh
 wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh # replace this with the desired path
 sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
@@ -35,22 +35,22 @@ source .bash_profile
 conda update conda
 conda deactivate
 ```
-2. Clone this repository
+Clone this repository
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 ```
-3. Create and activate conda environment
+Create and activate conda environment
 ```sh
 conda create -n smell-pittsburgh-prediction
 source ~/.bashrc # only run this for Linux-based operation systems
 conda activate smell-pittsburgh-prediction
 ```
-4. Install packages in the conda environment. The install_packages script is default for Mac and Linux. For Windows, please open the script with a text editor, comment out the first line, and uncomment the last line.
+Install packages in the conda environment. The install_packages script is default for Mac and Linux. For Windows, please open the script with a text editor, comment out the first line, and uncomment the last line.
 ```sh
 cd smell-pittsburgh-prediction/
 sh install_packages.sh
 ```
-5. Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
+Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
 ```sh
 cd py/prediction/
 python main.py pipeline
@@ -62,12 +62,12 @@ python main.py feature # extract features
 python main.py validation # perform cross validation
 python main.py analyze # analyze data and interpret model
 ```
-6. Train the classifier for production
+Train the classifier for production
 ```sh
 cd py/prediction/
 python production.py train
 ```
-7. Make a prediction for production
+Make a prediction for production
 ```sh
 cd py/prediction/
 python production.py predict
