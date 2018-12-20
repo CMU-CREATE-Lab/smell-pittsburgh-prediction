@@ -24,10 +24,6 @@ export PATH="/opt/anaconda/bin:$PATH"
 source /opt/anaconda3/etc/profile.d/conda.sh
 
 source /etc/profile
-sudo bash
-source /etc/profile
-conda update conda
-exit
 ```
 For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/)
 ```sh
