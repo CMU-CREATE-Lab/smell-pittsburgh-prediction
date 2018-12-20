@@ -30,8 +30,6 @@ For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/)
 brew cask install anaconda
 echo 'export PATH="/usr/local/anaconda3/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
-conda update conda
-conda deactivate
 ```
 Clone this repository
 ```sh
