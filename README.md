@@ -21,7 +21,7 @@ sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
 sudo vim /etc/profile
 # add the following two lines to /etc/profile
 export PATH="/opt/anaconda/bin:$PATH"
-source /opt/anaconda3/etc/profile.d/conda.sh
+. /opt/anaconda3/etc/profile.d/conda.sh
 
 source /etc/profile
 ```
