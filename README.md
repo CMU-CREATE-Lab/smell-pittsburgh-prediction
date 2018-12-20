@@ -52,15 +52,11 @@ python main.py preprocess # preprocess data
 python main.py feature # extract features
 python main.py validation # perform cross validation
 python main.py analyze # analyze data and interpret model
-```
-Train the classifier for production
-```sh
-cd py/prediction/
+
+# For deployment, train the classifier and perform prediction
+# Use crontab to call the following two commands periodically
+# (https://help.ubuntu.com/community/CronHowto)
 python production.py train
-```
-Make a prediction for production
-```sh
-cd py/prediction/
 python production.py predict
 ```
 
