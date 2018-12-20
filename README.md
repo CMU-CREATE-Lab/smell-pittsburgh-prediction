@@ -10,9 +10,23 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
   year={2018}
 }
 ```
-
 # Usage
-1. Install conda from https://conda.io/docs/user-guide/getting-started.html
+1. Install conda. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). To use the following script, first visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path.
+```sh
+wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh # replace this with the desired path
+sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
+# hold the “d” key on keyboard to go through agreement
+# when prompted to enter the installation location, use “/opt/anaconda3”
+
+sudo vim /etc/profile
+# add the following two lines to /etc/profile
+export PATH="/opt/anaconda/bin:$PATH"
+. /opt/anaconda3/etc/profile.d/conda.sh
+
+source /etc/profile
+conda update conda
+conda deactivate
+```
 2. Clone this repository
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
