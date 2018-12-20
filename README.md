@@ -31,12 +31,9 @@ brew cask install anaconda
 echo 'export PATH="/usr/local/anaconda3/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 ```
-Clone this repository
+Clone this repository, create and activate conda environment
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
-```
-Create and activate conda environment
-```sh
 cd smell-pittsburgh-prediction/
 conda env create -f environment.yml -n smell-pittsburgh-prediction
 conda activate smell-pittsburgh-prediction
