@@ -11,7 +11,7 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 }
 ```
 # Usage
-1. Install conda. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). To use the following script, first visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path.
+1. Install conda for all users. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). To use the following script, first visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path.
 ```sh
 wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh # replace this with the desired path
 sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
