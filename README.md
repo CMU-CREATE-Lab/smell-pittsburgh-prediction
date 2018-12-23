@@ -25,13 +25,13 @@ export PATH="/opt/anaconda/bin:$PATH"
 
 source /etc/profile
 ```
-For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/)
+For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/).
 ```sh
 brew cask install anaconda
 echo 'export PATH="/usr/local/anaconda3/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 ```
-Clone this repository, create and activate conda environment
+Clone this repository, create and activate conda environment.
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 cd smell-pittsburgh-prediction/
