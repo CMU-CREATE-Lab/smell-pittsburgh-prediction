@@ -18,12 +18,12 @@ sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
 # hold the “d” key on keyboard to go through agreement
 # when prompted to enter the installation location, use “/opt/anaconda3”
 
-sudo vim /etc/profile
-# add the following two lines to /etc/profile
+sudo vim /etc/bash.bashrc
+# add the following two lines to /etc/bash.bashrc
 export PATH="/opt/anaconda/bin:$PATH"
 . /opt/anaconda3/etc/profile.d/conda.sh
 
-source /etc/profile
+source /etc/bash.bashrc
 ```
 For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/).
 ```sh
