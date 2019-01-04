@@ -1,5 +1,5 @@
 # smell-pittsburgh-prediction
-A tool for predicting and interpreting smell data obtained from Smell Pittsburgh. The design and evaluation are documented in the paper, [Community-Empowered Mobile Smell Reporting System](https://arxiv.org/abs/1810.11143). If you find this useful, please consider citing:<br/>
+A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The design and evaluation are documented in the paper, [Community-Empowered Mobile Smell Reporting System](https://arxiv.org/abs/1810.11143). If you find this useful, please consider citing:<br/>
 
 Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2018. Community-Empowered Mobile Smell Reporting System. arXivpreprint arXiv:1810.11143. 
 ```
@@ -11,7 +11,7 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 }
 ```
 # Usage
-Install conda. This assumes that a ubuntu server is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path. The following script install conda for all users:
+Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path. The following script install conda for all users:
 ```sh
 wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh
 sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
