@@ -40,6 +40,7 @@ Install packages.
 ```sh
 conda activate smell-pittsburgh-prediction
 conda install pip
+conda install python=2.7
 sh smell-pittsburgh-prediction/install_packages.sh
 ```
 Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
