@@ -45,7 +45,7 @@ sh smell-pittsburgh-prediction/install_packages.sh
 ```
 Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
 ```sh
-cd py/prediction/
+cd smell-pittsburgh-prediction/py/prediction/
 python main.py pipeline
 
 # For each step in the pipeline
