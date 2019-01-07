@@ -11,32 +11,36 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 }
 ```
 # Usage
-Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://www.anaconda.com/download/#linux) to obtain the downloading path. The following script install conda for all users:
+Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://conda.io/miniconda.html) to obtain the downloading path. The following script install conda for all users:
 ```sh
-wget https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh
-sudo sh Anaconda3-5.3.1-Linux-x86_64.sh
-# hold the “d” key on keyboard to go through agreement
-# when prompted to enter the installation location, use “/opt/anaconda3”
+wget https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh
+sudo sh Miniconda3-4.5.11-Linux-x86_64.sh -b -p /opt/miniconda3
 
 sudo vim /etc/bash.bashrc
-# add the following two lines to /etc/bash.bashrc
-export PATH="/opt/anaconda/bin:$PATH"
-. /opt/anaconda3/etc/profile.d/conda.sh
+# Add the following lines to this file
+export PATH="/opt/miniconda3/bin:$PATH"
+. /opt/miniconda3/etc/profile.d/conda.sh
 
 source /etc/bash.bashrc
 ```
 For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/).
 ```sh
-brew cask install anaconda
-echo 'export PATH="/usr/local/anaconda3/bin:$PATH"' >> ~/.bash_profile
+brew cask install miniconda
+echo 'export PATH="/usr/local/miniconda3/bin:$PATH"' >> ~/.bash_profile
+echo '. /usr/local/miniconda3/etc/profile.d/conda.sh' >> ~/.bash_profile
 source ~/.bash_profile
 ```
-Clone this repository, create and activate conda environment.
+Clone this repository and create conda environment.
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
-cd smell-pittsburgh-prediction/
-conda env create -f environment.yml -n smell-pittsburgh-prediction
+sudo chown -R $USER smell-pittsburgh-prediction
+conda create -n smell-pittsburgh-prediction
+```
+Install packages.
+```sh
 conda activate smell-pittsburgh-prediction
+conda install pip
+sh smell-pittsburgh-prediction/install_packages.sh
 ```
 Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
 ```sh
