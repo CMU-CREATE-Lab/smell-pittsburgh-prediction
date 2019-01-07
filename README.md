@@ -3,7 +3,7 @@ A tool for predicting and interpreting smell data obtained from [Smell Pittsburg
 
 Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2018. Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System. arXivpreprint arXiv:1810.11143. 
 ```
-@article{hsu2018community,
+@article{hsu2018smellpittsburgh,
   title={Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System},
   author={Hsu, Yen-Chia and Cross, Jennifer and Dille, Paul and Tasota, Michael and Dias, Beatrice and Sargent, Randy and Huang, Ting-Hao'Kenneth' and Nourbakhsh, Illah},
   journal={arXiv preprint arXiv:1810.11143},
