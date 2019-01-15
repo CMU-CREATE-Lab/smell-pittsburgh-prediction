@@ -30,14 +30,14 @@ echo 'export PATH="/usr/local/miniconda3/bin:$PATH"' >> ~/.bash_profile
 echo '. /usr/local/miniconda3/etc/profile.d/conda.sh' >> ~/.bash_profile
 source ~/.bash_profile
 ```
-Clone this repository and create conda environment.
+Clone this repository.
 ```sh
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 sudo chown -R $USER smell-pittsburgh-prediction
-conda create -n smell-pittsburgh-prediction
 ```
-Install packages.
+Create conda environment and install packages.
 ```sh
+conda create -n smell-pittsburgh-prediction
 conda activate smell-pittsburgh-prediction
 conda install pip
 conda install python=2.7
