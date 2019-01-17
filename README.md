@@ -35,12 +35,12 @@ Clone this repository.
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 sudo chown -R $USER smell-pittsburgh-prediction
 ```
-Create conda environment and install packages.
+Create conda environment and install packages. It is important to install python 2.7 and pip first inside the newly created conda environment.
 ```sh
 conda create -n smell-pittsburgh-prediction
 conda activate smell-pittsburgh-prediction
-conda install pip
 conda install python=2.7
+conda install pip
 sh smell-pittsburgh-prediction/install_packages.sh
 ```
 Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
