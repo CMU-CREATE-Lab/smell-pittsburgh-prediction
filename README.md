@@ -1,14 +1,26 @@
 # smell-pittsburgh-prediction
-A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The design and evaluation are documented in the paper, [Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System](https://arxiv.org/abs/1810.11143). If you find this useful, please consider citing:<br/>
+A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The design and evaluation are documented in the paper, [Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System](https://arxiv.org/pdf/1810.11143.pdf). If you find this useful, please consider citing:<br/>
 
-Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2018. Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System. arXivpreprint arXiv:1810.11143. 
+Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2019. Smell Pittsburgh: community-empowered mobile smell reporting system. In Proceedings of the 24th International Conference on Intelligent User Interfaces (IUI '19). ACM, New York, NY, USA, 65-79. DOI: https://doi.org/10.1145/3301275.3302293
+
 ```
-@article{hsu2018smellpittsburgh,
-  title={Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System},
-  author={Hsu, Yen-Chia and Cross, Jennifer and Dille, Paul and Tasota, Michael and Dias, Beatrice and Sargent, Randy and Huang, Ting-Hao'Kenneth' and Nourbakhsh, Illah},
-  journal={arXiv preprint arXiv:1810.11143},
-  year={2018}
-}
+@inproceedings{hsu-2019-smellpgh,
+ author = {Hsu, Yen-Chia and Cross, Jennifer and Dille, Paul and Tasota, Michael and Dias, Beatrice and Sargent, Randy and Huang, Ting-Hao (Kenneth) and Nourbakhsh, Illah},
+ title = {Smell Pittsburgh: Community-empowered Mobile Smell Reporting System},
+ booktitle = {Proceedings of the 24th International Conference on Intelligent User Interfaces},
+ series = {IUI '19},
+ year = {2019},
+ isbn = {978-1-4503-6272-6},
+ location = {Marina del Ray, California},
+ pages = {65--79},
+ numpages = {15},
+ url = {http://doi.acm.org/10.1145/3301275.3302293},
+ doi = {10.1145/3301275.3302293},
+ acmid = {3302293},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {air quality, citizen science, community empowerment, machine learning, smell, sustainable HCI},
+} 
 ```
 # Usage
 Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://conda.io/miniconda.html) to obtain the downloading path. The following script install conda for all users:
