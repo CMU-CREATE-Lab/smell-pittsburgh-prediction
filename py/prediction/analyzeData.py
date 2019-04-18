@@ -46,7 +46,8 @@ def analyzeData(
     plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    corrStudy(in_p, out_p, logger=logger)
+    corrStudy(in_p, out_p, logger)
+    corrStudy(in_p, out_p, logger, is_regr=True)
 
     # Interpret model
     interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
@@ -135,11 +136,13 @@ def computeCrossCorrelation(x, y, max_lag=None):
     return cc
 
 # Correlational study
-def corrStudy(in_p, out_p, logger):
+def corrStudy(in_p, out_p, logger, is_regr=False):
     log("Compute correlation of lagged X and current Y...", logger)
+    f_name = "corr_with_time_lag"
+    if is_regr: f_name += "_is_regr"
 
     # Compute features
-    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=False,
+    df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=is_regr,
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
     
     # Compute daytime index
@@ -148,8 +151,8 @@ def corrStudy(in_p, out_p, logger):
     #h_end = 11
     #idx = (df_X["HourOfDay"]>=h_start)&(df_X["HourOfDay"]<=h_end)
     
-    # Compute point biserial correlation
-    Y = df_Y.squeeze().values
+    # Compute point biserial correlation or Pearson correlation
+    Y = df_Y.squeeze()
     max_t_lag = 6 # the maximum time lag
     df_corr_info = pd.DataFrame()
     df_corr = pd.DataFrame()
@@ -159,19 +162,23 @@ def corrStudy(in_p, out_p, logger):
         s = []
         X = df_X[c]
         for i in range(0, max_t_lag+1):
-            d = pd.DataFrame(data=[Y, X.shift(i)], columns=["y", "x"])
+            d = pd.concat([Y, X.shift(i)], axis=1)
+            d.columns = ["y", "x"]
             #d = d[idx] # select only daytime
             d = d.dropna()
-            r, p = pointbiserialr(d["y"], d["x"])
+            if is_regr:
+                r, p = pearsonr(d["y"], d["x"])
+            else:
+                r, p = pointbiserialr(d["y"], d["x"])
             s_info.append((np.round(r, 3), np.round(p, 5), len(d)))
             s.append(np.round(r, 3))
         df_corr_info[c] = pd.Series(data=s_info)
         df_corr[c] = pd.Series(data=s)
-    df_corr_info.to_csv(out_p+"corr_with_time_lag.csv")
+    df_corr_info.to_csv(out_p+f_name+".csv")
     
     # Plot
     df_corr = df_corr.round(2)
-    plotCorrelation(df_corr, out_p+"corr_with_time_lag.png")
+    plotCorrelation(df_corr, out_p+f_name+".png")
 
 def plotCorrelation(df_corr, out_p):
     # Plot graph
