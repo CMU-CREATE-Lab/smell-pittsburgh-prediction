@@ -28,8 +28,8 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_fscore_support
 
-from imblearn.over_sampling import SMOTE
-from imblearn.over_sampling import RandomOverSampler
+#from imblearn.over_sampling import SMOTE
+#from imblearn.over_sampling import RandomOverSampler
 
 import scipy.ndimage as ndimage
 
@@ -294,14 +294,14 @@ def evalEventDetection(Y_true, Y_pred, thr=40, h=1, round_to_decimal=3):
     if TP + FN == 0: recall = 0
     else: recall = TP / (TP + FN)
     if precision + recall == 0: f_score = 0
-    else: f_score = 2 * (precision * recall) / (precision + recall) 
+    else: f_score = 2 * (precision * recall) / (precision + recall)
 
     # Round to
     precision = round(precision, round_to_decimal)
     recall = round(recall, round_to_decimal)
     f_score = round(f_score, round_to_decimal)
 
-    return {"TP":TP, "FP":FP, "FN":FN, "precision":precision, "recall":recall, "f_score":f_score} 
+    return {"TP":TP, "FP":FP, "FN":FN, "precision":precision, "recall":recall, "f_score":f_score}
 
 # Merge intervals that are less or equal than "h" hours away from each other
 # (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
@@ -363,11 +363,11 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
     Y_true_origin, Y_pred_origin = deepcopy(Y_true), deepcopy(Y_pred)
     Y_true, Y_pred = Y_true[~np.isnan(Y_true)], Y_pred[~np.isnan(Y_pred)]
     metric = {}
-    # Compute the precision, recall, and f-score for smoke events 
+    # Compute the precision, recall, and f-score for smoke events
     if not simple:
         thr = event_thr if is_regr else 1
         event_prf = evalEventDetection(Y_true_origin, Y_pred_origin, thr=thr)
-        metric["event_prf"] = event_prf 
+        metric["event_prf"] = event_prf
     if is_regr:
         # Compute r-squared value and mean square error
         r2 = r2_score(Y_true, Y_pred, multioutput="variance_weighted")
@@ -465,7 +465,7 @@ def balanceDataset(X, Y):
     X_columns, Y_name = None, None
     if isinstance(X, pd.DataFrame): X_columns = X.columns
     if isinstance(Y, pd.Series): Y_name = Y.name
-    
+
     # Use SMOTE algorithm
     X = np.array(X)
     Y = np.array(Y)
@@ -521,7 +521,7 @@ def getEsdrAccessToken(auth_json_path):
         logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the access token")
         logger.info("Receive access token " + access_token)
         logger.info("Receive user ID " + str(user_id))
-        return access_token, user_id 
+        return access_token, user_id
 
 # Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
 # data_json = {
@@ -536,7 +536,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
         "Authorization": "Bearer " + access_token,
         "Content-Type": "application/json"
     }
-   
+
     # Check if the device exists
     logger.info("Try getting the device ID of device name '" + device_name + "'")
     url = esdrRootUrl() + "api/v1/devices?where=name=" + device_name + ",productId=" + str(product_id)
@@ -615,7 +615,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
             api_key = r_json["data"]["apiKey"]
             api_key_read_only = r_json["data"]["apiKeyReadOnly"]
             logger.info("Create new feed ID " + str(feed_id))
-    
+
     # Upload Speck data to ESDR
     logger.info("Upload sensor data for '" + device_name + "'")
     url = esdrRootUrl() + "api/v1/feeds/" + str(feed_id)
@@ -636,12 +636,12 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
 #    [{"feed": 27, "channel": "NO_PPB"}],
 #    [{"feed": 1, "channel": "PM25B_UG_M3"}, {"feed": 1, "channel": "PM25T_UG_M3"}]
 # ]
-# if source = [[A,B],[C]], this means that A and B will be merged 
+# if source = [[A,B],[C]], this means that A and B will be merged
 # start_time: starting epochtime in seconds
 # end_time: ending epochtime in seconds
 def getEsdrData(source, **options):
     print "Get ESDR data..."
-    
+
     # Url parts
     api_url = esdrRootUrl() + "api/v1/"
     export_para = "/export?format=csv"
@@ -649,7 +649,7 @@ def getEsdrData(source, **options):
         export_para += "&from=" + str(options["start_time"])
     if "end_time" in options:
         export_para += "&to=" + str(options["end_time"])
-    
+
     # Loop each source
     data = []
     for s_all in source:
@@ -660,6 +660,8 @@ def getEsdrData(source, **options):
             channel_para = "/channels/" + s["channel"]
             df_s = pd.read_csv(api_url + feed_para + channel_para + export_para)
             df_s.set_index("EpochTime", inplace=True)
+            if "factor" in s:
+                df_s = df_s * s["factor"]
             if df is None:
                 df = df_s
             else:
@@ -699,10 +701,10 @@ def getSmellReports(**options):
         api_para += "&min_smell_value=" + str(options["min_smell_value"])
     if "max_smell_value" in options:
         api_para += "&max_smell_value=" + str(options["max_smell_value"])
-    
+
     # Load smell reports
     df = pd.read_json(api_url + api_para, convert_dates=False)
-    
+
     # If empty, return None
     if df.empty:
         return None
@@ -740,11 +742,11 @@ def getGA(
         "Data Timestamp",
         "Event Category"] # pretty names for dimensions
     ):
-    
+
     print "Get Google Analytics..."
 
     SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
-    KEY_FILE_LOCATION = in_path 
+    KEY_FILE_LOCATION = in_path
 
     # Build the service object
     credentials = ServiceAccountCredentials.from_json_keyfile_name(KEY_FILE_LOCATION, SCOPES)
@@ -765,7 +767,7 @@ def getGA(
                     "includeEmptyRows": True,
                     "pageSize": 10000
                 }
-            ] 
+            ]
         }
         r = analytics.reports().batchGet(body=info).execute()
         # Parse rows and put them into a csv file

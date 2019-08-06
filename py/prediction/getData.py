@@ -35,9 +35,11 @@ def getData(
         "Feed_26_Lawrenceville_ACHD",
         "Feed_27_Lawrenceville_2_ACHD",
         "Feed_28_Liberty_ACHD",
-        "Feed_29_Liberty_2_ACHD",
+        "Feed_29_Liberty_2_ACHD_PM10",
+        "Feed_29_Liberty_2_ACHD_PM25",
         "Feed_3_North_Braddock_ACHD",
-        "Feed_23_Flag_Plaza_ACHD",
+        "Feed_23_Flag_Plaza_ACHD_CO",
+        "Feed_23_Flag_Plaza_ACHD_PM10",
         "Feed_43_and_Feed_11067_Parkway_East_ACHD",
         "Feed_3506_BAPC_301_39TH_STREET_BLDG_AirNow",
         "Feed_5975_Parkway_East_AirNow",
@@ -53,9 +55,17 @@ def getData(
         [{"feed": "26", "channel": "OZONE_PPM,PM25B_UG_M3,PM10B_UG_M3,SONICWS_MPH,SONICWD_DEG,SIGTHETA_DEG"}],
         [{"feed": "27", "channel": "NO_PPB,NOY_PPB,CO_PPB,SO2_PPB"}],
         [{"feed": "28", "channel": "H2S_PPM,SO2_PPM,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"}],
-        [{"feed": "29", "channel": "PM10_UG_M3,PM25_UG_M3"}],
+        [{"feed": "29", "channel": "PM10_UG_M3"}],
+        [
+            {"feed": "29", "channel": "PM25_UG_M3"},
+            {"feed": "29", "channel": "PM25T_UG_M3"}
+        ],
         [{"feed": "3", "channel": "SO2_PPM,SONICWD_DEG,SONICWS_MPH,SIGTHETA_DEG,PM10B_UG_M3"}],
-        [{"feed": "23", "channel": "CO_PPM,PM10_UG_M3"}],
+        [
+            {"feed": "23", "channel": "CO_PPM"},
+            {"feed": "23", "channel": "CO_PPB", "factor": 0.001}
+        ],
+        [{"feed": "23", "channel": "PM10_UG_M3"}],
         [
             {"feed": "11067", "channel": "CO_PPB,NO2_PPB,NOX_PPB,NO_PPB,PM25T_UG_M3,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"},
             {"feed": "43", "channel": "CO_PPB,NO2_PPB,NOX_PPB,NO_PPB,PM25T_UG_M3,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"}
@@ -68,10 +78,10 @@ def getData(
     start_time = datetimeToEpochtime(start_dt) / 1000 # ESDR uses seconds
     end_time = datetimeToEpochtime(end_dt) / 1000 # ESDR uses seconds
     df_esdr_array_raw = getEsdrData(esdr_source, start_time=start_time, end_time=end_time)
-    
+
     # Get smell reports
     df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time)
-    
+
     # Check directory and save file
     if out_p is not None:
         for p in out_p: checkAndCreateDir(p)

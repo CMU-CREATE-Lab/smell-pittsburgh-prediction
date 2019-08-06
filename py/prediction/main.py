@@ -17,7 +17,7 @@ def main(argv):
     is_regr = False # False for classification, True for regression
     smell_thr = 40 # threshold to define a smell event
     start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2018, 9, 30, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2019, 8, 5, 0, tzinfo=pytz.timezone("US/Eastern"))
 
     # Set mode
     get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False
@@ -70,7 +70,8 @@ def main(argv):
     if cross_validation:
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["RF", "ET"] # default for random forest and extra trees 
+        methods = ["RF", "ET"] # default for random forest and extra trees
+        #methods = genModelSet()
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"

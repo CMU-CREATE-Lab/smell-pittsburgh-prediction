@@ -30,7 +30,7 @@ def crossValidation(
     balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
     sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
-    num_folds=99, # number of folds for validation
+    num_folds=144, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
     augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
@@ -161,7 +161,7 @@ def crossValidation(
         if is_regr and pos_out:
             test["Y_pred"][test["Y_pred"]<0] = 0
             train["Y_pred"][train["Y_pred"]<0] = 0
-        test_all["Y"].append(test["Y"]) 
+        test_all["Y"].append(test["Y"])
         test_all["Y_pred"].append(test["Y_pred"])
         metric_i_test = computeMetric(test["Y"], test["Y_pred"], is_regr, aggr_axis=True, event_thr=event_thr)
         metric_all["test"].append(metric_i_test)
@@ -307,7 +307,7 @@ def crossValidation(
     for m in metric_dt["test"]:
         log("Metric: " + m, logger)
         log(metric_dt["test"][m], logger)
-    
+
     # Save plot
     if out_p_root is not None:
         Y_true = test_all["Y"]
@@ -449,7 +449,7 @@ def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx, fold="all", show_y_tic
     plt.xlim(0, len(Y_pred))
     plt.ylim(np.amin(Y_pred), np.amax(Y_pred))
     plt.grid(False)
-    
+
     # Save plot
     plt.tight_layout()
     fig.savefig(out_p + method + "_fold_" + str(fold) + "_regr_time.png")
