@@ -13,7 +13,7 @@ from sklearn.ensemble import BaggingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.multioutput import MultiOutputRegressor 
+from sklearn.multioutput import MultiOutputRegressor
 from sklearn.linear_model import Lasso
 from sklearn.tree import DecisionTreeRegressor
 
@@ -105,7 +105,7 @@ def trainModel(
         if method == "RF":
             model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=1000, max_features=60, min_samples_split=32, n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000, max_features=90, min_samples_split=64, n_jobs=-1)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", probability=True)
         elif method == "MLP":
@@ -165,7 +165,7 @@ def trainModel(
         y_minor = findLeastCommon(Y)
         select_y = (Y == y_minor)
         X, Y = X[select_y], Y[select_y]
-    
+
     # Fit data to the model
     if method == "ANCNN":
         model.fit(X, np.squeeze(Y), copy.deepcopy(train["X_pretrain"]))
