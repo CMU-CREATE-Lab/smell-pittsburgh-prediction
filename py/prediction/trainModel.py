@@ -105,7 +105,7 @@ def trainModel(
         if method == "RF":
             model = RandomForestClassifier(n_estimators=1000, max_features=30, min_samples_split=2, n_jobs=-1)
         elif method == "ET":
-            model = ExtraTreesClassifier(n_estimators=1000, max_features=90, min_samples_split=64, n_jobs=-1)
+            model = ExtraTreesClassifier(n_estimators=1000, max_features=60, min_samples_split=32, n_jobs=-1)
         elif method == "SVM":
             model = SVC(max_iter=5000, kernel="rbf", probability=True)
         elif method == "MLP":
