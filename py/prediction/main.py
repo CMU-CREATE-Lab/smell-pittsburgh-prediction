@@ -1,5 +1,5 @@
 import sys
-import torch # need to import torch early to avoid an ImportError related to static TLS
+#import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
 from preprocessData import *
@@ -17,7 +17,7 @@ def main(argv):
     is_regr = False # False for classification, True for regression
     smell_thr = 40 # threshold to define a smell event
     start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2019, 8, 5, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2018, 9, 27, 0, tzinfo=pytz.timezone("US/Eastern"))
 
     # Set mode
     get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False

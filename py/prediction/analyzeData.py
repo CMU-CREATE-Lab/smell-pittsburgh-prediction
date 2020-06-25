@@ -9,7 +9,7 @@ from util import *
 from sklearn.decomposition import PCA
 from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import TruncatedSVD
-import seaborn as sns
+#import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from computeFeatures import *
 from Interpreter import *
@@ -17,8 +17,8 @@ from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.manifold import SpectralEmbedding
 from copy import deepcopy
 from crossValidation import *
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.tsa.stattools import grangercausalitytests
+#from statsmodels.tsa.stattools import adfuller
+#from statsmodels.tsa.stattools import grangercausalitytests
 from scipy.stats import pearsonr
 from collections import Counter
 import re
@@ -37,17 +37,17 @@ def analyzeData(
     checkAndCreateDir(out_p)
 
     # Plot features
-    plotFeatures(in_p, out_p_root, logger)
+    #plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    plotAggrSmell(in_p, out_p, logger)
+    #plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    plotLowDimensions(in_p, out_p, logger)
+    #plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    corrStudy(in_p, out_p, logger)
-    corrStudy(in_p, out_p, logger, is_regr=True)
+    #corrStudy(in_p, out_p, logger)
+    #corrStudy(in_p, out_p, logger, is_regr=True)
 
     # Interpret model
     interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
@@ -108,7 +108,7 @@ def interpretModel(in_p, out_p, end_dt, start_dt, logger):
                 #r = grangercausalitytests(df_esdr[[col_i, col_j]], maxlag=max_lag, verbose=False)
                 #for key in r.keys(): print "\t (ts, p_value, dof, lag) = %.2f, %.3f, %d, %d" % r[key][0]['params_ftest']
                 #print "\t(corr, p_value) = %.2f, %.2f" % pearsonr(x_i, x_j)
-    
+
     # Interpret data
     df_esdr = df_esdr.reset_index()
     df_smell = df_smell.reset_index()
@@ -144,13 +144,13 @@ def corrStudy(in_p, out_p, logger, is_regr=False):
     # Compute features
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=0, thr=40, is_regr=is_regr,
          add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    
+
     # Compute daytime index
     # For 8 hours prediction, 11am covers duration from 11am to 7pm
     #h_start = 6
     #h_end = 11
     #idx = (df_X["HourOfDay"]>=h_start)&(df_X["HourOfDay"]<=h_end)
-    
+
     # Compute point biserial correlation or Pearson correlation
     Y = df_Y.squeeze()
     max_t_lag = 6 # the maximum time lag
@@ -175,23 +175,24 @@ def corrStudy(in_p, out_p, logger, is_regr=False):
         df_corr_info[c] = pd.Series(data=s_info)
         df_corr[c] = pd.Series(data=s)
     df_corr_info.to_csv(out_p+f_name+".csv")
-    
+
     # Plot
     df_corr = df_corr.round(2)
-    plotCorrelation(df_corr, out_p+f_name+".png")
+    print df_corr
+    #plotCorrelation(df_corr, out_p+f_name+".png")
 
 def plotCorrelation(df_corr, out_p):
     # Plot graph
     tick_font_size = 16
     label_font_size = 20
     title_font_size = 32
-    
+
     fig, ax1 = plt.subplots(1, 1, figsize=(28, 5))
     divider = make_axes_locatable(ax1)
     ax2 = divider.append_axes("right", size="2%", pad=0.4)
     sns.heatmap(df_corr, ax=ax1, cbar_ax=ax2, cmap="RdBu", vmin=-0.6, vmax=0.6,
         linewidths=0.1, annot=False, fmt="g", xticklabels=False, yticklabels="auto")
-    
+
     ax1.tick_params(labelsize=tick_font_size)
     ax2.tick_params(labelsize=tick_font_size)
     ax1.set_ylabel("Time lag (hours)", fontsize=label_font_size)
@@ -207,7 +208,7 @@ def plotCorrelation(df_corr, out_p):
 def plotAggrSmell(in_p, out_p, logger):
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=None, b_hr=0, thr=40, is_regr=True,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
-    
+
     # Plot the distribution of smell values by days of week and hours of day
     plotDayHour(df_X, df_Y, out_p, logger)
 
@@ -251,7 +252,7 @@ def plotDayHour(df_X, df_Y, out_p, logger):
     ax1.tick_params(axis="y", labelsize=22)
     ax2.tick_params(axis="y", labelsize=22)
     plt.suptitle("Average smell values over time", fontsize=30)
-        
+
     plt.tight_layout()
     fig.subplots_adjust(top=0.89)
     fig.savefig(out_p + "smell_day_hour.png", dpi=150)

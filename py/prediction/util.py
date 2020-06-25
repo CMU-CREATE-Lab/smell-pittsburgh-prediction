@@ -37,9 +37,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from nltk.corpus import stopwords
-from nltk.stem.wordnet import WordNetLemmatizer
-import seaborn as sns
+#from nltk.corpus import stopwords
+#from nltk.stem.wordnet import WordNetLemmatizer
+#import seaborn as sns
 
 # For Google Analytics
 #sudo pip install --upgrade google-api-python-client

@@ -30,9 +30,9 @@ from sklearn.svm import LinearSVC
 from HybridCrowdClassifier import HybridCrowdClassifier
 from sklearn.dummy import DummyClassifier
 
-from CRnnLearner import CRnnLearner
-from ANCnnLearner import ANCnnLearner
-from DmlpLearner import DmlpLearner
+#from CRnnLearner import CRnnLearner
+#from ANCnnLearner import ANCnnLearner
+#from DmlpLearner import DmlpLearner
 
 # Train a regression or classification model
 # To find a function F such that Y=F(X)

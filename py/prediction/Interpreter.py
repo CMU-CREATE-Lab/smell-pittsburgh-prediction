@@ -16,6 +16,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.cluster import MeanShift
 from scipy.stats import pointbiserialr
 from analyzeData import *
+import pandas as pd
 
 # This class builds and interprets the model
 class Interpreter(object):
@@ -25,19 +26,35 @@ class Interpreter(object):
         out_p=None, # the path for saving graphs
         use_forest=True,
         logger=None):
-       
-        df_X, df_Y = deepcopy(df_X), deepcopy(df_Y)
+
+        df_X = deepcopy(df_X)
+        df_Y = deepcopy(df_Y)
+
+        # We need to run the random forest in the unsupervised mode
+        # Consider the original data as class 1
+        # Create a synthetic second class of the same size that will be labeled as class 2
+        # The synthetic class is created by sampling at random from the univariate distributions of the original data
+        n = len(df_X)
+        synthetic = {}
+        for c in df_X.columns:
+            synthetic[c] = df_X[c].sample(n=n, replace=True).values
+        df_synthetic = pd.DataFrame(data=synthetic)
+        df_XX = pd.concat([df_X, df_synthetic])
+        df_YY = pd.concat([df_Y.applymap(lambda x: 1), df_Y.applymap(lambda x: -1)])
+
+        self.df_XX, self.df_YY = df_XX, df_YY
         self.df_X, self.df_Y = df_X, df_Y
         self.out_p = out_p
         self.logger = logger
-        
+
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            F = RandomForestClassifier(n_estimators=1000, max_features=0.15, n_jobs=-1)
-            F.fit(df_X, df_Y.squeeze())
-            self.reportPerformance(F)
-            self.reportFeatureImportance(F, thr=0.3)
+            n_trees = 1000
+            F = RandomForestClassifier(n_estimators=n_trees, max_features=0.15, n_jobs=-1, min_samples_split=4)
+            F.fit(df_XX, df_YY.squeeze())
+            self.reportPerformance(F, df_XX, df_YY)
+            self.reportFeatureImportance(F, df_XX, thr=0.3)
 
             # Build the decision paths of samples with label 1
             # self.dp_rules contains all decision paths of positive labels
@@ -49,7 +66,9 @@ class Interpreter(object):
 
             # Compute the similarity matrix of samples having label 1
             self.log("Compute the similarity matrix of samples with label 1...")
-            self.sm = self.computeSampleSimilarity()
+            self.sm = self.computeSampleSimilarity(n_trees)
+            print np.amax(self.sm)
+            print np.sum(self.sm)
 
             # Cluster samples with label 1 based on the similarity matrix
             self.log("Cluster samples with label 1...")
@@ -98,7 +117,7 @@ class Interpreter(object):
             df_corr_info[c] = pd.Series(data=(np.round(r,3), np.round(p,5), n))
             df_corr[c] = pd.Series(data=np.round(r,3))
         df_corr_info.to_csv(out_p+"corr_inference.csv")
-        self.plotCorrelation(df_corr, out_p+"corr_inference.png")
+        #self.plotCorrelation(df_corr, out_p+"corr_inference.png")
 
         # Format feature names
         #self.df_X.columns = [c.replace("*", "\n*") for c in self.df_X.columns]
@@ -112,10 +131,10 @@ class Interpreter(object):
 
         # Train a decision tree classifier on the selected cluster
         print "Train a decision tree..."
-        dt = DecisionTreeClassifier(min_samples_split=20, max_depth=8, min_samples_leaf=5)
+        dt = DecisionTreeClassifier(min_samples_split=10, max_depth=8, min_samples_leaf=5)
         dt.fit(self.df_X, self.df_Y.squeeze())
-        self.reportPerformance(dt)
-        self.reportFeatureImportance(dt)
+        self.reportPerformance(dt, self.df_X, self.df_Y)
+        self.reportFeatureImportance(dt, self.df_X)
         dt = self.selectDecisionTreePaths(dt)
         self.exportTreeGraph(dt)
 
@@ -157,7 +176,7 @@ class Interpreter(object):
         print "Pruning nodes..."
         self.postorderTraversal(0, 0)
         return dt
-    
+
     # i is the current node id
     # p is the parent node id
     def postorderTraversal(self, i, depth):
@@ -205,10 +224,10 @@ class Interpreter(object):
                 filled=True)
 
     def clusterSamplesWithPositiveLabels(self):
-        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.7, n_jobs=-1) # for Random Forest
+        c = DBSCAN(metric="precomputed", min_samples=30, eps=0.965, n_jobs=-1) # for Random Forest
         dist = 1.0 - self.sm # DBSCAN uses distance instead of similarity
         cluster = c.fit_predict(dist)
-        
+
         # Clean clusters
         print "Select only the largest cluster"
         cluster[cluster>0] = -1
@@ -223,9 +242,11 @@ class Interpreter(object):
                 print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
 
         # Evaluate the quality of the cluster
-        #qc = silhouette_score(dist, cluster, metric="precomputed")
-        qc = silhouette_score(self.df_X_pos, cluster) # on the original space
-        print "Silhouette Coefficient: %0.3f" % qc
+        if len(np.unique(cluster)) > 1:
+            qc1 = silhouette_score(dist, cluster, metric="precomputed") # on the distance space
+            print "Silhouette coefficient on the distance space: %0.3f" % qc1
+            qc2 = silhouette_score(self.df_X_pos, cluster) # on the original space
+            print "Silhouette coefficient on the original space: %0.3f" % qc2
         return cluster
 
     def plotClusters(self, df_X, df_Y, out_p):
@@ -251,7 +272,7 @@ class Interpreter(object):
         out_p_tmp = out_p + "kernel_pca_positive_labels.png"
         plotClusterPairGrid(X, df_Y, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
-    def computeSampleSimilarity(self):
+    def computeSampleSimilarity(self, n_trees):
         L = len(self.df_X_pos)
         sm = np.zeros([L, L])
 
@@ -262,8 +283,9 @@ class Interpreter(object):
                 for j in range(i+1, len(s)):
                     sm[s[i], s[j]] += 1
                     sm[s[j], s[i]] += 1
-        
-        return self.scaleMatrix(sm) 
+
+        return sm / n_trees
+        #return self.scaleMatrix(sm)
 
     def computeDecisionPathSimilarity(self):
         keys = self.dp_samples.keys()
@@ -364,23 +386,23 @@ class Interpreter(object):
         # return result
         return dp_rules, dp_samples, df, df_idx.values
 
-    def reportPerformance(self, model):
+    def reportPerformance(self, model, df_X, df_Y):
         print "Report performance for all data..."
-        metric = computeMetric(self.df_Y, model.predict(self.df_X), False)
+        metric = computeMetric(df_Y, model.predict(df_X), False)
         for m in metric: self.log(metric[m])
 
         print "Report performance for daytime data..."
         hd_start, hd_end = 8, 18
         hd = self.df_X["HourOfDay"]
         dt_idx = (hd>=hd_start)&(hd<=hd_end)
-        metric = computeMetric(self.df_Y[dt_idx], model.predict(self.df_X[dt_idx]), False)
+        metric = computeMetric(df_Y[dt_idx], model.predict(df_X[dt_idx]), False)
         for m in metric: self.log(metric[m])
 
-    def reportFeatureImportance(self, model, thr=0.9):
+    def reportFeatureImportance(self, model, df_X, thr=0.9):
         feat_ims = np.array(model.feature_importances_)
         sorted_ims_idx = np.argsort(feat_ims)[::-1]
         feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
-        feat_names = self.df_X.columns.copy()
+        feat_names = df_X.columns.copy()
         feat_names = feat_names[sorted_ims_idx]
         c = 0
         for (fi, fn) in zip(feat_ims, feat_names):
