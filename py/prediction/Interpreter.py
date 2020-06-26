@@ -67,8 +67,6 @@ class Interpreter(object):
             # Compute the similarity matrix of samples having label 1
             self.log("Compute the similarity matrix of samples with label 1...")
             self.sm = self.computeSampleSimilarity(n_trees)
-            print np.amax(self.sm)
-            print np.sum(self.sm)
 
             # Cluster samples with label 1 based on the similarity matrix
             self.log("Cluster samples with label 1...")
@@ -83,15 +81,15 @@ class Interpreter(object):
             cluster = MeanShift(n_jobs=-1, bandwidth=0.25).fit_predict(X)
             cluster[cluster>0] = -1
             self.cluster, self.df_X_pos, self.df_X_pos_idx = cluster, df_X_pos, df_X_pos_idx
-            print "Unique cluster ids : %s" % np.unique(cluster)
-            print "Total number of positive samples : %s" % len(self.df_X_pos)
+            self.log("Unique cluster ids : %s" % np.unique(cluster))
+            self.log("Total number of positive samples : %s" % len(self.df_X_pos))
             for c_id in np.unique(cluster):
                 if c_id < 0:
-                    print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
+                    self.log("%s samples are not clustered" % (len(cluster[cluster==c_id])))
                 else:
-                    print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
+                    self.log("Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id])))
             qc = silhouette_score(X, cluster)
-            print "Silhouette Coefficient: %0.3f" % qc
+            self.log("Silhouette Coefficient: %0.3f" % qc)
 
         # Set the label for samples outside the cluster to zero
         df_X_pos_idx_c0 = self.df_X_pos_idx[self.cluster==0] # select the largest cluster
@@ -130,7 +128,7 @@ class Interpreter(object):
         #self.reportCoefficient(lr)
 
         # Train a decision tree classifier on the selected cluster
-        print "Train a decision tree..."
+        self.log("Train a decision tree...")
         dt = DecisionTreeClassifier(min_samples_split=10, max_depth=8, min_samples_leaf=5)
         dt.fit(self.df_X, self.df_Y.squeeze())
         self.reportPerformance(dt, self.df_X, self.df_Y)
@@ -173,7 +171,7 @@ class Interpreter(object):
         self.dt_want_pruned = np.zeros(shape=tree.node_count, dtype=bool)
 
         # Perform post-order DFS to mark nodes that need to be pruned
-        print "Pruning nodes..."
+        self.log("Pruning nodes...")
         self.postorderTraversal(0, 0)
         return dt
 
@@ -229,29 +227,29 @@ class Interpreter(object):
         cluster = c.fit_predict(dist)
 
         # Clean clusters
-        print "Select only the largest cluster"
+        self.log("Select only the largest cluster")
         cluster[cluster>0] = -1
 
         # Print cluster information
-        print "Unique cluster ids : %s" % np.unique(cluster)
-        print "Total number of positive samples : %s" % len(self.df_X_pos)
+        self.log("Unique cluster ids : %s" % np.unique(cluster))
+        self.log("Total number of positive samples : %s" % len(self.df_X_pos))
         for c_id in np.unique(cluster):
             if c_id < 0:
-                print "%s samples are not clustered" % (len(cluster[cluster==c_id]))
+                self.log("%s samples are not clustered" % (len(cluster[cluster==c_id])))
             else:
-                print "Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id]))
+                self.log("Cluster %s has %s samples" % (c_id, len(cluster[cluster==c_id])))
 
         # Evaluate the quality of the cluster
         if len(np.unique(cluster)) > 1:
             qc1 = silhouette_score(dist, cluster, metric="precomputed") # on the distance space
-            print "Silhouette coefficient on the distance space: %0.3f" % qc1
+            self.log("Silhouette coefficient on the distance space: %0.3f" % qc1)
             qc2 = silhouette_score(self.df_X_pos, cluster) # on the original space
-            print "Silhouette coefficient on the original space: %0.3f" % qc2
+            self.log("Silhouette coefficient on the original space: %0.3f" % qc2)
         return cluster
 
     def plotClusters(self, df_X, df_Y, out_p):
         # Visualize the clusters using PCA
-        print "Plot PCA of positive labels..."
+        self.log("Plot PCA of positive labels...")
         pca = PCA(n_components=3)
         X = pca.fit_transform(deepcopy(df_X.values))
         r = np.round(pca.explained_variance_ratio_, 3)
@@ -263,7 +261,7 @@ class Interpreter(object):
         plotClusterPairGrid(X, df_Y, out_p_tmp, 3, 1, title, False, c_ls=c_ls, c_alpha=c_alpha, c_bin=c_bin)
 
         # Visualize the clusters using kernel PCA
-        print "Plot Kernel PCA of positive labels..."
+        self.log("Plot Kernel PCA of positive labels...")
         pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
         X = pca.fit_transform(deepcopy(df_X.values))
         r = pca.lambdas_
@@ -387,11 +385,11 @@ class Interpreter(object):
         return dp_rules, dp_samples, df, df_idx.values
 
     def reportPerformance(self, model, df_X, df_Y):
-        print "Report performance for all data..."
+        self.log("Report performance for all data...")
         metric = computeMetric(df_Y, model.predict(df_X), False)
         for m in metric: self.log(metric[m])
 
-        print "Report performance for daytime data..."
+        self.log("Report performance for daytime data...")
         hd_start, hd_end = 8, 18
         hd = self.df_X["HourOfDay"]
         dt_idx = (hd>=hd_start)&(hd<=hd_end)

@@ -114,15 +114,16 @@ def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     df_smell = df_smell.reset_index()
     df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=8, b_hr=2, thr=40, is_regr=False,
         add_inter=True, add_roll=False, add_diff=False, logger=logger)
-    model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p, logger=logger)
-    df_Y = model.getFilteredLabels()
-    df_X = model.getSelectedFeatures()
-    #for m in ["DT"]*100:
-    for m in ["DT"]:
+    for m in ["DT"]*98:
+    #for m in ["DT"]:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
-        lg = generateLogger(out_p + "log/" + m + "-" + start_time_str + ".log", format=None)
+        out_p_m = out_p + "experiment/" + start_time_str + "/"
+        lg = generateLogger(out_p_m + m + "-" + start_time_str + ".log", format=None)
+        model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p_m, logger=lg)
+        df_Y = model.getFilteredLabels()
+        df_X = model.getSelectedFeatures()
         num_folds = (end_dt - start_dt).days / 7 # one fold represents a week
-        crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p, method=m, is_regr=False, logger=lg,
+        crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p_m, method=m, is_regr=False, logger=lg,
             num_folds=num_folds, skip_folds=48, train_size=8000)
 
 def computeCrossCorrelation(x, y, max_lag=None):
