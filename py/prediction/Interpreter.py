@@ -114,6 +114,9 @@ class Interpreter(object):
             r, p = pointbiserialr(Y, self.df_X[c])
             df_corr_info[c] = pd.Series(data=(np.round(r,3), np.round(p,5), n))
             df_corr[c] = pd.Series(data=np.round(r,3))
+        # The first row is the correlation
+        # The second row is the p-value
+        # The third row is the numbe of samples
         df_corr_info.to_csv(out_p+"corr_inference.csv")
         #self.plotCorrelation(df_corr, out_p+"corr_inference.png")
 
