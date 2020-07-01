@@ -1,7 +1,7 @@
 # smell-pittsburgh-prediction
 A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The design and evaluation are documented in the paper, [Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System](https://arxiv.org/pdf/1810.11143.pdf). If you find this useful, please consider citing:<br/>
 
-Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2019. Smell Pittsburgh: community-empowered mobile smell reporting system. In Proceedings of the 24th International Conference on Intelligent User Interfaces (IUI '19). ACM, New York, NY, USA, 65-79. DOI: https://doi.org/10.1145/3301275.3302293
+Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao Huang, and Illah Nourbakhsh. 2019. Smell Pittsburgh: community-empowered mobile smell reporting system. In Proceedings of the 24th International Conference on Intelligent User Interfaces (IUI 2019). ACM.
 
 ```
 @inproceedings{hsu-2019-smellpgh,
