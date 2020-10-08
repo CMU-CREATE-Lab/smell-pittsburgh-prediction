@@ -1,5 +1,5 @@
 # smell-pittsburgh-prediction
-A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The design and evaluation are documented in the paper, [Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System](https://arxiv.org/pdf/1810.11143.pdf). If you find this useful, please consider citing:<br/>
+A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The code for the system can be found [here](https://github.com/CMU-CREATE-Lab/smell-pittsburgh-rails). The design and evaluation are documented in the paper, [Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System](https://arxiv.org/pdf/1810.11143.pdf). If you find this useful, please consider citing:<br/>
 
 Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao Huang, and Illah Nourbakhsh. 2019. Smell Pittsburgh: community-empowered mobile smell reporting system. In Proceedings of the 24th International Conference on Intelligent User Interfaces (IUI 2019). ACM.
 
