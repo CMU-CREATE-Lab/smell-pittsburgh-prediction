@@ -18,6 +18,7 @@ from scipy.stats import pointbiserialr
 from analyzeData import *
 import pandas as pd
 
+
 # This class builds and interprets the model
 class Interpreter(object):
     def __init__(self,
@@ -124,7 +125,7 @@ class Interpreter(object):
         #self.df_X.columns = [c.replace("*", "\n*") for c in self.df_X.columns]
 
         # Train a L1 logistic regression on the selected cluster
-        #print "Train a logistic regression model..."
+        #self.log("Train a logistic regression model...")
         #lr = LogisticRegression(penalty="l1", C=1)
         #lr.fit(self.df_X, self.df_Y.squeeze())
         #self.reportPerformance(lr)
@@ -286,52 +287,6 @@ class Interpreter(object):
                     sm[s[j], s[i]] += 1
 
         return sm / n_trees
-        #return self.scaleMatrix(sm)
-
-    def computeDecisionPathSimilarity(self):
-        keys = self.dp_samples.keys()
-        values = self.dp_samples.values()
-        values = map(set, values)
-        L = len(values)
-        sm = np.empty([L, L])
-        sm[:] = np.nan
-
-        # Loop and build the similarity matrix
-        for i in range(0, L):
-            for j in range(0, L):
-                # For diagonal entries, just use 0
-                if i == j:
-                    sm[i,j] = 0
-                    continue
-                # If it is already computed, just use the old value
-                if not np.isnan(sm[j,i]):
-                    sm[i,j] = sm[j,i]
-                    continue
-                # Compute weighted Jaccard Similarity of two sample sets i and j
-                set_i, set_j = values[i], values[j]
-                intersect_len = len(set_i & set_j)
-                union_len = len(set_i | set_j)
-                similarity = float(intersect_len) / float(union_len) # the normal Jaccard Similarit
-                similarity *= intersect_len # weighted by the number of common samples
-                sm[i,j] = similarity
-                if sm[i,j] > 15:
-                    print "-----------------------"
-                    print sm[i,j]
-                    print keys[i]
-                    print self.dp_rules[keys[i]]
-                    print keys[j]
-                    print self.dp_rules[keys[j]]
-
-        # Return the similarity matrix and the columns (indicating path_id)
-        return self.scaleMatrix(sm), keys
-
-    def scaleMatrix(self, m):
-        # Scale the entire matrix to range 0 and 1
-        min_m = np.min(m)
-        max_m = np.max(m)
-        m = (m - min_m) / (max_m - min_m)
-        m = np.round(m, 4)
-        return m
 
     def extractDecisionPath(self, model, extract_rule=False):
         # Store all decision path rules
@@ -411,30 +366,7 @@ class Interpreter(object):
             c += fi
             if c > thr: break
 
-    def tree_to_code(self, tree, feature_names):
-        tree_ = tree.tree_
-        feature_name = [
-            feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
-            for i in tree_.feature
-        ]
-        #print "def tree({}):".format(", ".join(feature_names))
-
-        def recurse(node, depth):
-            indent = "  " * depth
-            if tree_.feature[node] != _tree.TREE_UNDEFINED:
-                name = feature_name[node]
-                threshold = tree_.threshold[node]
-                threshold = np.round(threshold, 2)
-                print "{}if {} <= {}:".format(indent, name, threshold)
-                recurse(tree_.children_left[node], depth + 1)
-                print "{}else:  # if {} > {}".format(indent, name, threshold)
-                recurse(tree_.children_right[node], depth + 1)
-            else:
-                print "{}return {}".format(indent, tree_.value[node])
-
-        recurse(0, 1)
-
     def log(self, msg):
-        print msg
+        print(msg)
         if self.logger is not None:
             self.logger.info(msg)

@@ -2,6 +2,7 @@ from util import *
 import numpy as np
 import copy
 
+
 # A hybrid model that combines crowdsourcing and machine learning classifier
 class HybridCrowdClassifier(object):
     def __init__(self,
@@ -22,7 +23,7 @@ class HybridCrowdClassifier(object):
     def predict(self, X, crowd, X_thr=0.5):
         # Use crowd to predict result
         pred = np.squeeze(crowd>=self.crowd_thr) * 2
-        
+
         # Use the model to predict result and merge them
         # if pred==0, no event
         # if pred==1, event predicted by the base estimator
@@ -32,7 +33,7 @@ class HybridCrowdClassifier(object):
             prob_model = self.base_estimator.predict_proba(X)
             pred_model = (prob_model[:,1] > X_thr).astype(int)
             pred += pred_model
-        
+
         return pred
 
     def predict_proba(self, X, crowd):
@@ -46,7 +47,7 @@ class HybridCrowdClassifier(object):
             # If no crowd event, then the prediction uses the base estimator
             idx = np.squeeze(crowd<self.crowd_thr)
             prob[idx] = prob_model[idx]
-        
+
         return prob
 
     def save(self, out_path):
@@ -56,6 +57,6 @@ class HybridCrowdClassifier(object):
         return None
 
     def log(self, msg):
-        print msg
+        print(msg)
         if self.logger is not None:
             self.logger.info(msg)

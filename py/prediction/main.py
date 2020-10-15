@@ -1,11 +1,11 @@
 import sys
-#import torch # need to import torch early to avoid an ImportError related to static TLS
 from util import *
 from getData import *
 from preprocessData import *
 from analyzeData import *
 from computeFeatures import *
 from crossValidation import *
+
 
 def main(argv):
     p = "data_main/"
@@ -83,6 +83,7 @@ def main(argv):
             crossValidation(in_p=[p+"X.csv",p+"Y.csv",p+"C.csv"], out_p_root=p, event_thr=smell_thr,
                 method=m, is_regr=is_regr, logger=lg, num_folds=num_folds, skip_folds=48, train_size=8000)
 
+
 def genModelSet(is_regr):
     m_all = []
     methods = ["ET", "RF"]
@@ -98,6 +99,7 @@ def genModelSet(is_regr):
                 for m in methods:
                     m_all.append(m + "-" + str(n) + "-" + str(mf) + "-" + str(mss))
     return m_all
+
 
 if __name__ == "__main__":
     main(sys.argv)

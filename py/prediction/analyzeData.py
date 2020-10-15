@@ -9,7 +9,7 @@ from util import *
 from sklearn.decomposition import PCA
 from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import TruncatedSVD
-#import seaborn as sns
+import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from computeFeatures import *
 from Interpreter import *
@@ -17,12 +17,11 @@ from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.manifold import SpectralEmbedding
 from copy import deepcopy
 from crossValidation import *
-#from statsmodels.tsa.stattools import adfuller
-#from statsmodels.tsa.stattools import grangercausalitytests
 from scipy.stats import pearsonr
 from collections import Counter
 import re
 from scipy.stats import pointbiserialr
+
 
 # Analyze data
 def analyzeData(
@@ -52,13 +51,14 @@ def analyzeData(
     # Interpret model
     interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
 
+
 def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     # Load time series data
     df_esdr = pd.read_csv(in_p[0], parse_dates=True, index_col="DateTime")
     df_smell = pd.read_csv(in_p[1], parse_dates=True, index_col="DateTime")
 
     # Select variables based on prior knowledge
-    print "Select variables based on prior knowledge..."
+    log("Select variables based on prior knowledge...")
     want = {
         #"3.feed_26.OZONE_PPM": "O3", # Lawrenceville ACHD
         "3.feed_26.SONICWS_MPH": "Lawrenceville_wind_speed",
@@ -78,36 +78,8 @@ def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     df_esdr = pd.DataFrame()
     for col in df_esdr_cp.columns:
         if col in want_vars:
-            print "\t" + col
+            log("\t" + col)
             df_esdr[want[col]] = df_esdr_cp[col]
-
-    # Check if time series variables are stationary using Dickey-Fuller test
-    if False:
-        print "Check if time series variables are stationary using Dickey-Fuller test..."
-        for col in df_esdr.columns:
-            r = adfuller(df_esdr[col], regression="ctt")
-            print "p-value: %.3f -- %s" % (r[1], col)
-
-    # Compute cross-correlation between variables
-    if False:
-        L = len(df_esdr.columns)
-        for i in range(0, L-1):
-            col_i = df_esdr.columns[i]
-            for j in range(i+1, L):
-                col_j = df_esdr.columns[j]
-                x_i, x_j = df_esdr[col_i], df_esdr[col_j]
-                pair = col_i + " === " + col_j
-                max_lag = 3
-                cc = computeCrossCorrelation(x_i, x_j, max_lag=max_lag)
-                all_lag = np.array(range(0, max_lag*2 + 1)) - max_lag
-                max_cr_idx = np.argmax(abs(cc))
-                max_cr_val = cc[max_cr_idx]
-                max_cr_lag = all_lag[max_cr_idx]
-                pair = col_i + " === " + col_j
-                print "(max_corr=%.3f, lag=%d)  %s" % (max_cr_val, max_cr_lag, pair)
-                #r = grangercausalitytests(df_esdr[[col_i, col_j]], maxlag=max_lag, verbose=False)
-                #for key in r.keys(): print "\t (ts, p_value, dof, lag) = %.2f, %.3f, %d, %d" % r[key][0]['params_ftest']
-                #print "\t(corr, p_value) = %.2f, %.2f" % pearsonr(x_i, x_j)
 
     # Interpret data
     df_esdr = df_esdr.reset_index()
@@ -126,6 +98,7 @@ def interpretModel(in_p, out_p, end_dt, start_dt, logger):
         crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p_m, method=m, is_regr=False, logger=lg,
             num_folds=num_folds, skip_folds=48, train_size=8000)
 
+
 def computeCrossCorrelation(x, y, max_lag=None):
     n = len(x)
     xo = x - x.mean()
@@ -135,6 +108,7 @@ def computeCrossCorrelation(x, y, max_lag=None):
     if max_lag > 0:
         cc = cc[n-1-max_lag:n+max_lag]
     return cc
+
 
 # Correlational study
 def corrStudy(in_p, out_p, logger, is_regr=False):
@@ -179,8 +153,9 @@ def corrStudy(in_p, out_p, logger, is_regr=False):
 
     # Plot
     df_corr = df_corr.round(2)
-    print df_corr
+    log(df_corr)
     #plotCorrelation(df_corr, out_p+f_name+".png")
+
 
 def plotCorrelation(df_corr, out_p):
     # Plot graph
@@ -206,12 +181,14 @@ def plotCorrelation(df_corr, out_p):
     fig.clf()
     plt.close()
 
+
 def plotAggrSmell(in_p, out_p, logger):
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=None, b_hr=0, thr=40, is_regr=True,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
 
     # Plot the distribution of smell values by days of week and hours of day
     plotDayHour(df_X, df_Y, out_p, logger)
+
 
 def plotDayHour(df_X, df_Y, out_p, logger):
     log("Plot the distribution of smell over day and hour...", logger)
@@ -260,6 +237,7 @@ def plotDayHour(df_X, df_Y, out_p, logger):
     fig.clf()
     plt.close()
 
+
 def plotFeatures(in_p, out_p_root, logger):
     plot_time_hist_pair = True
     plot_corr = True
@@ -305,9 +283,9 @@ def plotFeatures(in_p, out_p_root, logger):
 
     log("Finished plotting features", logger)
 
+
 def plotTime(df_v, title_head, out_p):
     v = df_v.name
-    print title_head + v
     fig = plt.figure(figsize=(40, 8), dpi=150)
     df_v.plot(alpha=0.5, title=title_head)
     fig.tight_layout()
@@ -316,9 +294,9 @@ def plotTime(df_v, title_head, out_p):
     plt.close()
     gc.collect()
 
+
 def plotHist(df_v, title_head, out_p, bins=30):
     v = df_v.name
-    print title_head + v
     fig = plt.figure(figsize=(8, 8), dpi=150)
     df_v.plot.hist(alpha=0.5, bins=bins, title=title_head)
     plt.xlabel(v)
@@ -328,9 +306,9 @@ def plotHist(df_v, title_head, out_p, bins=30):
     plt.close()
     gc.collect()
 
+
 def plotPair(df_v1, df_v2, title_head, out_p):
     v1, v2 = df_v1.name, df_v2.name
-    print title_head + v1 + " === " + v2
     fig = plt.figure(figsize=(8, 8), dpi=150)
     plt.scatter(df_v1, df_v2, s=10, alpha=0.4)
     plt.title(title_head)
@@ -341,6 +319,7 @@ def plotPair(df_v1, df_v2, title_head, out_p):
     fig.clf()
     plt.close()
     gc.collect()
+
 
 # Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
 def plotCorrMatirx(df, out_p):
@@ -358,13 +337,14 @@ def plotCorrMatirx(df, out_p):
     fig.clf()
     plt.close()
 
+
 def plotLowDimensions(in_p, out_p, logger):
     df_X, df_Y, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
     X = df_X.values
     Y = df_Y.squeeze().values
-    print "Number of positive samples: " + str(len(Y[Y==1])) + " (" + str(float(len(Y[Y==1]))/len(Y)) + ")"
-    print "Number of negative samples: " + str(len(Y[Y==0])) + " (" + str(float(len(Y[Y==0]))/len(Y)) + ")"
+    log("Number of positive samples: " + str(len(Y[Y==1])) + " (" + str(float(len(Y[Y==1]))/len(Y)) + ")")
+    log("Number of negative samples: " + str(len(Y[Y==0])) + " (" + str(float(len(Y[Y==0]))/len(Y)) + ")")
     _, df_Y_regr, _ = computeFeatures(in_p=in_p, f_hr=8, b_hr=3, thr=40, is_regr=True,
         add_inter=False, add_roll=False, add_diff=False, logger=logger)
     Y_regr = df_Y_regr.squeeze().values
@@ -372,8 +352,8 @@ def plotLowDimensions(in_p, out_p, logger):
     plotPCA(X, Y, Y_regr, out_p)
     log("Plot Kernel PCA...", logger)
     plotKernelPCA(X, Y, Y_regr, out_p)
-
     log("Finished plotting dimensions", logger)
+
 
 def plotSpectralEmbedding(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
@@ -385,6 +365,7 @@ def plotSpectralEmbedding(X, Y, out_p, is_regr=False):
     out_p += "spectral_embedding.png"
     plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
+
 def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
     X, Y = deepcopy(X), deepcopy(Y)
     hasher = RandomTreesEmbedding(n_estimators=1000, max_depth=5, min_samples_split=2, n_jobs=-1)
@@ -394,6 +375,7 @@ def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
     title = "Random Trees Embedding"
     out_p += "random_trees_embedding.png"
     plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
+
 
 # Y is the binned dataset
 # Y_regr is the original dataset
@@ -406,6 +388,7 @@ def plotKernelPCA(X, Y, Y_regr, out_p):
     title = "Kernel PCA, eigenvalue = " + str(r)
     plotClusterPairGrid(X, Y, out_p+"kernel_pca.png", 3, 1, title, False)
     plotClusterPairGrid(X, Y_regr, out_p+"kernel_pca_regr.png", 3, 1, title, True)
+
 
 # Y is the binned dataset
 # Y_rege is the original dataset

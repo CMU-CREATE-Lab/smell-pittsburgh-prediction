@@ -9,10 +9,11 @@ from sklearn.feature_selection import f_regression
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.ensemble import RandomForestClassifier 
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LogisticRegression
+
 
 # Perform feature selection (or variable selection)
 # Notice that we are not going to use dimension reduction like PCA
@@ -23,7 +24,6 @@ def selectFeatures(
     df_Y, # dataset containing label (in pandas dataframe format)
     is_regr=False, # regression or classification
     method="RFE", # method for selecting features
-    balance=False, # oversample or undersample the original features or not
     out_p=None, # the path for saving features,
     num_feat_rfe=30, # number of features to select for RFE
     step_rfe=10, # step for RFE
@@ -70,13 +70,7 @@ def selectFeatures(
     label_t = ["DayOfWeek", "HourOfDay"]
     df_t = df_X[label_t].copy(deep=True)
     df_X = df_X.drop(label_t, axis=1)
-
-    # Use balanced dataset or not
-    if balance:
-        log("Compute balanced dataset...", logger)
-        df_X_cp, df_Y_cp = balanceDataset(df_X, df_Y)
-    else:
-        df_X_cp, df_Y_cp = df_X.copy(deep=True), df_Y.copy(deep=True)
+    df_X_cp, df_Y_cp = df_X.copy(deep=True), df_Y.copy(deep=True)
 
     # Select features
     log("Perform feature selection...", logger)
@@ -84,7 +78,7 @@ def selectFeatures(
     selected_cols = df_X.columns[model.get_support()]
     df_X = df_X[selected_cols]
     log("Select " + str(len(selected_cols)) + " features...", logger)
-    
+
     # Print feature importance
     log("Compute feature importance...", logger)
     if is_regr:
@@ -99,11 +93,11 @@ def selectFeatures(
     feat_ims = np.round(feat_ims[sorted_ims_idx], 5)
     for k in zip(feat_ims, feat_names):
         log("{0:.5f}".format(k[0]) + " -- " + str(k[1]), logger)
-    
+
     # Merge
     log("Merge DayOfWeek and HourOfDay back to selected features...", logger)
     df_X = pd.concat([df_X, df_t], join="outer", axis=1)
-    
+
     # Save feature names
     if out_p:
         df_X.to_csv(out_p, index=False)

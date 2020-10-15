@@ -6,6 +6,7 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer
 import pytz
 
+
 # Get data
 # OUTPUT: raw esdr and smell data
 def getData(

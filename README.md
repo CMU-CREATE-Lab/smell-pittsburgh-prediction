@@ -47,11 +47,11 @@ Clone this repository.
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 sudo chown -R $USER smell-pittsburgh-prediction
 ```
-Create conda environment and install packages. It is important to install python 2.7 and pip first inside the newly created conda environment.
+Create conda environment and install packages. It is important to install python 3.8 and pip first inside the newly created conda environment.
 ```sh
 conda create -n smell-pittsburgh-prediction
 conda activate smell-pittsburgh-prediction
-conda install python=2.7
+conda install python=3.8
 conda install pip
 which pip # make sure this is the pip inside the smell-pittsburgh-prediction environment
 sh smell-pittsburgh-prediction/install_packages.sh

@@ -2,6 +2,7 @@ from util import *
 import pandas as pd
 import json
 
+
 def readInfo(p):
     with open(p) as f:
         data = f.readlines()
@@ -13,6 +14,7 @@ def readInfo(p):
         tail = data[-12]
     tail = tail.strip().replace("'", "\"")
     return pd.read_json("[" + tail + "]", orient="records")
+
 
 def readInfo2(p):
     with open(p) as f:
@@ -38,6 +40,7 @@ def readInfo2(p):
             info["test_cv"] = json.loads(data[i+2].split("\n")[0].replace("\'","\""))
     return info
 
+
 def main2():
     path = "data_main/analysis/experiment/"
     dt = []
@@ -50,36 +53,37 @@ def main2():
             train_cv.append(info["train_cv"])
             test_cv.append(info["test_cv"])
             corr = pd.read_csv(path + name + "/corr_inference.csv")
-            print "-"*10
-            print "Most important feature:"
-            print info["train_all"]["f1"]
-            print corr[info["train_all"]["f1"]]
-            print "Second important feature:"
-            print info["train_all"]["f2"]
-            print corr[info["train_all"]["f2"]]
-            print "-"*10
+            log("-"*10)
+            log("Most important feature:")
+            log(info["train_all"]["f1"])
+            log(corr[info["train_all"]["f1"]])
+            log("Second important feature:")
+            log(info["train_all"]["f2"])
+            log(corr[info["train_all"]["f2"]])
+            log("-"*10)
         except Exception as e:
-            print(e)
+            log(e)
             continue
     df_dt = pd.DataFrame(data=dt) # Decision Tree
     df_train_cv = pd.DataFrame(data=train_cv) # Training performance for cross-validation
     df_test_cv = pd.DataFrame(data=test_cv) # Testing performance for cross-validation
-    print df_dt
-    print "----------------"
-    print "Decision Tree"
-    print df_dt.describe()
-    print "----------------"
-    print "Unique for the most important feature"
-    print df_dt.groupby("f1").count()["FN"]
-    print "----------------"
-    print "Unique for the second important feature"
-    print df_dt.groupby("f2").count()["FN"]
-    print "----------------"
-    print "Training performance for cross-validation"
-    print df_train_cv.describe()
-    print "----------------"
-    print "Testing performance for cross-validation"
-    print df_test_cv.describe()
+    log(df_dt)
+    log("----------------")
+    log("Decision Tree")
+    log(df_dt.describe())
+    log("----------------")
+    log("Unique for the most important feature")
+    log(df_dt.groupby("f1").count()["FN"])
+    log("----------------")
+    log("Unique for the second important feature")
+    log(df_dt.groupby("f2").count()["FN"])
+    log("----------------")
+    log("Training performance for cross-validation")
+    log(df_train_cv.describe())
+    log("----------------")
+    log("Testing performance for cross-validation")
+    log(df_test_cv.describe())
+
 
 def evaluate(path, rule):
     cols = ["TP","FP","FN","precision","recall","fscore"]
@@ -88,29 +92,31 @@ def evaluate(path, rule):
         if rule in name:
             d.append(readInfo(path + name))
     df = pd.concat(d) # Decision Tree
-    print df
-    print df.describe()
+    log(df)
+    log(df.describe())
+
 
 def main():
-    print "------------------------------------------------------"
-    print "------------------------------------------------------"
-    print "Classification ExtraTrees"
+    log("------------------------------------------------------")
+    log("------------------------------------------------------")
+    log("Classification ExtraTrees")
     evaluate("data_main/log/classification/result/", "ET")
-    print "------------------------------------------------------"
-    print "------------------------------------------------------"
-    print "Classification Random Forest"
+    log("------------------------------------------------------")
+    log("------------------------------------------------------")
+    log("Classification Random Forest")
     evaluate("data_main/log/classification/result/", "RF")
-    print "------------------------------------------------------"
-    print "------------------------------------------------------"
-    print "Regression ExtraTrees"
+    log("------------------------------------------------------")
+    log("------------------------------------------------------")
+    log("Regression ExtraTrees")
     evaluate("data_main/log/regression/result/", "ET")
-    print "------------------------------------------------------"
-    print "------------------------------------------------------"
-    print "Regresssion Random Forest"
+    log("------------------------------------------------------")
+    log("------------------------------------------------------")
+    log("Regresssion Random Forest")
     evaluate("data_main/log/regression/result/", "RF")
-    print "------------------------------------------------------"
-    print "------------------------------------------------------"
-    print "Decision Tree"
+    log("------------------------------------------------------")
+    log("------------------------------------------------------")
+    log("Decision Tree")
     evaluate("data_main/analysis/log/result/", "DT")
+
 
 main2()

@@ -4,6 +4,7 @@ from util import *
 from sklearn import preprocessing
 import pytz
 
+
 # Merge all data together and compute features
 # OUTPUT: pandas dataframe containing features
 def computeFeatures(
@@ -25,7 +26,7 @@ def computeFeatures(
     in_p_std=None, # the path of std in pandas dataframe for scaling features
     aggr_axis=True, # whether we want to sum all smell reports together for all zipcodes
     logger=None):
-    
+
     log("Compute features...", logger)
 
     # Read preprocessed ESDR and smell report data
@@ -62,9 +63,8 @@ def computeFeatures(
 
     # Extract features (X) from ESDR data
     # For models that do not have time-series structure, we want to add time-series features
-    # For models that do have time-series structure (e.g. RNN), we want to use original features
     df_X = extractFeatures(df_esdr, b_hr, add_inter, add_roll, add_diff, add_sqa)
-    df_X[df_X < 1e-6] = 0 # prevent extreme small values 
+    df_X[df_X < 1e-6] = 0 # prevent extreme small values
 
     # Transform features
     if in_p_mean is not None and in_p_std is not None:
@@ -76,7 +76,7 @@ def computeFeatures(
     df_X = (df_X - df_X_mean) / df_X_std
     df_X = df_X.round(8)
     df_X = df_X.fillna(0)
-    
+
     # Add day of month, days of week, and hours of day
     df_X["Day"] = df_X.index.day
     df_X["DayOfWeek"] = df_X.index.dayofweek
@@ -125,7 +125,8 @@ def computeFeatures(
         checkAndCreateDir(out_p_std)
         df_X_std.to_csv(out_p_std, index=True)
         log("Original std created at " + out_p_std, logger)
-    return df_X, df_Y, df_C 
+    return df_X, df_Y, df_C
+
 
 def extractFeatures(df, b_hr, add_inter, add_roll, add_diff, add_sqa):
     df = df.copy(deep=True)
@@ -153,13 +154,13 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff, add_sqa):
             df_roll_mean.columns += "_Mean" + str(b_hr)
             df_all.append(df_roll_max)
             df_all.append(df_roll_mean)
-    
+
     # Combine dataframes
     #df.columns += ".Now"
     df_feat = df
     for d in df_all:
         df_feat = df_feat.join(d)
-    
+
     # Delete the first b_hr rows
     df_feat = df_feat.iloc[b_hr:]
 
@@ -189,18 +190,19 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff, add_sqa):
         df_feat = df_feat.join(df_inte)
     if add_sqa:
         df_feat = df_feat.join(df_sqa)
-    
+
     return df_feat
+
 
 def extractSmellResponse(df, f_hr, bins, labels, aggr_axis=False):
     df_resp = df.copy(deep=True)
-    
+
     # Compute the total smell_values in future f_hr hours
     if f_hr is not None:
         df_resp = df_resp.rolling(f_hr, min_periods=1).sum().shift(-1*f_hr)
         # Remove the last f_hr rows
         df_resp = df_resp.iloc[:-1*f_hr]
-    
+
     # Bin smell values for classification
     if aggr_axis: df_resp = df_resp.sum(axis=1)
     if bins is not None and labels is not None:
@@ -212,6 +214,7 @@ def extractSmellResponse(df, f_hr, bins, labels, aggr_axis=False):
 
     return df_resp
 
+
 def convertWindDirection(df):
     df_cp = df.copy(deep=True)
     for c in df.columns:
@@ -222,7 +225,7 @@ def convertWindDirection(df):
             df_c_sin = np.sin(np.deg2rad(df_c))
             df_c_cos.name += "cosine"
             df_c_sin.name += "sine"
-            df_cp.drop([c], axis=1, inplace=True) 
+            df_cp.drop([c], axis=1, inplace=True)
             df_cp[df_c_cos.name] = df_c_cos
             df_cp[df_c_sin.name] = df_c_sin
     return df_cp

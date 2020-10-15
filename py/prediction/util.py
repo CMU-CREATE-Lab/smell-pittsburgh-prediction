@@ -1,6 +1,5 @@
 # Python helper functions
 # Developed by Yen-Chia Hsu, hsu.yenchia@gmail.com
-# v1.3
 
 import logging
 from os import listdir
@@ -28,24 +27,18 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_fscore_support
 
-#from imblearn.over_sampling import SMOTE
-#from imblearn.over_sampling import RandomOverSampler
-
 import scipy.ndimage as ndimage
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-#from nltk.corpus import stopwords
-#from nltk.stem.wordnet import WordNetLemmatizer
-#import seaborn as sns
-
 # For Google Analytics
 #sudo pip install --upgrade google-api-python-client
 #sudo pip install --upgrade oauth2client
 from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
+
 
 # Generate a logger for loggin files
 def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()),
@@ -62,6 +55,7 @@ def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()),
     logger.addHandler(handler)
     return logger
 
+
 # log and print
 def log(msg, logger, level="info"):
     if logger is not None:
@@ -69,12 +63,14 @@ def log(msg, logger, level="info"):
             logger.info(msg)
         elif level == "error":
             logger.error(msg)
-    print msg
+    print(msg)
+
 
 # find the least common elements in a given array
 def findLeastCommon(arr):
     m = Counter(arr)
     return m.most_common()[-1][0]
+
 
 # Convert string to float in a safe way
 def str2float(string, **options):
@@ -86,25 +82,31 @@ def str2float(string, **options):
         else:
             return None
 
+
 # Check if a file exists
 def isFileHere(path):
     return os.path.isfile(path)
+
 
 # Return a list of all files in a folder
 def getAllFileNamesInFolder(path):
     return  [f for f in listdir(path) if isfile(join(path, f))]
 
+
 # Return the root url for ESDR
 def esdrRootUrl():
     return "https://esdr.cmucreatelab.org/"
+
 
 # Return the root url for smell Pittsburgh
 def smellPghRootUrl():
     return "http://api.smellpittsburgh.org/"
 
+
 # Return the root url for smell Pittsburgh Staging
 def smellPghStagingRootUrl():
     return "http://staging.api.smellpittsburgh.org/"
+
 
 # Replace a non-breaking space to a normal space
 def sanitizeUnicodeSpace(string):
@@ -113,6 +115,7 @@ def sanitizeUnicodeSpace(string):
         return string.replace(u'\xa0', u' ')
     else:
         return None
+
 
 # Convert a datetime object to epoch time
 def datetimeToEpochtime(dt):
@@ -123,12 +126,14 @@ def datetimeToEpochtime(dt):
     epoch_utc = datetime.utcfromtimestamp(0)
     return int((dt_utc - epoch_utc).total_seconds() * 1000)
 
+
 # Sum up two dictionaries
 def dictSum(a, b):
     d = defaultdict(list, deepcopy(a))
     for key, val in b.items():
         d[key] += val
     return dict(d)
+
 
 # Flip keys and values in a dictionary
 def flipDict(a):
@@ -137,11 +142,13 @@ def flipDict(a):
         d[val] += [key]
     return dict(d)
 
+
 # Check if a directory exists, if not, create it
 def checkAndCreateDir(path):
     dir_name = os.path.dirname(path)
     if dir_name != "" and not os.path.exists(dir_name):
         os.makedirs(dir_name)
+
 
 # Convert the epochtime index in a pandas dataframe to datetime index
 def epochtimeIdxToDatetime(df):
@@ -150,6 +157,7 @@ def epochtimeIdxToDatetime(df):
     df.index = pd.to_datetime(df.index, unit="s", utc=True)
     df.index.name = "DateTime"
     return df
+
 
 # Get the base name of a file path
 def getBaseName(path, **options):
@@ -165,6 +173,7 @@ def getBaseName(path, **options):
         else:
             return base_name_no_ext
 
+
 # Remove all non-ascii characters in the string
 def removeNonAsciiChars(str_in):
     if str_in is None:
@@ -172,68 +181,6 @@ def removeNonAsciiChars(str_in):
     else:
         return str(unicode(str_in.encode("utf-8"), "ascii", "ignore"))
 
-# Augment time series data
-# INPUT:
-# - df_X: 2D numpy array with shape (sample_size, feature_size, sequence_length, 1)
-# - df_Y: 1D numpy array with shape (sample_size)
-def augmentTimeSeriesData(X, Y):
-    X_new, Y_new = [], []
-    for i in range(X.shape[0]):
-        x = X[i,:,:,:]
-        X_new.append(x)
-        if Y is not None:
-            y = Y[i]
-            Y_new.append(y)
-        # Resize a small part of image
-        for kernel_size in [2]:
-            for j in range(0, int(np.floor(x.shape[1]-kernel_size+1))):
-                # Choose a block in the middle
-                before = x[:, 0:j, :]
-                block = x[:, j:j+kernel_size, :]
-                after = x[:, j+kernel_size:, :]
-                s = block.shape
-                # Make the block smaller or larger and resize the array
-                block_1 = ndimage.zoom(block, (1, 0.5, 1))
-                block_2 = ndimage.zoom(block, (1, 2, 1))
-                img_1 = np.concatenate((before, block_1, after), axis=1)
-                img_2 = np.concatenate((before, block_2, after), axis=1)
-                z_1 = float(x.shape[1]) / img_1.shape[1]
-                z_2 = float(x.shape[1]) / img_2.shape[1]
-                img_1 = ndimage.zoom(img_1, (1, z_1, 1))
-                img_2 = ndimage.zoom(img_2, (1, z_2, 1))
-                X_new.append(img_1)
-                X_new.append(img_2)
-                if Y is not None:
-                    Y_new.append(y)
-                    Y_new.append(y)
-        if i % 1000 == 0:
-            print "Augment data: i = " + str(i)
-    X_new = np.array(X_new)
-    Y_new = np.array(Y_new)
-    return X_new, Y_new
-
-# Compute time series batches from a 2D numpy array
-# INPUT:
-# - X: 2D numpy array with shape (sample_size, feature_size)
-# - Y: 2D numpy array with shape (sample_size, label_size)
-# - sequence_length: the number of data points to look back
-# - index_filter: 1D numpy boolean array, (only process and return the indices that has filter value True)
-# OUTPUT:
-# - X: 3D numpy array with shape (num_of_mini_batches, sequence_length, feature_size)
-# - Y: 1D numpy array with shape (num_of_mini_batches)
-def computeTimeSeriesBatches(X, Y, sequence_length, index_filter=None):
-    data_X = []
-    data_Y = []
-    index_all = np.array(range(sequence_length, X.shape[0]))
-    if index_filter is not None:
-        index_filter = np.array(index_filter[sequence_length:])
-        index_all = index_all[index_filter]
-    for i in index_all:
-        data_X.append(X[i-sequence_length+1:i+1])
-        if Y is not None: data_Y.append(Y[i])
-    data_X = np.array(data_X)
-    data_Y = np.array(data_Y)
-    return data_X, data_Y
 
 # Compute a custom metric for evaluating the regression function
 # Notice that for daytime cases, the Y arrays may contain NaN
@@ -303,6 +250,7 @@ def evalEventDetection(Y_true, Y_pred, thr=40, h=1, round_to_decimal=3):
 
     return {"TP":TP, "FP":FP, "FN":FN, "precision":precision, "recall":recall, "f_score":f_score}
 
+
 # Merge intervals that are less or equal than "h" hours away from each other
 # (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
 def mergeInterval(intervals, h=1):
@@ -321,6 +269,7 @@ def mergeInterval(intervals, h=1):
         intervals_merged.append(current_iv)
     return intervals_merged
 
+
 # Convert a binary array with False and True to intervals
 # input = [False, True, True, False, True, False]
 # output = [[1,2], [4,4]]
@@ -336,6 +285,7 @@ def binary2Interval(Y):
             intervals.append(current_iv)
             current_iv = None
     return intervals
+
 
 # Compute the evaluation result of regression or classification Y=F(X)
 # INPUTS:
@@ -403,6 +353,7 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
             metric["cm"] = flattenDataframe(metric["cm"])
     return metric
 
+
 # Get wrongly and correctly classified data points
 # Only works for classification with label 0 and 1
 # INPUT:
@@ -447,6 +398,7 @@ def evaluateData(Y_true, Y_pred, X, col_names=None):
     df_fn = pd.DataFrame(data=data_fn, columns=columns)
     return {"tp": df_tp, "fp": df_fp, "tn": df_tn, "fn": df_fn}
 
+
 # Flatten a pandas dataframe
 def flattenDataframe(df):
     df = df.stack()
@@ -456,51 +408,24 @@ def flattenDataframe(df):
     val = df.values.tolist()
     return [idx, val]
 
-# Oversample the minority class and undersample the majority class for classification
-# INPUT:
-# - X: predictors (or features), 2D array
-# - Y: responses (or labels), 1D array
-def balanceDataset(X, Y):
-    # Check types
-    X_columns, Y_name = None, None
-    if isinstance(X, pd.DataFrame): X_columns = X.columns
-    if isinstance(Y, pd.Series): Y_name = Y.name
-
-    # Use SMOTE algorithm
-    X = np.array(X)
-    Y = np.array(Y)
-    s = X.shape
-    if len(s) > 4:
-        print "Unable to resample a dataset with feature having more than 4 dimensions"
-        return None, None
-    if len(s) == 4: # this is the CNN case (convolutional neural network)
-        X = X.reshape(s[0], s[1]*s[2]*s[3])
-    model = SMOTE(random_state=0, n_jobs=-1, kind="svm")
-    #model = RandomOverSampler(random_state=0)
-    X_res, Y_res = model.fit_sample(X, Y)
-    if len(s) == 4:
-        X_res = X_res.reshape(X_res.shape[0], s[1], s[2], s[3])
-
-    # Revert types
-    if X_columns is not None: X_res = pd.DataFrame(data=X_res, columns=X_columns)
-    if Y_name is not None: Y_res = pd.Series(data=Y_res, name=Y_name)
-
-    return X_res, Y_res
 
 # Load json file
 def loadJson(fpath):
     with open(fpath, "r") as f:
         return json.load(f)
 
+
 # Save json file
 def saveJson(content, fpath):
     with open(fpath, "w") as f:
         json.dump(content, f)
 
+
 # Save text file
 def saveText(content, fpath):
     with open(fpath, "w") as f:
         f.write(content)
+
 
 # Get the access token from ESDR, need the auth.json file
 # See https://github.com/CMU-CREATE-Lab/esdr/blob/master/HOW_TO.md
@@ -522,6 +447,7 @@ def getEsdrAccessToken(auth_json_path):
         logger.info("Receive access token " + access_token)
         logger.info("Receive user ID " + str(user_id))
         return access_token, user_id
+
 
 # Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
 # data_json = {
@@ -631,6 +557,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     logger.info("Data uploaded")
     return [device_id, feed_id, api_key, api_key_read_only]
 
+
 # Get data from ESDR
 # source = [
 #    [{"feed": 27, "channel": "NO_PPB"}],
@@ -640,7 +567,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
 # start_time: starting epochtime in seconds
 # end_time: ending epochtime in seconds
 def getEsdrData(source, **options):
-    print "Get ESDR data..."
+    print("Get ESDR data...")
 
     # Url parts
     api_url = esdrRootUrl() + "api/v1/"
@@ -681,9 +608,10 @@ def getEsdrData(source, **options):
     # Return
     return data
 
+
 # Get smell reports data from smell PGH
 def getSmellReports(**options):
-    print "Get smell reports..."
+    print("Get smell reports...")
 
     # Url
     api_url = smellPghRootUrl() + "api/v1/"
@@ -721,6 +649,7 @@ def getSmellReports(**options):
     # Return
     return df
 
+
 # Get Google Analytics data, need to obtain the client secret from Google API console first
 # see https://developers.google.com/analytics/devguides/config/mgmt/v3/authorization
 def getGA(
@@ -743,7 +672,7 @@ def getGA(
         "Event Category"] # pretty names for dimensions
     ):
 
-    print "Get Google Analytics..."
+    print("Get Google Analytics...")
 
     SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
     KEY_FILE_LOCATION = in_path
@@ -775,16 +704,17 @@ def getGA(
         with open(out_path + file_name, 'w') as out_file:
             out_file.write(",".join(dimensions_col_names) + "," + ",".join(metrics_col_names) + "\n")
             if "rows" not in r["reports"][0]["data"]:
-                print "Error: no rows"
+                print("Error: no rows")
             else:
                 rows = r["reports"][0]["data"]["rows"]
-                print str(len(rows)) + " rows from " + k["startDate"] + " to " + k["endDate"]
+                print(str(len(rows)) + " rows from " + k["startDate"] + " to " + k["endDate"])
                 for p in rows:
                     line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
                     out_file.write(line + "\n")
-                print "Google Analytics file created at " + out_path + file_name
+                print("Google Analytics file created at " + out_path + file_name)
         # Pause for some time
         time.sleep(1)
+
 
 # Plot a grid of scatter plot pairs in X, with point colors representing binary labels
 def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
@@ -831,6 +761,7 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
     fig.clf()
     plt.close()
 
+
 # Plot bar charts
 # Note that x, y, title are all arrays
 def plotBar(x, y, h, w, title, out_p):
@@ -848,35 +779,17 @@ def plotBar(x, y, h, w, title, out_p):
     fig.clf()
     plt.close()
 
-# The input is a pandas time series
-# replace is a dictionary, key is the original word, value is the replaced word
-# exclude is an array, indicating words that we do not want
-def textAnalysis(s, exclude=[], replace={}):
-    sw = stopwords.words("english")
-    s = s.str.lower()
-    s = s.dropna().values
-    s = " ".join(map(str, s))
-    s = re.sub("[^0-9a-zA-Z]+", " ", s)
-    s = s.split(" ")
-    wnl = WordNetLemmatizer() # for lemmatisation
-    res = []
-    len_exclude = len(exclude)
-    for k in s:
-        k = wnl.lemmatize(wnl.lemmatize(k), "v")
-        if k is not None and k != "" and k not in sw and not hasNumbers(k):
-            if len_exclude > 0 and k in exclude: continue
-            if k in replace: k = replace[k]
-            res.append(k)
-    return res
 
 def dateIndexToMonthYear(index):
     month_txt = np.array(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
     return map("\n".join, zip(month_txt[index.month.values - 1], index.year.astype(str).values))
 
+
 # This function converts a date object to epoch time
 def dateToEpochtime(d):
     dt = datetime.combine(d, datetime.min.time())
     return datetimeToEpochtime(dt)
+
 
 # This function groups a numpy array containing epoch time by date
 def groupTime(epochtime, unit):
@@ -910,6 +823,7 @@ def groupTime(epochtime, unit):
 
     return data
 
+
 # This function aggregates a numpy array containing epoch time
 def aggregateTime(epochtime, unit, resample_method, format_method, **options):
     raw_time = pd.to_datetime(epochtime, unit=unit)
@@ -941,13 +855,16 @@ def aggregateTime(epochtime, unit, resample_method, format_method, **options):
 
     return {"data": map(list, zip(keys, vals.tolist())), "val_argmax": vals.argmax(), "val_max": vals.max()}
 
+
 # Count the word frequency of a word array
 def countWords(A):
     return Counter(A)
 
+
 # Find if a string contains numbers
 def hasNumbers(str):
     return bool(re.search(r'\d', str))
+
 
 def plotScatter(df, x, y, title, out_p):
     ax = df.plot.scatter(x=x, y=y, figsize=(6, 6))
@@ -957,6 +874,7 @@ def plotScatter(df, x, y, title, out_p):
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
+
 
 # Plot line charts
 # df_all and title_all are all arrays
@@ -973,6 +891,7 @@ def plotLineCharts(df_all, title_all, h, w, out_p):
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
+
 
 # Plot box charts
 # df_all and title_all are all arrays
@@ -993,6 +912,7 @@ def plotBoxCharts(df_all, title_all, h, w, out_p):
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
+
 
 # Find if the datetime object is timezone aware
 def isDatetimeObjTzAware(dt):

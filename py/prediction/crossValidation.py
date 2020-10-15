@@ -14,9 +14,9 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 import gc
-
 import warnings
 warnings.filterwarnings("ignore") # "error", "ignore", "always", "default", "module", or "once"
+
 
 # Cross validation
 def crossValidation(
@@ -27,12 +27,9 @@ def crossValidation(
     out_p_root=None, # root directory for outputing files
     method="ET", # see trainModel.py
     is_regr=False, # regression or classification,
-    balance=False, # oversample or undersample training dataset
     only_day_time=False, # only use daytime data for training or not
-    sequence_length=3, # length of data points (hours) to look back (only work for CRNN)
     num_folds=144, # number of folds for validation
     skip_folds=48, # skip first n folds (not enough data for training) 48
-    augment_data=False, # augment data or not
     select_feat=False, # False means do not select features, int means select n number of features
     hd_start=5, # definition of the starting time of "daytime", e.g. 6 means 6am
     hd_end=11, # definition of the ending time of "daytime", e.g. 14 means 2pm
@@ -44,12 +41,10 @@ def crossValidation(
     log("================================================================================", logger)
     log("================================================================================", logger)
     log("Cross validation using method = " + method, logger)
-    log("balance = " + str(balance), logger)
     log("only_day_time = " + str(only_day_time), logger)
     log("is_regr = " + str(is_regr), logger)
     log("num_folds = " + str(num_folds), logger)
     log("skip_folds = " + str(skip_folds), logger)
-    log("augment_data = " + str(augment_data), logger)
     log("select_feat = " + str(select_feat), logger)
 
     # Ouput path
@@ -74,27 +69,10 @@ def crossValidation(
         df_hd = df_X["HourOfDay"]
         daytime_idx = ((df_hd>=hd_start)&(df_hd<=hd_end)).values
 
-    # Convert to time series batches if using models that have time-series structure (e.g. RNN)
-    # Dimension of X for RNN is (batch_size, sequence_length, feature_size)
-    # Dimension of X for CNN is (batch_size, feature_size, sequence_length, 1)
-    if "CRNN" in method or "ANCNN" in method:
-        log("sequence_length = " + str(sequence_length), logger) # the number of data points to look back
-        # Compute batches
-        C = df_C.values
-        X, Y = computeTimeSeriesBatches(df_X.values, df_Y.values, sequence_length, index_filter=daytime_idx)
-        # For CNN, we want to do 1D convolution on time-series images
-        # Each image has dimention (sequence_length * 1), and has channel size equal to feature_size
-        X = np.expand_dims(X.transpose(0,2,1), axis=3)
-        # save the original data for pre-training an autoencoder
-        if "ANCNN" in method:
-            X_pretrain, _  = computeTimeSeriesBatches(df_X.values, None, sequence_length)
-            X_pretrain = np.expand_dims(X_pretrain.transpose(0,2,1), axis=3)
-    else:
-        # For non-CNN methods, we need to perform feature selection for each cross validation fold
-        # So do not convert the dataframe to numpy format yet
-        if only_day_time:
-            df_X, df_Y = df_X[daytime_idx], df_Y[daytime_idx], df_C[daytime_idx]
-        X, Y, C = df_X, df_Y, df_C
+    # Perform feature selection for each cross validation fold
+    if only_day_time:
+        df_X, df_Y = df_X[daytime_idx], df_Y[daytime_idx], df_C[daytime_idx]
+    X, Y, C = df_X, df_Y, df_C
 
     # Validation folds
     # Notice that this is time-series prediction, we cannot use traditional cross-validation folds
@@ -102,11 +80,6 @@ def crossValidation(
         tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=train_size/2)
     else:
         tscv = TimeSeriesSplit(n_splits=num_folds, max_train_size=train_size)
-
-    # For pretraining the autoencoder, we always want to use all data
-    if "ANCNN" in method:
-        tscv_pretrain = TimeSeriesSplit(n_splits=num_folds, max_train_size=train_size)
-        tscv_pretrain_split = list(tscv_pretrain.split(X_pretrain))
 
     # Perform cross validation
     fold = 0
@@ -120,36 +93,19 @@ def crossValidation(
         fold += 1
         log("--------------------------------------------------------------", logger)
         log("Processing fold " + str(fold) + " with method " + str(method) + ":", logger)
-        if len(X.shape) == 2:
-            # For non-CNN methods, we need to do feature selection and convert data to numpy format
-            X_train, Y_train, C_train = X.iloc[train_idx], Y.iloc[train_idx], C.iloc[train_idx]
-            X_test, Y_test, C_test = X.iloc[test_idx], Y.iloc[test_idx], C.iloc[test_idx]
-            if select_feat:
-                X_train, Y_train = selectFeatures(X_train, Y_train, is_regr=is_regr, logger=logger, num_feat_rfe=select_feat)
-            X_test = X_test[X_train.columns]
-            X_train, Y_train, C_train = X_train.values, Y_train.values, C_train.values
-            X_test, Y_test, C_test = X_test.values, Y_test.values, C_test.values
-            if augment_data:
-                log("Data augmentation is ignored for non-CNN methods", logger)
-        else:
-            # For CNN methods, we need to augment time series data
-            X_train, Y_train, C_train = X[train_idx], Y[train_idx], C[train_idx]
-            if augment_data:
-                log("Augment time series data...", logger)
-                X_train, Y_train = augmentTimeSeriesData(X_train, Y_train)
-            X_test, Y_test, C_test = X[test_idx], Y[test_idx], C[test_idx]
+        # Do feature selection and convert data to numpy format
+        X_train, Y_train, C_train = X.iloc[train_idx], Y.iloc[train_idx], C.iloc[train_idx]
+        X_test, Y_test, C_test = X.iloc[test_idx], Y.iloc[test_idx], C.iloc[test_idx]
+        if select_feat:
+            X_train, Y_train = selectFeatures(X_train, Y_train, is_regr=is_regr, logger=logger, num_feat_rfe=select_feat)
+        X_test = X_test[X_train.columns]
+        X_train, Y_train, C_train = X_train.values, Y_train.values, C_train.values
+        X_test, Y_test, C_test = X_test.values, Y_test.values, C_test.values
         # Prepare training and testing set
         train = {"X": X_train, "Y": Y_train, "Y_pred": None, "C": C_train}
         test = {"X": X_test, "Y": Y_test, "Y_pred": None, "C": C_test}
-        if "ANCNN" in method:
-            tr_idx, te_idx = tscv_pretrain_split[fold]
-            train["X_pretrain"] = X_pretrain[tr_idx]
-            test["X_pretrain"] = X_pretrain[te_idx]
-            #if augment_data:
-            #    log("Augment time series data (for pre-training)...", logger)
-            #    train["X_pretrain"], _ = augmentTimeSeriesData(train["X_pretrain"] , None)
         # Train model
-        model = trainModel(train, test=test, method=method, is_regr=is_regr, logger=logger, balance=balance)
+        model = trainModel(train, test=test, method=method, is_regr=is_regr, logger=logger)
         # Evaluate model
         if method == "HCR" or method == "CR": # the hybrid crowd classifier requires Y
             test["Y_pred"] = model.predict(test["X"], test["C"])
@@ -176,20 +132,15 @@ def crossValidation(
             else:
                 test_all["Y_score"].append(model.predict_proba(test["X"]))
                 train_all["Y_score"].append(model.predict_proba(train["X"]))
-        if len(X.shape) == 2:
-            train_all["X"].append(train["X"])
-            test_all["X"].append(test["X"])
-        else: # CNN case
-            train_all["X"].append(train["X"][:,:,-1,:].squeeze())
-            test_all["X"].append(test["X"][:,:,-1,:].squeeze())
+        train_all["X"].append(train["X"])
+        test_all["X"].append(test["X"])
         # Print result
-        if not ("CRNN" in method or "CRMANN" in method):
-            for m in metric_i_train:
-                log("Training metrics: " + m, logger)
-                log(metric_i_train[m], logger)
-            for m in metric_i_test:
-                log("Testing metrics: " + m, logger)
-                log(metric_i_test[m], logger)
+        for m in metric_i_train:
+            log("Training metrics: " + m, logger)
+            log(metric_i_train[m], logger)
+        for m in metric_i_test:
+            log("Testing metrics: " + m, logger)
+            log(metric_i_test[m], logger)
         # Plot graph
         log("Print time series plots for fold " + str(fold), logger)
         hd_val_test = test["X"][:,-1:].squeeze()
@@ -347,6 +298,7 @@ def crossValidation(
     gc.collect()
     log("Done", logger)
 
+
 def rocPlot(method, Y_true, Y_score, out_p):
     roc = round(roc_auc_score(Y_true, Y_score[:, -1]), 4)
     # Precision vs recall
@@ -386,6 +338,7 @@ def rocPlot(method, Y_true, Y_score, out_p):
     plt.tight_layout()
     fig.savefig(out_p + method + "_clas_tpr_thr.png")
 
+
 def prPlot(method, Y_true, Y_score, out_p):
     # Precision vs recall
     fig = plt.figure(figsize=(8, 8), dpi=150)
@@ -423,6 +376,7 @@ def prPlot(method, Y_true, Y_score, out_p):
     plt.tight_layout()
     fig.savefig(out_p + method + "_clas_r_thr.png")
 
+
 def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx, fold="all", show_y_tick=False, w=18):
     if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
     if len(Y_pred.shape) > 1: Y_pred = np.sum(Y_pred, axis=1)
@@ -455,6 +409,7 @@ def timeSeriesPlot(method, Y_true, Y_pred, out_p, dt_idx, fold="all", show_y_tic
     fig.savefig(out_p + method + "_fold_" + str(fold) + "_regr_time.png")
     fig.clf()
     plt.close()
+
 
 def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
@@ -527,6 +482,7 @@ def residualPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     plt.grid(True)
     plt.tight_layout()
     fig.savefig(out_p + method + "_regr_res_pred_dt.png")
+
 
 def predictionPlot(method, r2, mse, Y_true, Y_pred, out_p, dt_idx, r2_dt, mse_dt):
     if len(Y_true.shape) > 1: Y_true = np.sum(Y_true, axis=1)
