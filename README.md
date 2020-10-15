@@ -56,6 +56,10 @@ conda install pip
 which pip # make sure this is the pip inside the smell-pittsburgh-prediction environment
 sh smell-pittsburgh-prediction/install_packages.sh
 ```
+If the environment already exists and you want to remove it before installing packages, use the following:
+```sh
+conda env remove -n smell-pittsburgh-prediction
+```
 Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
 ```sh
 cd smell-pittsburgh-prediction/py/prediction/
