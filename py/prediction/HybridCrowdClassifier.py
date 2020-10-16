@@ -1,9 +1,9 @@
-from util import *
 import numpy as np
-import copy
 
 
-# A hybrid model that combines crowdsourcing and machine learning classifier
+"""
+A hybrid model that combines crowdsourcing and machine learning classifier
+"""
 class HybridCrowdClassifier(object):
     def __init__(self,
             base_estimator=None, # if no estimator is specified, only use crowdsourcing

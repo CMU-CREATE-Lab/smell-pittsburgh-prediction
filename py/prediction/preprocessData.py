@@ -1,15 +1,14 @@
 import pandas as pd
-import numpy as np
-from util import *
-from datetime import datetime
+from util import log, getAllFileNamesInFolder, checkAndCreateDir, epochtimeIdxToDatetime
 import re
 from sklearn.feature_extraction.text import CountVectorizer
-import pytz
 
 
-# Preprocess data
-# INPUT: raw esdr and smell data
-# OUTPUT: preprocessed esdr and smell data
+"""
+Preprocess data
+INPUT: raw esdr and smell data
+OUTPUT: preprocessed esdr and smell data
+"""
 def preprocessData(
     df_esdr_array_raw=None, # raw esdr dataframes
     df_smell_raw=None, # raw smell dataframe
@@ -27,7 +26,7 @@ def preprocessData(
                     df_esdr_array_raw.append(pd.read_csv(in_p[0] + f, index_col="EpochTime"))
             df_smell_raw = pd.read_csv(in_p[1], index_col="EpochTime")
         else:
-            if df_esdr is None:
+            if df_esdr_array_raw is None:
                 log("ERROR: no data, return None.", logger)
                 return None
 

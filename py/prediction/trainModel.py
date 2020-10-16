@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.matlib
 import copy
-from util import *
+from util import log, findLeastCommon
 import joblib
 
 from sklearn.ensemble import RandomForestRegressor
@@ -9,7 +9,6 @@ from sklearn.svm import SVR
 from sklearn.linear_model import HuberRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import ElasticNet
-from sklearn.ensemble import BaggingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import ExtraTreesRegressor
@@ -19,21 +18,20 @@ from sklearn.tree import DecisionTreeRegressor
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.ensemble import BaggingClassifier
-from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import LinearSVC
 from HybridCrowdClassifier import HybridCrowdClassifier
 from sklearn.dummy import DummyClassifier
 
 
-# Train a regression or classification model
-# To find a function F such that Y=F(X)
-# OUTPUT: model
+"""
+Train a regression or classification model
+To find a function F such that Y=F(X)
+OUTPUT: model
+"""
 def trainModel(
     train, # the training set in pandas dataframe (contain train["X"] and train["Y"])
     test=None, # the testing set in pandas dataframe (contain test["X"] and test["Y"])

@@ -1,14 +1,12 @@
-import numpy as npc
+import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.model_selection import TimeSeriesSplit
-from trainModel import *
-import os
-from util import *
-from datetime import datetime
-from selectFeatures import *
+from trainModel import trainModel
+from util import log, checkAndCreateDir, computeMetric, evaluateData
+from selectFeatures import selectFeatures
 import copy
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve
@@ -18,7 +16,6 @@ import warnings
 warnings.filterwarnings("ignore") # "error", "ignore", "always", "default", "module", or "once"
 
 
-# Cross validation
 def crossValidation(
     df_X=None, # features
     df_Y=None, # labels

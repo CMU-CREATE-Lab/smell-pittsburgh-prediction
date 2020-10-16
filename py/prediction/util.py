@@ -1,6 +1,3 @@
-# Python helper functions
-# Developed by Yen-Chia Hsu, hsu.yenchia@gmail.com
-
 import logging
 from os import listdir
 from os.path import isfile, join
@@ -17,18 +14,10 @@ import numpy as np
 from collections import Counter
 import time
 import re
-
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
-from sklearn.metrics import f1_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import recall_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_recall_fscore_support
-
-import scipy.ndimage as ndimage
-
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -111,7 +100,7 @@ def smellPghStagingRootUrl():
 # Replace a non-breaking space to a normal space
 def sanitizeUnicodeSpace(string):
     type_string = type(string)
-    if string is not None and (type_string is str or type_string is unicode):
+    if string is not None and type_string is str:
         return string.replace(u'\xa0', u' ')
     else:
         return None
@@ -179,7 +168,7 @@ def removeNonAsciiChars(str_in):
     if str_in is None:
         return ""
     else:
-        return str(unicode(str_in.encode("utf-8"), "ascii", "ignore"))
+        return str_in.encode("ascii", "ignore").decode()
 
 
 # Compute a custom metric for evaluating the regression function
@@ -437,7 +426,7 @@ def getEsdrAccessToken(auth_json_path):
     headers = {"Authorization": "", "Content-Type": "application/json"}
     r = requests.post(url, data=json.dumps(auth_json), headers=headers)
     r_json = r.json()
-    if r.status_code is not 200:
+    if r.status_code != 200:
         logger.error("ESDR returns: " + json.dumps(r_json) + " when getting the access token")
         return None, None
     else:
@@ -469,7 +458,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     r = requests.get(url, headers=headers)
     r_json = r.json()
     device_id = None
-    if r.status_code is not 200:
+    if r.status_code != 200:
         logger.error("ESDR returns: " + json.dumps(r_json) + " when getting the device ID for '" + device_name + "'")
     else:
         logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the device ID for '" + device_name + "'")
@@ -489,7 +478,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
         }
         r = requests.post(url, data=json.dumps(device_json), headers=headers)
         r_json = r.json()
-        if r.status_code is not 201:
+        if r.status_code != 201:
             logger.error("ESDR returns: " + json.dumps(r_json) + " when creating a device for '" + device_name + "'")
             return None
         else:
@@ -505,7 +494,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     feed_id = None
     api_key = None
     api_key_read_only = None
-    if r.status_code is not 200:
+    if r.status_code != 200:
         logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the feed ID")
     else:
         logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the feed ID")
@@ -532,7 +521,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
         }
         r = requests.post(url, data=json.dumps(feed_json), headers=headers)
         r_json = r.json()
-        if r.status_code is not 201:
+        if r.status_code != 201:
             logger.error("ESDR returns: " + json.dumps(r_json) + " when creating a feed")
             return None
         else:
@@ -547,7 +536,7 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     url = esdrRootUrl() + "api/v1/feeds/" + str(feed_id)
     r = requests.put(url, data=json.dumps(data_json), headers=headers)
     r_json = r.json()
-    if r.status_code is not 200:
+    if r.status_code != 200:
         logger.error("ESDR returns: " + json.dumps(r_json) + " when uploading data")
         return None
     else:
@@ -766,9 +755,9 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
 # Note that x, y, title are all arrays
 def plotBar(x, y, h, w, title, out_p):
     fig = plt.figure(figsize=(w*12, h*1.5))
-    c = 1
     for i in range(0, h*w):
-        ax = plt.subplot(h, w, i+1)
+        #ax = plt.subplot(h, w, i+1)
+        plt.subplot(h, w, i+1)
         plt.title(title[i], fontsize=14)
         plt.bar(range(0,len(x[i])), y[i], 0.6, color=(0.4,0.4,0.4), align="center")
         plt.xticks(range(0,len(x[i])), x[i])
@@ -880,7 +869,6 @@ def plotScatter(df, x, y, title, out_p):
 # df_all and title_all are all arrays
 def plotLineCharts(df_all, title_all, h, w, out_p):
     fig = plt.figure(figsize=(w*12, h*2))
-    c = 1
     for i in range(0, h*w):
         ax = plt.subplot(h, w, i+1)
         plt.title(title_all[i], fontsize=14)
@@ -899,7 +887,6 @@ def plotBoxCharts(df_all, title_all, h, w, out_p):
     fig = plt.figure(figsize=(w*4, h*4))
     medianprops = dict(linestyle="-", linewidth=2.5, color="firebrick")
     meanpointprops = dict(marker="D", markeredgecolor="firebrick", markerfacecolor="firebrick", markersize=7)
-    c = 1
     for i in range(0, h*w):
         ax = plt.subplot(h, w, i+1)
         plt.title(title_all[i], fontsize=14)

@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
-from util import *
-from sklearn import preprocessing
+from util import log, checkAndCreateDir, isDatetimeObjTzAware
 import pytz
 
 
-# Merge all data together and compute features
-# OUTPUT: pandas dataframe containing features
+"""
+Merge all data together and compute features
+OUTPUT: pandas dataframe containing features
+"""
 def computeFeatures(
     df_esdr=None, # the pandas dataframe that contains the predictors (preprocessed esdr data)
     df_smell=None, # the pandas dataframe that contains the responses (preprocessed smell data)

@@ -1,25 +1,26 @@
-from util import *
+from util import plotClusterPairGrid, computeMetric
 import numpy as np
 from copy import deepcopy
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.tree import _tree
 from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 from sklearn.decomposition import KernelPCA
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import export_graphviz
-from sklearn.feature_selection import SelectFromModel
-from sklearn.linear_model import LogisticRegression
-from selectFeatures import *
+#from sklearn.linear_model import LogisticRegression
+from selectFeatures import selectFeatures
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import MeanShift
 from scipy.stats import pointbiserialr
-from analyzeData import *
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-# This class builds and interprets the model
+"""
+This class builds and interprets the model
+"""
 class Interpreter(object):
     def __init__(self,
         df_X=None, # the predictors, a pandas dataframe
@@ -111,7 +112,6 @@ class Interpreter(object):
         n = len(self.df_X)
         for c in self.df_X.columns:
             if c in ["Day", "DayOfWeek", "HourOfDay"]: continue
-            s = []
             r, p = pointbiserialr(Y, self.df_X[c])
             df_corr_info[c] = pd.Series(data=(np.round(r,3), np.round(p,5), n))
             df_corr[c] = pd.Series(data=np.round(r,3))

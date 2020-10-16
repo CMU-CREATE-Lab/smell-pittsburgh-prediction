@@ -1,14 +1,10 @@
-import pandas as pd
-import numpy as np
-from util import *
-from datetime import datetime
-import re
-from sklearn.feature_extraction.text import CountVectorizer
-import pytz
+from util import log, datetimeToEpochtime, getEsdrData, getSmellReports, checkAndCreateDir
 
 
-# Get data
-# OUTPUT: raw esdr and smell data
+"""
+Get data
+OUTPUT: raw esdr and smell data
+"""
 def getData(
     out_p=None, # output file path
     start_dt=None, # starting date for the data

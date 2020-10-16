@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from util import *
+from util import log
 from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import SelectFromModel
 from sklearn.feature_selection import SelectFpr
@@ -8,17 +8,18 @@ from sklearn.feature_selection import SelectFdr
 from sklearn.feature_selection import f_regression
 from sklearn.feature_selection import f_classif
 from sklearn.feature_selection import RFE
-from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import LogisticRegression
 
 
-# Perform feature selection (or variable selection)
-# Notice that we are not going to use dimension reduction like PCA
-# The reason is because dimension reduction makes variables hard to interpret
-# OUTPUT: selected features
+"""
+Perform feature selection (or variable selection)
+Notice that we are not going to use dimension reduction like PCA
+The reason is because dimension reduction makes variables hard to interpret
+OUTPUT: selected features
+"""
 def selectFeatures(
     df_X, # dataset containing features (in pandas dataframe format)
     df_Y, # dataset containing label (in pandas dataframe format)

@@ -5,25 +5,27 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 import gc
-from util import *
+from util import log, checkAndCreateDir, generateLogger, plotClusterPairGrid
 from sklearn.decomposition import PCA
 from sklearn.decomposition import KernelPCA
 from sklearn.decomposition import TruncatedSVD
 import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from computeFeatures import *
-from Interpreter import *
+from computeFeatures import computeFeatures
+from Interpreter import Interpreter
 from sklearn.ensemble import RandomTreesEmbedding
 from sklearn.manifold import SpectralEmbedding
 from copy import deepcopy
-from crossValidation import *
+from crossValidation import crossValidation
 from scipy.stats import pearsonr
-from collections import Counter
-import re
 from scipy.stats import pointbiserialr
+from datetime import datetime
 
 
-# Analyze data
+"""
+Analyzing Smell PGH data
+Revealing the patterns of air pollution
+"""
 def analyzeData(
     in_p=None, # input path for raw esdr and smell data
     out_p_root=None, # root directory for outputing files
@@ -110,7 +112,6 @@ def computeCrossCorrelation(x, y, max_lag=None):
     return cc
 
 
-# Correlational study
 def corrStudy(in_p, out_p, logger, is_regr=False):
     log("Compute correlation of lagged X and current Y...", logger)
     f_name = "corr_with_time_lag"
@@ -321,7 +322,9 @@ def plotPair(df_v1, df_v2, title_head, out_p):
     gc.collect()
 
 
-# Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
+"""
+Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
+"""
 def plotCorrMatirx(df, out_p):
     # Compute correlation matrix
     df_corr = df.corr().round(3)
@@ -377,8 +380,10 @@ def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
     plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
 
-# Y is the binned dataset
-# Y_regr is the original dataset
+"""
+Y is the binned dataset
+Y_regr is the original dataset
+"""
 def plotKernelPCA(X, Y, Y_regr, out_p):
     X, Y, Y_regr = deepcopy(X), deepcopy(Y), deepcopy(Y_regr)
     pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
@@ -390,8 +395,10 @@ def plotKernelPCA(X, Y, Y_regr, out_p):
     plotClusterPairGrid(X, Y_regr, out_p+"kernel_pca_regr.png", 3, 1, title, True)
 
 
-# Y is the binned dataset
-# Y_rege is the original dataset
+"""
+Y is the binned dataset
+Y_rege is the original dataset
+"""
 def plotPCA(X, Y, Y_regr, out_p):
     X, Y, Y_regr = deepcopy(X), deepcopy(Y), deepcopy(Y_regr)
     pca = PCA(n_components=3)

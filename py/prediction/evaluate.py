@@ -1,6 +1,7 @@
-from util import *
+from util import log, getAllFileNamesInFolder
 import pandas as pd
 import json
+from os import listdir
 
 
 def readInfo(p):
@@ -86,7 +87,7 @@ def main2():
 
 
 def evaluate(path, rule):
-    cols = ["TP","FP","FN","precision","recall","fscore"]
+    #cols = ["TP","FP","FN","precision","recall","fscore"]
     d = []
     for name in getAllFileNamesInFolder(path):
         if rule in name:
