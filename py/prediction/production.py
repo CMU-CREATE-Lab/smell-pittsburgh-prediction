@@ -109,8 +109,8 @@ def predict(f_hr=8, b_hr=3, thr=40):
     # if pred==3, event both predicted by the base estimator and detected by the crowd
     y_pred = model.predict(df_X, df_C)[0]
     log("Prediction for " + str(end_dt) + " is " + str(y_pred), logger)
-    if y_pred == 1 or y_pred == 3: pushType1(end_dt, logger)
-    if y_pred == 2 or y_pred == 3: pushType2(end_dt, logger)
+    if y_pred in (1, 3): pushType1(end_dt, logger)
+    if y_pred in (2, 3): pushType2(end_dt, logger)
 
 
 # Type 1 push notification (predicted by the classifier)

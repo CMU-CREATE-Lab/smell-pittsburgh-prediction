@@ -14,12 +14,6 @@ from sklearn.linear_model import Lasso
 from sklearn.linear_model import LogisticRegression
 
 
-"""
-Perform feature selection (or variable selection)
-Notice that we are not going to use dimension reduction like PCA
-The reason is because dimension reduction makes variables hard to interpret
-OUTPUT: selected features
-"""
 def selectFeatures(
     df_X, # dataset containing features (in pandas dataframe format)
     df_Y, # dataset containing label (in pandas dataframe format)
@@ -29,7 +23,12 @@ def selectFeatures(
     num_feat_rfe=30, # number of features to select for RFE
     step_rfe=10, # step for RFE
     logger=None):
-
+    """
+    Perform feature selection (or variable selection)
+    Notice that we are not going to use dimension reduction like PCA
+    The reason is because dimension reduction makes variables hard to interpret
+    OUTPUT: selected features
+    """
     log("Select features using method: " + method, logger)
 
     # Select model

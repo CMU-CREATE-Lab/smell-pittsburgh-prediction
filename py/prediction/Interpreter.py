@@ -18,10 +18,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-"""
-This class builds and interprets the model
-"""
-class Interpreter(object):
+class Interpreter():
+    """
+    This class builds and interprets the model
+    """
     def __init__(self,
         df_X=None, # the predictors, a pandas dataframe
         df_Y=None, # the responses, a pandas dataframe

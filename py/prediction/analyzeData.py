@@ -22,17 +22,16 @@ from scipy.stats import pointbiserialr
 from datetime import datetime
 
 
-"""
-Analyzing Smell PGH data
-Revealing the patterns of air pollution
-"""
 def analyzeData(
     in_p=None, # input path for raw esdr and smell data
     out_p_root=None, # root directory for outputing files
     start_dt=None, # starting date for the data
     end_dt=None, # ending data for the data
     logger=None):
-
+    """
+    Analyzing Smell PGH data
+    Revealing the patterns of air pollution
+    """
     log("Analyze data...", logger)
     out_p = out_p_root + "analysis/"
     checkAndCreateDir(out_p)
@@ -322,10 +321,10 @@ def plotPair(df_v1, df_v2, title_head, out_p):
     gc.collect()
 
 
-"""
-Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
-"""
 def plotCorrMatirx(df, out_p):
+    """
+    Plot correlation matrix of (x_i, x_j) for each vector x_i and vector x_j in matrix X
+    """
     # Compute correlation matrix
     df_corr = df.corr().round(3)
     df_corr.to_csv(out_p + "corr_matrix.csv")
@@ -380,11 +379,11 @@ def plotRandomTreesEmbedding(X, Y, out_p, is_regr=False):
     plotClusterPairGrid(X, Y, out_p, 3, 1, title, is_regr)
 
 
-"""
-Y is the binned dataset
-Y_regr is the original dataset
-"""
 def plotKernelPCA(X, Y, Y_regr, out_p):
+    """
+    Y is the binned dataset
+    Y_regr is the original dataset
+    """
     X, Y, Y_regr = deepcopy(X), deepcopy(Y), deepcopy(Y_regr)
     pca = KernelPCA(n_components=3, kernel="rbf", n_jobs=-1)
     X = pca.fit_transform(X)
@@ -395,11 +394,11 @@ def plotKernelPCA(X, Y, Y_regr, out_p):
     plotClusterPairGrid(X, Y_regr, out_p+"kernel_pca_regr.png", 3, 1, title, True)
 
 
-"""
-Y is the binned dataset
-Y_rege is the original dataset
-"""
 def plotPCA(X, Y, Y_regr, out_p):
+    """
+    Y is the binned dataset
+    Y_rege is the original dataset
+    """
     X, Y, Y_regr = deepcopy(X), deepcopy(Y), deepcopy(Y_regr)
     pca = PCA(n_components=3)
     X = pca.fit_transform(X)

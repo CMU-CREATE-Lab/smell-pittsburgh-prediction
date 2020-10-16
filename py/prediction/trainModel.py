@@ -1,5 +1,4 @@
 import numpy as np
-import numpy.matlib
 import copy
 from util import log, findLeastCommon
 import joblib
@@ -27,23 +26,21 @@ from HybridCrowdClassifier import HybridCrowdClassifier
 from sklearn.dummy import DummyClassifier
 
 
-"""
-Train a regression or classification model
-To find a function F such that Y=F(X)
-OUTPUT: model
-"""
 def trainModel(
     train, # the training set in pandas dataframe (contain train["X"] and train["Y"])
-    test=None, # the testing set in pandas dataframe (contain test["X"] and test["Y"])
     out_p=None, # the path for saving the model
     method="ET", # the regression or classification method
     is_regr=False, # is regression or not
     logger=None):
-
+    """
+    Train a regression or classification model
+    To find a function F such that Y=F(X)
+    OUTPUT: model
+    """
     log("Training model with " + str(train["X"].shape[1]) + " features...", logger)
 
     # Build model
-    multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
+    multi_output = bool(len(train["Y"]) > 1 and train["Y"].shape[1] > 1)
     if is_regr:
         if method == "RF":
             model = RandomForestRegressor(n_estimators=200, max_features=90, min_samples_split=2, n_jobs=-1)

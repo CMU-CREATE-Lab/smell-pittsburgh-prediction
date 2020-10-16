@@ -1,16 +1,15 @@
 from util import log, datetimeToEpochtime, getEsdrData, getSmellReports, checkAndCreateDir
 
 
-"""
-Get data
-OUTPUT: raw esdr and smell data
-"""
 def getData(
     out_p=None, # output file path
     start_dt=None, # starting date for the data
     end_dt=None, # ending data for the data
     logger=None):
-
+    """
+    Get data
+    OUTPUT: raw esdr and smell data
+    """
     log("Get data...", logger)
 
     # Get and save ESDR data

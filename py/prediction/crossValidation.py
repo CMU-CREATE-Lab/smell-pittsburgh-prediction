@@ -68,7 +68,7 @@ def crossValidation(
 
     # Perform feature selection for each cross validation fold
     if only_day_time:
-        df_X, df_Y = df_X[daytime_idx], df_Y[daytime_idx], df_C[daytime_idx]
+        df_X, df_Y, df_C = df_X[daytime_idx], df_Y[daytime_idx], df_C[daytime_idx]
     X, Y, C = df_X, df_Y, df_C
 
     # Validation folds
@@ -104,7 +104,7 @@ def crossValidation(
         # Train model
         model = trainModel(train, test=test, method=method, is_regr=is_regr, logger=logger)
         # Evaluate model
-        if method == "HCR" or method == "CR": # the hybrid crowd classifier requires Y
+        if method in ["HCR", "CR"]: # the hybrid crowd classifier requires Y
             test["Y_pred"] = model.predict(test["X"], test["C"])
             train["Y_pred"] = model.predict(train["X"], train["C"])
         else:
@@ -123,7 +123,7 @@ def crossValidation(
         metric_i_train = computeMetric(train["Y"], train["Y_pred"], is_regr, aggr_axis=True, event_thr=event_thr)
         metric_all["train"].append(metric_i_train)
         if not is_regr:
-            if method == "HCR" or method == "CR": # the hybrid crowd classifier requires Y
+            if method in ["HCR", "CR"]: # the hybrid crowd classifier requires Y
                 test_all["Y_score"].append(model.predict_proba(test["X"], test["C"]))
                 train_all["Y_score"].append(model.predict_proba(train["X"], train["C"]))
             else:
@@ -294,6 +294,7 @@ def crossValidation(
     del test_all
     gc.collect()
     log("Done", logger)
+    return True
 
 
 def rocPlot(method, Y_true, Y_score, out_p):

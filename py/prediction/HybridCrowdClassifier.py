@@ -1,16 +1,17 @@
 import numpy as np
 
 
-"""
-A hybrid model that combines crowdsourcing and machine learning classifier
-"""
-class HybridCrowdClassifier(object):
+class HybridCrowdClassifier():
+    """
+    A hybrid model that combines crowdsourcing and machine learning classifier
+    """
     def __init__(self,
             base_estimator=None, # if no estimator is specified, only use crowdsourcing
             crowd_thr=20, # the threshold to determine an event detected by the crowd
             logger=None):
         self.base_estimator = base_estimator
         self.crowd_thr = crowd_thr
+        self.logger = logger
 
     def fit(self, X, Y):
         if self.base_estimator is not None:

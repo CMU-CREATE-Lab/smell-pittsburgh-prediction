@@ -4,10 +4,6 @@ from util import log, checkAndCreateDir, isDatetimeObjTzAware
 import pytz
 
 
-"""
-Merge all data together and compute features
-OUTPUT: pandas dataframe containing features
-"""
 def computeFeatures(
     df_esdr=None, # the pandas dataframe that contains the predictors (preprocessed esdr data)
     df_smell=None, # the pandas dataframe that contains the responses (preprocessed smell data)
@@ -27,7 +23,10 @@ def computeFeatures(
     in_p_std=None, # the path of std in pandas dataframe for scaling features
     aggr_axis=True, # whether we want to sum all smell reports together for all zipcodes
     logger=None):
-
+    """
+    Merge all data together and compute features
+    OUTPUT: pandas dataframe containing features
+    """
     log("Compute features...", logger)
 
     # Read preprocessed ESDR and smell report data
@@ -39,8 +38,7 @@ def computeFeatures(
             if df_esdr is None:
                 log("ERROR: no data, return None.", logger)
                 return None
-            else:
-                df_esdr = df_esdr.set_index("DateTime")
+            df_esdr = df_esdr.set_index("DateTime")
     else:
         df_esdr = df_esdr.set_index("DateTime")
         df_smell = df_smell.set_index("DateTime")
@@ -135,24 +133,24 @@ def extractFeatures(df, b_hr, add_inter, add_roll, add_diff, add_sqa):
 
     # Extract time series features
     df_diff = df.diff()
-    for b_hr in range(1, b_hr + 1):
+    for bh in range(1, b_hr + 1):
         # Add the previous readings
-        df_previous = df.shift(b_hr)
-        df_previous.columns += "_" + str(b_hr) + "h"
+        df_previous = df.shift(bh)
+        df_previous.columns += "_" + str(bh) + "h"
         df_all.append(df_previous)
         if add_diff:
             # Add differential feature
-            df_previous_diff = df_diff.shift(b_hr - 1).copy(deep=True)
-            df_previous_diff.columns += "_Diff" + str(b_hr-1) + "&" + str(b_hr)
+            df_previous_diff = df_diff.shift(bh - 1).copy(deep=True)
+            df_previous_diff.columns += "_Diff" + str(bh-1) + "&" + str(bh)
             df_all.append(df_previous_diff)
         if add_roll:
             # Perform rolling mean and max (data is already resampled by hour)
-            if b_hr <= 1: continue
-            df_roll = df.rolling(b_hr, min_periods=1)
+            if bh <= 1: continue
+            df_roll = df.rolling(bh, min_periods=1)
             df_roll_max = df_roll.max()
             df_roll_mean = df_roll.mean()
-            df_roll_max.columns += "_Max" + str(b_hr)
-            df_roll_mean.columns += "_Mean" + str(b_hr)
+            df_roll_max.columns += "_Max" + str(bh)
+            df_roll_mean.columns += "_Mean" + str(bh)
             df_all.append(df_roll_max)
             df_all.append(df_roll_mean)
 

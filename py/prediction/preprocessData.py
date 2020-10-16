@@ -4,18 +4,17 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-"""
-Preprocess data
-INPUT: raw esdr and smell data
-OUTPUT: preprocessed esdr and smell data
-"""
 def preprocessData(
     df_esdr_array_raw=None, # raw esdr dataframes
     df_smell_raw=None, # raw smell dataframe
     in_p=None, # input file path
     out_p=None, # output file path
     logger=None):
-
+    """
+    Preprocess data
+    INPUT: raw esdr and smell data
+    OUTPUT: preprocessed esdr and smell data
+    """
     log("Preprocess data...", logger)
 
     if df_esdr_array_raw is None or df_smell_raw is None:

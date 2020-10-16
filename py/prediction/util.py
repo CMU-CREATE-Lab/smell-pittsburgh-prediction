@@ -23,8 +23,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # For Google Analytics
-#sudo pip install --upgrade google-api-python-client
-#sudo pip install --upgrade oauth2client
 from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -46,7 +44,7 @@ def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()),
 
 
 # log and print
-def log(msg, logger, level="info"):
+def log(msg, logger=None, level="info"):
     if logger is not None:
         if level == "info":
             logger.info(msg)
@@ -68,8 +66,7 @@ def str2float(string, **options):
     except ValueError:
         if "default_value" in options:
             return options["default_value"]
-        else:
-            return None
+        return None
 
 
 # Check if a file exists
@@ -102,8 +99,7 @@ def sanitizeUnicodeSpace(string):
     type_string = type(string)
     if string is not None and type_string is str:
         return string.replace(u'\xa0', u' ')
-    else:
-        return None
+    return None
 
 
 # Convert a datetime object to epoch time
@@ -155,20 +151,17 @@ def getBaseName(path, **options):
     base_name = os.path.basename(path)
     if with_extension:
         return base_name
-    else:
-        base_name_no_ext = os.path.splitext(base_name)[0]
-        if do_strip:
-            return base_name_no_ext.strip()
-        else:
-            return base_name_no_ext
+    base_name_no_ext = os.path.splitext(base_name)[0]
+    if do_strip:
+        return base_name_no_ext.strip()
+    return base_name_no_ext
 
 
 # Remove all non-ascii characters in the string
 def removeNonAsciiChars(str_in):
     if str_in is None:
         return ""
-    else:
-        return str_in.encode("ascii", "ignore").decode()
+    return str_in.encode("ascii", "ignore").decode()
 
 
 # Compute a custom metric for evaluating the regression function
@@ -288,7 +281,7 @@ def binary2Interval(Y):
 # - prf: precision, recall, and f-score (for classification) in pandas dataframe format
 # - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
-        round_to_decimal=3, labels=[0,1], aggr_axis=False, only_binary=True, event_thr=40):
+        round_to_decimal=3, aggr_axis=False, only_binary=True, event_thr=40):
     Y_true, Y_pred = deepcopy(Y_true), deepcopy(Y_pred)
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
@@ -427,15 +420,14 @@ def getEsdrAccessToken(auth_json_path):
     r = requests.post(url, data=json.dumps(auth_json), headers=headers)
     r_json = r.json()
     if r.status_code != 200:
-        logger.error("ESDR returns: " + json.dumps(r_json) + " when getting the access token")
+        logger.error("ESDR returns: %s when getting the access token" % json.dumps(r_json))
         return None, None
-    else:
-        access_token = r_json["access_token"]
-        user_id = r_json["userId"]
-        logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the access token")
-        logger.info("Receive access token " + access_token)
-        logger.info("Receive user ID " + str(user_id))
-        return access_token, user_id
+    access_token = r_json["access_token"]
+    user_id = r_json["userId"]
+    logger.debug("ESDR returns: %s when getting the access token" % json.dumps(r_json))
+    logger.info("Receive access token %s" % access_token)
+    logger.info("Receive user ID %s" % str(user_id))
+    return access_token, user_id
 
 
 # Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
@@ -453,24 +445,25 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     }
 
     # Check if the device exists
-    logger.info("Try getting the device ID of device name '" + device_name + "'")
+    logger.info("Try getting the device ID of device name %s" % device_name)
     url = esdrRootUrl() + "api/v1/devices?where=name=" + device_name + ",productId=" + str(product_id)
     r = requests.get(url, headers=headers)
     r_json = r.json()
     device_id = None
+    msg = "ESDR returns: %s when getting the device ID for %s" % (json.dumps(r_json), device_name)
     if r.status_code != 200:
-        logger.error("ESDR returns: " + json.dumps(r_json) + " when getting the device ID for '" + device_name + "'")
+        logger.error(msg)
     else:
-        logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the device ID for '" + device_name + "'")
+        logger.debug(msg)
         if r_json["data"]["totalCount"] < 1:
-            logger.error("'" + device_name + "' did not exist")
+            logger.error("%s did not exist" % device_name)
         else:
             device_id = r_json["data"]["rows"][0]["id"]
-            logger.info("Receive existing device ID " + str(device_id))
+            logger.info("Receive existing device ID %s" % str(device_id))
 
     # Create a device if it does not exist
     if device_id is None:
-        logger.info("Create a device for '" + device_name + "'")
+        logger.info("Create a device for %s" % device_name)
         url = esdrRootUrl() + "api/v1/products/" + str(product_id) + "/devices"
         device_json = {
             "name": device_name,
@@ -478,13 +471,13 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
         }
         r = requests.post(url, data=json.dumps(device_json), headers=headers)
         r_json = r.json()
+        msg = "ESDR returns: %s when creating a device for %s" % (json.dumps(r_json), device_name)
         if r.status_code != 201:
-            logger.error("ESDR returns: " + json.dumps(r_json) + " when creating a device for '" + device_name + "'")
+            logger.error(msg)
             return None
-        else:
-            logger.debug("ESDR returns: " + json.dumps(r_json) + " when creating a device for '" + device_name + "'")
-            device_id = r_json["data"]["id"]
-            logger.info("Create new device ID " + str(device_id))
+        logger.debug(msg)
+        device_id = r_json["data"]["id"]
+        logger.info("Create new device ID %s" % str(device_id))
 
     # Check if a feed exists for the device
     logger.info("Get feed ID for '" + device_name + "'")
@@ -494,18 +487,19 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     feed_id = None
     api_key = None
     api_key_read_only = None
+    msg = "ESDR returns: %s when getting the feed ID" % json.dumps(r_json)
     if r.status_code != 200:
-        logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the feed ID")
+        logger.debug(msg)
     else:
-        logger.debug("ESDR returns: " + json.dumps(r_json) + " when getting the feed ID")
+        logger.debug(msg)
         if r_json["data"]["totalCount"] < 1:
-            logger.info("No feed ID exists for device " + str(device_id))
+            logger.info("No feed ID exists for device %s" % str(device_id))
         else:
             row = r_json["data"]["rows"][0]
             feed_id = row["id"]
             api_key = row["apiKey"]
             api_key_read_only = row["apiKeyReadOnly"]
-            logger.info("Receive existing feed ID " + str(feed_id))
+            logger.info("Receive existing feed ID %s" % str(feed_id))
 
     # Create a feed if no feed ID exists
     if feed_id is None:
@@ -521,26 +515,26 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
         }
         r = requests.post(url, data=json.dumps(feed_json), headers=headers)
         r_json = r.json()
+        msg = "ESDR returns: %s when creating a feed" % json.dumps(r_json)
         if r.status_code != 201:
-            logger.error("ESDR returns: " + json.dumps(r_json) + " when creating a feed")
+            logger.error(msg)
             return None
-        else:
-            logger.info("ESDR returns: " + json.dumps(r_json) + " when creating a feed")
-            feed_id = r_json["data"]["id"]
-            api_key = r_json["data"]["apiKey"]
-            api_key_read_only = r_json["data"]["apiKeyReadOnly"]
-            logger.info("Create new feed ID " + str(feed_id))
+        logger.info(msg)
+        feed_id = r_json["data"]["id"]
+        api_key = r_json["data"]["apiKey"]
+        api_key_read_only = r_json["data"]["apiKeyReadOnly"]
+        logger.info("Create new feed ID " + str(feed_id))
 
     # Upload Speck data to ESDR
-    logger.info("Upload sensor data for '" + device_name + "'")
+    logger.info("Upload sensor data for %s" % device_name)
     url = esdrRootUrl() + "api/v1/feeds/" + str(feed_id)
     r = requests.put(url, data=json.dumps(data_json), headers=headers)
     r_json = r.json()
+    msg = "ESDR returns: %s when uploading data" % json.dumps(r_json)
     if r.status_code != 200:
-        logger.error("ESDR returns: " + json.dumps(r_json) + " when uploading data")
+        logger.error(msg)
         return None
-    else:
-        logger.debug("ESDR returns: " + json.dumps(r_json) + " when uploading data")
+    logger.debug(msg)
 
     # Return a list of information for getting data from ESDR
     logger.info("Data uploaded")
@@ -851,8 +845,8 @@ def countWords(A):
 
 
 # Find if a string contains numbers
-def hasNumbers(str):
-    return bool(re.search(r'\d', str))
+def hasNumbers(str_in):
+    return bool(re.search(r'\d', str_in))
 
 
 def plotScatter(df, x, y, title, out_p):
