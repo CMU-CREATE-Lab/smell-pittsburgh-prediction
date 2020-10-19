@@ -60,7 +60,7 @@ If the environment already exists and you want to remove it before installing pa
 ```sh
 conda env remove -n smell-pittsburgh-prediction
 ```
-Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
+Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data. Notice that if you change the is_regr parameter in the "main.py" file, you will need to run "python main.py feature" again to create a new set of features.
 ```sh
 cd smell-pittsburgh-prediction/py/prediction/
 python main.py pipeline
