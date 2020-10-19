@@ -25,8 +25,8 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 # Usage
 Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://conda.io/miniconda.html) to obtain the downloading path. The following script install conda for all users:
 ```sh
-wget https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh
-sudo sh Miniconda3-4.5.11-Linux-x86_64.sh -b -p /opt/miniconda3
+wget https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh
+sudo sh Miniconda3-4.7.12.1-Linux-x86_64.sh -b -p /opt/miniconda3
 
 sudo vim /etc/bash.bashrc
 # Add the following lines to this file
@@ -38,8 +38,8 @@ source /etc/bash.bashrc
 For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/).
 ```sh
 brew cask install miniconda
-echo 'export PATH="/usr/local/miniconda3/bin:$PATH"' >> ~/.bash_profile
-echo '. /usr/local/miniconda3/etc/profile.d/conda.sh' >> ~/.bash_profile
+echo 'export PATH="/usr/local/Caskroom/miniconda/base/bin:$PATH"' >> ~/.bash_profile
+echo '. /usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh' >> ~/.bash_profile
 source ~/.bash_profile
 ```
 Clone this repository.
