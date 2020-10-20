@@ -25,8 +25,8 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 # Usage
 Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://conda.io/miniconda.html) to obtain the downloading path. The following script install conda for all users:
 ```sh
-wget https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh
-sudo sh Miniconda3-4.5.11-Linux-x86_64.sh -b -p /opt/miniconda3
+wget https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh
+sudo sh Miniconda3-4.7.12.1-Linux-x86_64.sh -b -p /opt/miniconda3
 
 sudo vim /etc/bash.bashrc
 # Add the following lines to this file
@@ -38,8 +38,8 @@ source /etc/bash.bashrc
 For Mac OS, I recommend installing conda by using [Homebrew](https://brew.sh/).
 ```sh
 brew cask install miniconda
-echo 'export PATH="/usr/local/miniconda3/bin:$PATH"' >> ~/.bash_profile
-echo '. /usr/local/miniconda3/etc/profile.d/conda.sh' >> ~/.bash_profile
+echo 'export PATH="/usr/local/Caskroom/miniconda/base/bin:$PATH"' >> ~/.bash_profile
+echo '. /usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh' >> ~/.bash_profile
 source ~/.bash_profile
 ```
 Clone this repository.
@@ -47,11 +47,11 @@ Clone this repository.
 git clone https://github.com/CMU-CREATE-Lab/smell-pittsburgh-prediction.git
 sudo chown -R $USER smell-pittsburgh-prediction
 ```
-Create conda environment and install packages. It is important to install python 2.7 and pip first inside the newly created conda environment.
+Create conda environment and install packages. It is important to install python 3.8 and pip first inside the newly created conda environment.
 ```sh
 conda create -n smell-pittsburgh-prediction
 conda activate smell-pittsburgh-prediction
-conda install python=2.7
+conda install python=3.8
 conda install pip
 which pip # make sure this is the pip inside the smell-pittsburgh-prediction environment
 sh smell-pittsburgh-prediction/install_packages.sh
@@ -60,7 +60,7 @@ If the environment already exists and you want to remove it before installing pa
 ```sh
 conda env remove -n smell-pittsburgh-prediction
 ```
-Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data.
+Get data, preprocess data, extract features, train the classifier, perform cross validation, analyze data, and interpret the model. This will create a directory (py/prediction/data_main/) to store all downloaded and processed data. Notice that if you change the is_regr parameter in the "main.py" file, you will need to run "python main.py feature" again to create a new set of features.
 ```sh
 cd smell-pittsburgh-prediction/py/prediction/
 python main.py pipeline

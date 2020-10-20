@@ -1,7 +1,6 @@
 import numpy as np
-import numpy.matlib
 import copy
-from util import *
+from util import log, findLeastCommon
 import joblib
 
 from sklearn.ensemble import RandomForestRegressor
@@ -9,7 +8,6 @@ from sklearn.svm import SVR
 from sklearn.linear_model import HuberRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import ElasticNet
-from sklearn.ensemble import BaggingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.ensemble import ExtraTreesRegressor
@@ -19,37 +17,30 @@ from sklearn.tree import DecisionTreeRegressor
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.ensemble import BaggingClassifier
-from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import LinearSVC
 from HybridCrowdClassifier import HybridCrowdClassifier
 from sklearn.dummy import DummyClassifier
 
-#from CRnnLearner import CRnnLearner
-#from ANCnnLearner import ANCnnLearner
-#from DmlpLearner import DmlpLearner
 
-# Train a regression or classification model
-# To find a function F such that Y=F(X)
-# OUTPUT: model
 def trainModel(
     train, # the training set in pandas dataframe (contain train["X"] and train["Y"])
-    test=None, # the testing set in pandas dataframe (contain test["X"] and test["Y"])
     out_p=None, # the path for saving the model
     method="ET", # the regression or classification method
     is_regr=False, # is regression or not
-    balance=False, # oversample or undersample data or not
     logger=None):
-
+    """
+    Train a regression or classification model
+    To find a function F such that Y=F(X)
+    OUTPUT: model
+    """
     log("Training model with " + str(train["X"].shape[1]) + " features...", logger)
 
     # Build model
-    multi_output = True if len(train["Y"]) > 1 and train["Y"].shape[1] > 1 else False
+    multi_output = bool(len(train["Y"]) > 1 and train["Y"].shape[1] > 1)
     if is_regr:
         if method == "RF":
             model = RandomForestRegressor(n_estimators=200, max_features=90, min_samples_split=2, n_jobs=-1)
@@ -74,12 +65,6 @@ def trainModel(
             model = MLPRegressor(hidden_layer_sizes=(128, 64))
         elif method == "KN":
             model = KNeighborsRegressor(n_neighbors=10, weights="uniform")
-        elif method == "DMLP":
-            model = DmlpLearner(test=test, logger=logger, is_regr=is_regr)
-        elif method == "CRNN":
-            model = CRnnLearner(test=test, logger=logger, is_regr=is_regr)
-        elif method == "ANCNN":
-            model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "DT":
             model = DecisionTreeRegressor()
         else:
@@ -114,12 +99,6 @@ def trainModel(
             model = KNeighborsClassifier(n_neighbors=10, weights="uniform")
         elif method == "LG":
             model = LogisticRegression(penalty="l1", C=1)
-        elif method == "DMLP":
-            model = DmlpLearner(test=test, logger=logger, is_regr=is_regr)
-        elif method == "CRNN":
-            model = CRnnLearner(test=test, logger=logger, is_regr=is_regr)
-        elif method == "ANCNN":
-            model = ANCnnLearner(test=test, logger=logger, is_regr=is_regr)
         elif method == "HCR":
             model = ExtraTreesClassifier(n_estimators=1000, max_features=90, min_samples_split=32, n_jobs=-1)
             model = HybridCrowdClassifier(base_estimator=model, logger=logger)
@@ -153,12 +132,7 @@ def trainModel(
                 log("ERROR: method " + method + " is not supported", logger)
                 return None
 
-    # Use balanced dataset or not
-    if balance:
-        log("Compute balanced dataset...", logger)
-        X, Y = balanceDataset(train["X"], train["Y"])
-    else:
-        X, Y = copy.deepcopy(train["X"]), copy.deepcopy(train["Y"])
+    X, Y = copy.deepcopy(train["X"]), copy.deepcopy(train["Y"])
 
     # For one-class classification task, we only want to use the minority class (because we are sure that they are labeled)
     if not is_regr and method == "IF":
@@ -167,16 +141,10 @@ def trainModel(
         X, Y = X[select_y], Y[select_y]
 
     # Fit data to the model
-    if method == "ANCNN":
-        model.fit(X, np.squeeze(Y), copy.deepcopy(train["X_pretrain"]))
-    else:
-        model.fit(X, np.squeeze(Y))
+    model.fit(X, np.squeeze(Y))
 
     # Save and return model
     if out_p is not None:
-        if method == "CRNN" or method == "CRMANN":
-            model.save(out_p)
-        else:
-            joblib.dump(model, out_p)
+        joblib.dump(model, out_p)
         log("Model saved at " + out_p, logger)
     return model

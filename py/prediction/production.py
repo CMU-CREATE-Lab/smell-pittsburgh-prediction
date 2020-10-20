@@ -1,15 +1,14 @@
 import sys
-import torch # need to import torch early to avoid an ImportError related to static TLS
-from util import *
-from getData import *
-from preprocessData import *
-from computeFeatures import *
-from selectFeatures import *
-from trainModel import *
+from util import log, generateLogger, computeMetric, isFileHere
+import pandas as pd
+from getData import getData
+from preprocessData import preprocessData
+from computeFeatures import computeFeatures
+#from selectFeatures import selectFeatures
+from trainModel import trainModel
 import joblib
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os
-import subprocess
 
 # The flag to determine the server type
 #SERVER = "staging"
@@ -22,6 +21,7 @@ ENABLE_RAKE_CALL = False
 # The path for storing push notification data
 DATA_PATH = "data_production/"
 
+
 def main(argv):
     mode = None
     if len(argv) >= 2:
@@ -32,7 +32,8 @@ def main(argv):
     elif mode == "predict":
         predict()
     else:
-        print "Use 'python main.py [mode]'; mode can be 'train' or 'predict'"
+        print("Use 'python main.py [mode]'; mode can be 'train' or 'predict'")
+
 
 def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     p = DATA_PATH
@@ -52,7 +53,7 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     # Compute features
     df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger, out_p_mean=p+"mean.csv", out_p_std=p+"std.csv")
- 
+
     # Select features
     # NOTE: currently, the best model uses all the features
     #df_X, df_Y = selectFeatures(df_X, df_Y, logger=logger, out_p=p+"feat_selected.csv")
@@ -62,6 +63,7 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     metric = computeMetric(df_Y, model.predict(df_X, df_C), False)
     for m in metric:
         log(metric[m], logger)
+
 
 def predict(f_hr=8, b_hr=3, thr=40):
     p = DATA_PATH
@@ -81,7 +83,7 @@ def predict(f_hr=8, b_hr=3, thr=40):
         log("ERROR: Length of esdr is less than " + str(b_hr+1) + " hours", logger)
         log("Length of esdr = " + str(len(df_esdr)), logger)
         return
-    
+
     # Compute features
     df_X, _, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=f_hr, b_hr=b_hr, thr=thr, is_regr=False,
         add_inter=False, add_roll=False, add_diff=False, logger=logger, in_p_mean=p+"mean.csv", in_p_std=p+"std.csv")
@@ -94,7 +96,7 @@ def predict(f_hr=8, b_hr=3, thr=40):
     # NOTE: currently, the best model uses all the features
     #df_feat_selected = pd.read_csv(p+"feat_selected.csv")
     #df_X = df_X[df_feat_selected.columns]
-    
+
     # Load model
     log("Load model...", logger)
     model = joblib.load(p+"model.pkl")
@@ -107,8 +109,9 @@ def predict(f_hr=8, b_hr=3, thr=40):
     # if pred==3, event both predicted by the base estimator and detected by the crowd
     y_pred = model.predict(df_X, df_C)[0]
     log("Prediction for " + str(end_dt) + " is " + str(y_pred), logger)
-    if y_pred == 1 or y_pred == 3: pushType1(end_dt, logger)
-    if y_pred == 2 or y_pred == 3: pushType2(end_dt, logger)
+    if y_pred in (1, 3): pushType1(end_dt, logger)
+    if y_pred in (2, 3): pushType2(end_dt, logger)
+
 
 # Type 1 push notification (predicted by the classifier)
 def pushType1(end_dt, logger):
@@ -126,15 +129,16 @@ def pushType1(end_dt, logger):
             return
     else:
         df_nst = pd.DataFrame(data=[], columns=["DateTime"])
-    
+
     # Send push notification to users
     if ENABLE_RAKE_CALL:
         os.system('cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/push.log 2>&1')
-    
+
     # Save result
     log("A prediction push notification was sent to users", logger)
     df_nst = df_nst.append({"DateTime": end_dt}, ignore_index=True)
     df_nst.to_csv(nst_p, index=False)
+
 
 # Type 2 push notification (verified by the crowd)
 def pushType2(end_dt, logger):
@@ -152,15 +156,16 @@ def pushType2(end_dt, logger):
             return
     else:
         df_cvnst = pd.DataFrame(data=[], columns=["DateTime"])
-    
+
     # Send crowd-verified push notification to users
     if ENABLE_RAKE_CALL:
         os.system('cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction_type2["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/crow_verified_push.log 2>&1')
-    
+
     # Send push notification to users
     log("A crowd-verified push notification was sent to users", logger)
     df_cvnst = df_cvnst.append({"DateTime": end_dt}, ignore_index=True)
     df_cvnst.to_csv(cvnst_p, index=False)
+
 
 if __name__ == "__main__":
     main(sys.argv)
