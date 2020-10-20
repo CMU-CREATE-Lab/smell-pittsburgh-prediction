@@ -67,8 +67,8 @@ def computeFeatures(
 
     # Transform features
     if in_p_mean is not None and in_p_std is not None:
-        df_X_mean = pd.read_csv(in_p_mean, header=None, index_col=0, squeeze=True)
-        df_X_std = pd.read_csv(in_p_std, header=None, index_col=0, squeeze=True)
+        df_X_mean = pd.read_csv(in_p_mean, index_col=0, squeeze=True)
+        df_X_std = pd.read_csv(in_p_std, index_col=0, squeeze=True)
     else:
         df_X_mean = df_X.mean()
         df_X_std = df_X.std()

@@ -26,7 +26,7 @@ def crossValidation(
     is_regr=False, # regression or classification,
     only_day_time=False, # only use daytime data for training or not
     num_folds=144, # number of folds for validation
-    skip_folds=48, # skip first n folds (not enough data for training) 48
+    skip_folds=48, # skip first n folds (not enough data for training)
     select_feat=False, # False means do not select features, int means select n number of features
     hd_start=5, # definition of the starting time of "daytime", e.g. 6 means 6am
     hd_end=11, # definition of the ending time of "daytime", e.g. 14 means 2pm
@@ -102,7 +102,7 @@ def crossValidation(
         train = {"X": X_train, "Y": Y_train, "Y_pred": None, "C": C_train}
         test = {"X": X_test, "Y": Y_test, "Y_pred": None, "C": C_test}
         # Train model
-        model = trainModel(train, test=test, method=method, is_regr=is_regr, logger=logger)
+        model = trainModel(train, method=method, is_regr=is_regr, logger=logger)
         # Evaluate model
         if method in ["HCR", "CR"]: # the hybrid crowd classifier requires Y
             test["Y_pred"] = model.predict(test["X"], test["C"])

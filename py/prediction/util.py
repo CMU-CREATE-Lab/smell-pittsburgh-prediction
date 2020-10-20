@@ -27,9 +27,8 @@ from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-# Generate a logger for loggin files
-def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()),
-        format="%(asctime)s %(levelname)s %(message)s"):
+def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()), format="%(asctime)s %(levelname)s %(message)s"):
+    """Generate a logger for loggin files"""
     if log_level == "debug": log_level = logging.DEBUG
     checkAndCreateDir(file_name)
     formatter = logging.Formatter(format)
@@ -43,8 +42,8 @@ def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()),
     return logger
 
 
-# log and print
 def log(msg, logger=None, level="info"):
+    """Log and print"""
     if logger is not None:
         if level == "info":
             logger.info(msg)
@@ -53,14 +52,14 @@ def log(msg, logger=None, level="info"):
     print(msg)
 
 
-# find the least common elements in a given array
 def findLeastCommon(arr):
+    """Find the least common elements in a given array"""
     m = Counter(arr)
     return m.most_common()[-1][0]
 
 
-# Convert string to float in a safe way
 def str2float(string, **options):
+    """Convert string to float in a safe way"""
     try:
         return float(string)
     except ValueError:
@@ -69,41 +68,41 @@ def str2float(string, **options):
         return None
 
 
-# Check if a file exists
 def isFileHere(path):
+    """Check if a file exists"""
     return os.path.isfile(path)
 
 
-# Return a list of all files in a folder
 def getAllFileNamesInFolder(path):
+    """Return a list of all files in a folder"""
     return  [f for f in listdir(path) if isfile(join(path, f))]
 
 
-# Return the root url for ESDR
 def esdrRootUrl():
+    """Return the root url for ESDR"""
     return "https://esdr.cmucreatelab.org/"
 
 
-# Return the root url for smell Pittsburgh
 def smellPghRootUrl():
+    """Return the root url for SmellPGH production"""
     return "http://api.smellpittsburgh.org/"
 
 
-# Return the root url for smell Pittsburgh Staging
 def smellPghStagingRootUrl():
+    """Return the root url for SmellPGH Staging"""
     return "http://staging.api.smellpittsburgh.org/"
 
 
-# Replace a non-breaking space to a normal space
 def sanitizeUnicodeSpace(string):
+    """Replace a non-breaking space to a normal space"""
     type_string = type(string)
     if string is not None and type_string is str:
         return string.replace(u'\xa0', u' ')
     return None
 
 
-# Convert a datetime object to epoch time
 def datetimeToEpochtime(dt):
+    """Convert a datetime object to epoch time"""
     if dt.tzinfo is None:
         dt_utc = dt
     else:
@@ -112,31 +111,31 @@ def datetimeToEpochtime(dt):
     return int((dt_utc - epoch_utc).total_seconds() * 1000)
 
 
-# Sum up two dictionaries
 def dictSum(a, b):
+    """Sum up two dictionaries"""
     d = defaultdict(list, deepcopy(a))
     for key, val in b.items():
         d[key] += val
     return dict(d)
 
 
-# Flip keys and values in a dictionary
 def flipDict(a):
+    """Flip keys and values in a dictionary"""
     d = defaultdict(list)
     for key, val in a.items():
         d[val] += [key]
     return dict(d)
 
 
-# Check if a directory exists, if not, create it
 def checkAndCreateDir(path):
+    """Check if a directory exists, if not, create it"""
     dir_name = os.path.dirname(path)
     if dir_name != "" and not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
 
-# Convert the epochtime index in a pandas dataframe to datetime index
 def epochtimeIdxToDatetime(df):
+    """Convert the epochtime index in a pandas dataframe to datetime index"""
     df = df.copy(deep=True)
     df.sort_index(inplace=True)
     df.index = pd.to_datetime(df.index, unit="s", utc=True)
@@ -144,8 +143,8 @@ def epochtimeIdxToDatetime(df):
     return df
 
 
-# Get the base name of a file path
 def getBaseName(path, **options):
+    """Get the base name of a file path"""
     with_extension = options["with_extension"] if "with_extension" in options else False
     do_strip = options["do_strip"] if "do_strip" in options else True
     base_name = os.path.basename(path)
@@ -157,27 +156,29 @@ def getBaseName(path, **options):
     return base_name_no_ext
 
 
-# Remove all non-ascii characters in the string
 def removeNonAsciiChars(str_in):
+    """Remove all non-ascii characters in the string"""
     if str_in is None:
         return ""
     return str_in.encode("ascii", "ignore").decode()
 
 
-# Compute a custom metric for evaluating the regression function
-# Notice that for daytime cases, the Y arrays may contain NaN
-# For each smoke event, the prediction only need to hit the event at some time point
-# (for an event from 9am to 11am, good enough if there are at least one predicted event within it)
-# Denote T the 1D signal of the true data
-# Denote P the 1D signal of the predicted data
-# 1. Detect the time intervals in T and P that has values larger than a threshold "thr"
-# 2. Merge intervals that are less or equal than "h" hours away from each other
-#    (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
-# 3. Compute the precision, recall, and f-score for each interval ...
-#    ... true positive: for each t in T, if it overlaps with a least one p in P
-#    ... false positive: for each p in P, if there is no t in T that overlaps with it
-#    ... false negative: for each t in T, if there is no p in P that overlaps with it
 def evalEventDetection(Y_true, Y_pred, thr=40, h=1, round_to_decimal=3):
+    """
+    Compute a custom metric for evaluating the regression function
+    Notice that for daytime cases, the Y arrays may contain NaN
+    For each smoke event, the prediction only need to hit the event at some time point
+    (for an event from 9am to 11am, good enough if there are at least one predicted event within it)
+    Denote T the 1D signal of the true data
+    Denote P the 1D signal of the predicted data
+    1. Detect the time intervals in T and P that has values larger than a threshold "thr"
+    2. Merge intervals that are less or equal than "h" hours away from each other
+        (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
+    3. Compute the precision, recall, and f-score for each interval ...
+        true positive: for each t in T, if it overlaps with a least one p in P
+        false positive: for each p in P, if there is no t in T that overlaps with it
+        false negative: for each t in T, if there is no p in P that overlaps with it
+    """
     # Convert Y_true and Y_pred into binary signals and to intervals
     Y_true_iv, Y_pred_iv = binary2Interval(Y_true>=thr), binary2Interval(Y_pred>=thr)
 
@@ -233,9 +234,11 @@ def evalEventDetection(Y_true, Y_pred, thr=40, h=1, round_to_decimal=3):
     return {"TP":TP, "FP":FP, "FN":FN, "precision":precision, "recall":recall, "f_score":f_score}
 
 
-# Merge intervals that are less or equal than "h" hours away from each other
-# (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
 def mergeInterval(intervals, h=1):
+    """
+    Merge intervals that are less or equal than "h" hours away from each other
+    (e.g., for h=1, intervals [1,3] and [4,5] need to be merged into [1,5])
+    """
     intervals_merged = []
     current_iv = None
     for iv in intervals:
@@ -252,10 +255,12 @@ def mergeInterval(intervals, h=1):
     return intervals_merged
 
 
-# Convert a binary array with False and True to intervals
-# input = [False, True, True, False, True, False]
-# output = [[1,2], [4,4]]
 def binary2Interval(Y):
+    """
+    Convert a binary array with False and True to intervals
+    input = [False, True, True, False, True, False]
+    output = [[1,2], [4,4]]
+    """
     Y_cp = np.append(Y, False) # this is important for case like [False, True, True]
     intervals = []
     current_iv = None
@@ -269,19 +274,21 @@ def binary2Interval(Y):
     return intervals
 
 
-# Compute the evaluation result of regression or classification Y=F(X)
-# INPUTS:
-# - Y_true: the true values of Y
-# - Y_pred: the predicted values of Y
-# - is_regr: is regression or classification
-# - event_thr: the threshold for defining an event, used when applying regression to detect events
-# OUTPUT:
-# - r2: r-squared (for regression)
-# - mse: mean squared error (for regression)
-# - prf: precision, recall, and f-score (for classification) in pandas dataframe format
-# - cm: confusion matrix (for classification) in pandas dataframe format
 def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
         round_to_decimal=3, aggr_axis=False, only_binary=True, event_thr=40):
+    """
+    Compute the evaluation result of regression or classification Y=F(X)
+    INPUTS:
+    - Y_true: the true values of Y
+    - Y_pred: the predicted values of Y
+    - is_regr: is regression or classification
+    - event_thr: the threshold for defining an event, used when applying regression to detect events
+    OUTPUT:
+    - r2: r-squared (for regression)
+    - mse: mean squared error (for regression)
+    - prf: precision, recall, and f-score (for classification) in pandas dataframe format
+    - cm: confusion matrix (for classification) in pandas dataframe format
+    """
     Y_true, Y_pred = deepcopy(Y_true), deepcopy(Y_pred)
     if len(Y_true.shape) > 2: Y_true = np.reshape(Y_true, (Y_true.shape[0], -1))
     if len(Y_pred.shape) > 2: Y_pred = np.reshape(Y_pred, (Y_pred.shape[0], -1))
@@ -336,16 +343,18 @@ def computeMetric(Y_true, Y_pred, is_regr, flatten=False, simple=False,
     return metric
 
 
-# Get wrongly and correctly classified data points
-# Only works for classification with label 0 and 1
-# INPUT:
-# - Y_true: the true values of responses (in numpy format, 1D array)
-# - Y_pred: the predicted values of responses (in numpy format, 1D array)
-# - X: the predictors (in numpy format, 2D array)
-# - col_names: the column names for creating the pandas dataframe
-# OUTPUT:
-# - true positives (tp), false positives (fp), true negatives (tn), false negatives(fn)
 def evaluateData(Y_true, Y_pred, X, col_names=None):
+    """
+    Get wrongly and correctly classified data points
+    Only works for classification with label 0 and 1
+    INPUT:
+    - Y_true: the true values of responses (in numpy format, 1D array)
+    - Y_pred: the predicted values of responses (in numpy format, 1D array)
+    - X: the predictors (in numpy format, 2D array)
+    - col_names: the column names for creating the pandas dataframe
+    OUTPUT:
+    - true positives (tp), false positives (fp), true negatives (tn), false negatives(fn)
+    """
     if col_names is None: col_names = map(str, range(0,X.shape[1]))
     Y_true = np.squeeze(Y_true)
     Y_pred = np.squeeze(Y_pred)
@@ -381,8 +390,8 @@ def evaluateData(Y_true, Y_pred, X, col_names=None):
     return {"tp": df_tp, "fp": df_fp, "tn": df_tn, "fn": df_fn}
 
 
-# Flatten a pandas dataframe
 def flattenDataframe(df):
+    """Flatten a pandas dataframe"""
     df = df.stack()
     idx = df.index.values.tolist()
     for i in range(0, len(idx)):
@@ -391,27 +400,29 @@ def flattenDataframe(df):
     return [idx, val]
 
 
-# Load json file
 def loadJson(fpath):
+    """Load json file"""
     with open(fpath, "r") as f:
         return json.load(f)
 
 
-# Save json file
 def saveJson(content, fpath):
+    """Save json file"""
     with open(fpath, "w") as f:
         json.dump(content, f)
 
 
-# Save text file
 def saveText(content, fpath):
+    """Save text file"""
     with open(fpath, "w") as f:
         f.write(content)
 
 
-# Get the access token from ESDR, need the auth.json file
-# See https://github.com/CMU-CREATE-Lab/esdr/blob/master/HOW_TO.md
 def getEsdrAccessToken(auth_json_path):
+    """
+    Get the access token from ESDR, need the auth.json file
+    See https://github.com/CMU-CREATE-Lab/esdr/blob/master/HOW_TO.md
+    """
     logger = generateLogger("log.log")
     logger.info("Get access token from ESDR")
     auth_json = loadJson(auth_json_path)
@@ -430,12 +441,14 @@ def getEsdrAccessToken(auth_json_path):
     return access_token, user_id
 
 
-# Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
-# data_json = {
-#   "channel_names": ["particle_concentration", "particle_count", "raw_particles", "temperature"],
-#   "data": [[1449776044, 0.3, 8.0, 6.0, 2.3], [1449776104, 0.1, 3.0, 0.0, 4.9]]
-# }
 def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options):
+    """
+    Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
+    data_json = {
+        "channel_names": ["particle_concentration", "particle_count", "raw_particles", "temperature"],
+        "data": [[1449776044, 0.3, 8.0, 6.0, 2.3], [1449776104, 0.1, 3.0, 0.0, 4.9]]
+    }
+    """
     logger = generateLogger("log.log")
 
     # Set the header for http request
@@ -541,15 +554,17 @@ def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options
     return [device_id, feed_id, api_key, api_key_read_only]
 
 
-# Get data from ESDR
-# source = [
-#    [{"feed": 27, "channel": "NO_PPB"}],
-#    [{"feed": 1, "channel": "PM25B_UG_M3"}, {"feed": 1, "channel": "PM25T_UG_M3"}]
-# ]
-# if source = [[A,B],[C]], this means that A and B will be merged
-# start_time: starting epochtime in seconds
-# end_time: ending epochtime in seconds
 def getEsdrData(source, **options):
+    """
+    Get data from ESDR
+    source = [
+        [{"feed": 27, "channel": "NO_PPB"}],
+        [{"feed": 1, "channel": "PM25B_UG_M3"}, {"feed": 1, "channel": "PM25T_UG_M3"}]
+    ]
+    if source = [[A,B],[C]], this means that A and B will be merged
+    start_time: starting epochtime in seconds
+    end_time: ending epochtime in seconds
+    """
     print("Get ESDR data...")
 
     # Url parts
@@ -592,8 +607,8 @@ def getEsdrData(source, **options):
     return data
 
 
-# Get smell reports data from smell PGH
 def getSmellReports(**options):
+    """Get smell reports data from SmellPGH"""
     print("Get smell reports...")
 
     # Url
@@ -633,8 +648,6 @@ def getSmellReports(**options):
     return df
 
 
-# Get Google Analytics data, need to obtain the client secret from Google API console first
-# see https://developers.google.com/analytics/devguides/config/mgmt/v3/authorization
 def getGA(
     in_path="client_secrets.json", # client secret json file
     out_path="GA/", # the path to store CSV files
@@ -654,7 +667,10 @@ def getGA(
         "Data Timestamp",
         "Event Category"] # pretty names for dimensions
     ):
-
+    """
+    Get Google Analytics data, need to obtain the client secret from Google API console first
+    see https://developers.google.com/analytics/devguides/config/mgmt/v3/authorization
+    """
     print("Get Google Analytics...")
 
     SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
@@ -699,13 +715,14 @@ def getGA(
         time.sleep(1)
 
 
-# Plot a grid of scatter plot pairs in X, with point colors representing binary labels
 def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
     c_ls=[(0.5, 0.5, 0.5), (0.2275, 0.298, 0.7529), (0.702, 0.0118, 0.149), (0, 1, 0)], # color
     c_alpha=[0.1, 0.1, 0.2, 0.1], # color opacity
     c_bin=[0, 1], # color is mapped to index [Y<c_bin[0], Y==c_bin[0], Y==c_bin[1], Y>c_bin[1]]
     logger=None):
-
+    """
+    Plot a grid of scatter plot pairs in X, with point colors representing binary labels
+    """
     if not is_Y_continuous:
         c_idx = [Y<c_bin[0]]
         for k in range(0, len(c_bin)):
@@ -745,9 +762,11 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
     plt.close()
 
 
-# Plot bar charts
-# Note that x, y, title are all arrays
 def plotBar(x, y, h, w, title, out_p):
+    """
+    Plot bar charts
+    Note that x, y, title are all arrays
+    """
     fig = plt.figure(figsize=(w*12, h*1.5))
     for i in range(0, h*w):
         #ax = plt.subplot(h, w, i+1)
@@ -768,14 +787,14 @@ def dateIndexToMonthYear(index):
     return map("\n".join, zip(month_txt[index.month.values - 1], index.year.astype(str).values))
 
 
-# This function converts a date object to epoch time
 def dateToEpochtime(d):
+    """This function converts a date object to epoch time"""
     dt = datetime.combine(d, datetime.min.time())
     return datetimeToEpochtime(dt)
 
 
-# This function groups a numpy array containing epoch time by date
 def groupTime(epochtime, unit):
+    """This function groups a numpy array containing epoch time by date"""
     raw_time = pd.to_datetime(epochtime, unit=unit)
 
     # Convert to US Eastern time
@@ -807,8 +826,8 @@ def groupTime(epochtime, unit):
     return data
 
 
-# This function aggregates a numpy array containing epoch time
 def aggregateTime(epochtime, unit, resample_method, format_method, **options):
+    """This function aggregates a numpy array containing epoch time"""
     raw_time = pd.to_datetime(epochtime, unit=unit)
 
     # Convert to US Eastern time
@@ -839,13 +858,13 @@ def aggregateTime(epochtime, unit, resample_method, format_method, **options):
     return {"data": map(list, zip(keys, vals.tolist())), "val_argmax": vals.argmax(), "val_max": vals.max()}
 
 
-# Count the word frequency of a word array
 def countWords(A):
+    """Count the word frequency of a word array"""
     return Counter(A)
 
 
-# Find if a string contains numbers
 def hasNumbers(str_in):
+    """Find if a string contains numbers"""
     return bool(re.search(r'\d', str_in))
 
 
@@ -859,25 +878,28 @@ def plotScatter(df, x, y, title, out_p):
     plt.close()
 
 
-# Plot line charts
-# df_all and title_all are all arrays
 def plotLineCharts(df_all, title_all, h, w, out_p):
+    """
+    Plot line charts
+    df_all and title_all are all arrays
+    """
     fig = plt.figure(figsize=(w*12, h*2))
     for i in range(0, h*w):
         ax = plt.subplot(h, w, i+1)
         plt.title(title_all[i], fontsize=14)
         df_all[i].plot(ax=ax)
         #for j in range(0, len(y[i])): ax.text(j, y[i][j], int(y[i][j]), color=(0.2,0.2,0.2), ha="center", fontsize=10)
-
     plt.tight_layout()
     fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
 
 
-# Plot box charts
-# df_all and title_all are all arrays
 def plotBoxCharts(df_all, title_all, h, w, out_p):
+    """
+    Plot box charts
+    df_all and title_all are all arrays
+    """
     fig = plt.figure(figsize=(w*4, h*4))
     medianprops = dict(linestyle="-", linewidth=2.5, color="firebrick")
     meanpointprops = dict(marker="D", markeredgecolor="firebrick", markerfacecolor="firebrick", markersize=7)
@@ -895,6 +917,6 @@ def plotBoxCharts(df_all, title_all, h, w, out_p):
     plt.close()
 
 
-# Find if the datetime object is timezone aware
 def isDatetimeObjTzAware(dt):
+    """Find if the datetime object is timezone aware"""
     return dt.tzinfo is not None and dt.tzinfo.utcoffset(dt) is not None

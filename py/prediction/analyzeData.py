@@ -37,23 +37,26 @@ def analyzeData(
     checkAndCreateDir(out_p)
 
     # Plot features
-    #plotFeatures(in_p, out_p_root, logger)
+    plotFeatures(in_p, out_p_root, logger)
 
     # Plot aggregated smell data
-    #plotAggrSmell(in_p, out_p, logger)
+    plotAggrSmell(in_p, out_p, logger)
 
     # Plot dimension reduction
-    #plotLowDimensions(in_p, out_p, logger)
+    plotLowDimensions(in_p, out_p, logger)
 
     # Correlational study
-    #corrStudy(in_p, out_p, logger)
-    #corrStudy(in_p, out_p, logger, is_regr=True)
+    corrStudy(in_p, out_p, logger)
+    corrStudy(in_p, out_p, logger, is_regr=True)
 
     # Interpret model
-    interpretModel(in_p, out_p, end_dt, start_dt, logger=logger)
+    num_run = 1 # how many times to run the simulation
+    interpretModel(in_p, out_p, end_dt, start_dt, num_run, logger)
+
+    print("END")
 
 
-def interpretModel(in_p, out_p, end_dt, start_dt, logger):
+def interpretModel(in_p, out_p, end_dt, start_dt, num_run, logger):
     # Load time series data
     df_esdr = pd.read_csv(in_p[0], parse_dates=True, index_col="DateTime")
     df_smell = pd.read_csv(in_p[1], parse_dates=True, index_col="DateTime")
@@ -87,15 +90,14 @@ def interpretModel(in_p, out_p, end_dt, start_dt, logger):
     df_smell = df_smell.reset_index()
     df_X, df_Y, df_C = computeFeatures(df_esdr=df_esdr, df_smell=df_smell, f_hr=8, b_hr=2, thr=40, is_regr=False,
         add_inter=True, add_roll=False, add_diff=False, logger=logger)
-    for m in ["DT"]*98:
-    #for m in ["DT"]:
+    for m in ["DT"]*num_run:
         start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
         out_p_m = out_p + "experiment/" + start_time_str + "/"
         lg = generateLogger(out_p_m + m + "-" + start_time_str + ".log", format=None)
         model = Interpreter(df_X=df_X, df_Y=df_Y, out_p=out_p_m, logger=lg)
         df_Y = model.getFilteredLabels()
         df_X = model.getSelectedFeatures()
-        num_folds = (end_dt - start_dt).days / 7 # one fold represents a week
+        num_folds = int((end_dt - start_dt).days / 7) # one fold represents a week
         crossValidation(df_X=df_X, df_Y=df_Y, df_C=df_C, out_p_root=out_p_m, method=m, is_regr=False, logger=lg,
             num_folds=num_folds, skip_folds=48, train_size=8000)
 

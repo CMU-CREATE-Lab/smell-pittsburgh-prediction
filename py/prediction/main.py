@@ -16,10 +16,11 @@ def main(argv):
         mode = argv[1]
 
     # Parameters
+    # NOTE: if is_regr is changed, you need to run the computeFeatures function again to generate new features
     is_regr = False # False for classification, True for regression
     smell_thr = 40 # threshold to define a smell event
     start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2018, 9, 27, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2018, 9, 30, 0, tzinfo=pytz.timezone("US/Eastern"))
 
     # Set mode
     get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False
@@ -72,13 +73,13 @@ def main(argv):
     if cross_validation:
         #methods = ["ET", "RF", "SVM", "RLR", "LR", "LA", "EN", "MLP", "KN", "DMLP"] # regression
         #methods = ["ET", "RF", "SVM", "LG", "MLP", "KN", "DMLP", "HCR", "CR", "DT"] # classification
-        methods = ["RF", "ET"] # default for random forest and extra trees
+        methods = ["ET"] # default for extra trees
         #methods = genModelSet(is_regr)
         p_log = p + "log/"
         if is_regr: p_log += "regression/"
         else: p_log += "classification/"
         checkAndCreateDir(p_log)
-        num_folds = (end_dt - start_dt).days / 7 # one fold represents a week
+        num_folds = int((end_dt - start_dt).days / 7) # one fold represents a week
         for m in methods:
             start_time_str = datetime.now().strftime("%Y-%d-%m-%H%M%S")
             lg = generateLogger(p_log + m + "-" + start_time_str + ".log", format=None)

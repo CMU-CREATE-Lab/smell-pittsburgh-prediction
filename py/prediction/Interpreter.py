@@ -26,7 +26,8 @@ class Interpreter():
         df_X=None, # the predictors, a pandas dataframe
         df_Y=None, # the responses, a pandas dataframe
         out_p=None, # the path for saving graphs
-        use_forest=True,
+        use_forest=True, # use random forest or not
+        n_trees=200, # the number of trees for the forest (in the paper we use 1000)
         logger=None):
 
         df_X = deepcopy(df_X)
@@ -52,7 +53,6 @@ class Interpreter():
         if use_forest:
             # Fit the predictive model
             self.log("Fit predictive model..")
-            n_trees = 1000
             F = RandomForestClassifier(n_estimators=n_trees, max_features=0.15, n_jobs=-1, min_samples_split=4)
             F.fit(df_XX, df_YY.squeeze())
             self.reportPerformance(F, df_XX, df_YY)
@@ -73,8 +73,6 @@ class Interpreter():
             # Cluster samples with label 1 based on the similarity matrix
             self.log("Cluster samples with label 1...")
             self.cluster = self.clusterSamplesWithPositiveLabels()
-
-            # TODO: Refine the cluster by using k-means on the original feature space
         else:
             df_X_pos = df_X[df_Y["smell"]==1]
             df_X_pos_idx = df_X_pos.index.values
