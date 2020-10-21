@@ -1,3 +1,8 @@
+"""
+Compute model performance statistics in the paper
+"""
+
+
 from util import log, getAllFileNamesInFolder
 import pandas as pd
 import json

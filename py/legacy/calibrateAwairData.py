@@ -11,7 +11,7 @@ def calibrateAwairData(file_path_in, file_path_out):
 
     # Get all files
     file_name_in_all = getAllFileNamesInFolder(file_path_in[0])
-    
+
     # Check output directory
     for i in file_path_out:
         checkAndCreateDir(i)
@@ -83,3 +83,15 @@ def minByIndex(idx_ref, idx_data, data, offset):
             result[c] = np.amin(data[np.logical_and(idx_data>=i+offset, idx_data<=i)])
         c += 1
     return result
+
+def getBaseName(path, **options):
+    """Get the base name of a file path"""
+    with_extension = options["with_extension"] if "with_extension" in options else False
+    do_strip = options["do_strip"] if "do_strip" in options else True
+    base_name = os.path.basename(path)
+    if with_extension:
+        return base_name
+    base_name_no_ext = os.path.splitext(base_name)[0]
+    if do_strip:
+        return base_name_no_ext.strip()
+    return base_name_no_ext

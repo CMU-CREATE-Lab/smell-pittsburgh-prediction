@@ -1,3 +1,8 @@
+"""
+Train the smell event prediction model
+"""
+
+
 import numpy as np
 import copy
 from util import log, findLeastCommon

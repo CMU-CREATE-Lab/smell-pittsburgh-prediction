@@ -1,19 +1,18 @@
+"""
+Utility functions for smell-pittsburgh-prediction
+"""
+
 import logging
 from os import listdir
 from os.path import isfile, join
 import os
 from datetime import datetime
-from collections import defaultdict
 from copy import deepcopy
-import json
-import requests
 import uuid
 import pytz
 import pandas as pd
 import numpy as np
 from collections import Counter
-import time
-import re
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import confusion_matrix
@@ -21,10 +20,6 @@ from sklearn.metrics import precision_recall_fscore_support
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
-# For Google Analytics
-from apiclient.discovery import build
-from oauth2client.service_account import ServiceAccountCredentials
 
 
 def generateLogger(file_name, log_level=logging.INFO, name=str(uuid.uuid4()), format="%(asctime)s %(levelname)s %(message)s"):
@@ -58,16 +53,6 @@ def findLeastCommon(arr):
     return m.most_common()[-1][0]
 
 
-def str2float(string, **options):
-    """Convert string to float in a safe way"""
-    try:
-        return float(string)
-    except ValueError:
-        if "default_value" in options:
-            return options["default_value"]
-        return None
-
-
 def isFileHere(path):
     """Check if a file exists"""
     return os.path.isfile(path)
@@ -88,19 +73,6 @@ def smellPghRootUrl():
     return "http://api.smellpittsburgh.org/"
 
 
-def smellPghStagingRootUrl():
-    """Return the root url for SmellPGH Staging"""
-    return "http://staging.api.smellpittsburgh.org/"
-
-
-def sanitizeUnicodeSpace(string):
-    """Replace a non-breaking space to a normal space"""
-    type_string = type(string)
-    if string is not None and type_string is str:
-        return string.replace(u'\xa0', u' ')
-    return None
-
-
 def datetimeToEpochtime(dt):
     """Convert a datetime object to epoch time"""
     if dt.tzinfo is None:
@@ -109,22 +81,6 @@ def datetimeToEpochtime(dt):
         dt_utc = dt.astimezone(pytz.utc).replace(tzinfo=None)
     epoch_utc = datetime.utcfromtimestamp(0)
     return int((dt_utc - epoch_utc).total_seconds() * 1000)
-
-
-def dictSum(a, b):
-    """Sum up two dictionaries"""
-    d = defaultdict(list, deepcopy(a))
-    for key, val in b.items():
-        d[key] += val
-    return dict(d)
-
-
-def flipDict(a):
-    """Flip keys and values in a dictionary"""
-    d = defaultdict(list)
-    for key, val in a.items():
-        d[val] += [key]
-    return dict(d)
 
 
 def checkAndCreateDir(path):
@@ -141,19 +97,6 @@ def epochtimeIdxToDatetime(df):
     df.index = pd.to_datetime(df.index, unit="s", utc=True)
     df.index.name = "DateTime"
     return df
-
-
-def getBaseName(path, **options):
-    """Get the base name of a file path"""
-    with_extension = options["with_extension"] if "with_extension" in options else False
-    do_strip = options["do_strip"] if "do_strip" in options else True
-    base_name = os.path.basename(path)
-    if with_extension:
-        return base_name
-    base_name_no_ext = os.path.splitext(base_name)[0]
-    if do_strip:
-        return base_name_no_ext.strip()
-    return base_name_no_ext
 
 
 def removeNonAsciiChars(str_in):
@@ -400,160 +343,6 @@ def flattenDataframe(df):
     return [idx, val]
 
 
-def loadJson(fpath):
-    """Load json file"""
-    with open(fpath, "r") as f:
-        return json.load(f)
-
-
-def saveJson(content, fpath):
-    """Save json file"""
-    with open(fpath, "w") as f:
-        json.dump(content, f)
-
-
-def saveText(content, fpath):
-    """Save text file"""
-    with open(fpath, "w") as f:
-        f.write(content)
-
-
-def getEsdrAccessToken(auth_json_path):
-    """
-    Get the access token from ESDR, need the auth.json file
-    See https://github.com/CMU-CREATE-Lab/esdr/blob/master/HOW_TO.md
-    """
-    logger = generateLogger("log.log")
-    logger.info("Get access token from ESDR")
-    auth_json = loadJson(auth_json_path)
-    url = esdrRootUrl() + "oauth/token"
-    headers = {"Authorization": "", "Content-Type": "application/json"}
-    r = requests.post(url, data=json.dumps(auth_json), headers=headers)
-    r_json = r.json()
-    if r.status_code != 200:
-        logger.error("ESDR returns: %s when getting the access token" % json.dumps(r_json))
-        return None, None
-    access_token = r_json["access_token"]
-    user_id = r_json["userId"]
-    logger.debug("ESDR returns: %s when getting the access token" % json.dumps(r_json))
-    logger.info("Receive access token %s" % access_token)
-    logger.info("Receive user ID %s" % str(user_id))
-    return access_token, user_id
-
-
-def uploadDataToEsdr(device_name, data_json, product_id, access_token, **options):
-    """
-    Upload data to ESDR, use the getEsdrAccessToken() function to get the access_token
-    data_json = {
-        "channel_names": ["particle_concentration", "particle_count", "raw_particles", "temperature"],
-        "data": [[1449776044, 0.3, 8.0, 6.0, 2.3], [1449776104, 0.1, 3.0, 0.0, 4.9]]
-    }
-    """
-    logger = generateLogger("log.log")
-
-    # Set the header for http request
-    headers = {
-        "Authorization": "Bearer " + access_token,
-        "Content-Type": "application/json"
-    }
-
-    # Check if the device exists
-    logger.info("Try getting the device ID of device name %s" % device_name)
-    url = esdrRootUrl() + "api/v1/devices?where=name=" + device_name + ",productId=" + str(product_id)
-    r = requests.get(url, headers=headers)
-    r_json = r.json()
-    device_id = None
-    msg = "ESDR returns: %s when getting the device ID for %s" % (json.dumps(r_json), device_name)
-    if r.status_code != 200:
-        logger.error(msg)
-    else:
-        logger.debug(msg)
-        if r_json["data"]["totalCount"] < 1:
-            logger.error("%s did not exist" % device_name)
-        else:
-            device_id = r_json["data"]["rows"][0]["id"]
-            logger.info("Receive existing device ID %s" % str(device_id))
-
-    # Create a device if it does not exist
-    if device_id is None:
-        logger.info("Create a device for %s" % device_name)
-        url = esdrRootUrl() + "api/v1/products/" + str(product_id) + "/devices"
-        device_json = {
-            "name": device_name,
-            "serialNumber": options["serialNumber"] if "serialNumber" in options else str(uuid.uuid4())
-        }
-        r = requests.post(url, data=json.dumps(device_json), headers=headers)
-        r_json = r.json()
-        msg = "ESDR returns: %s when creating a device for %s" % (json.dumps(r_json), device_name)
-        if r.status_code != 201:
-            logger.error(msg)
-            return None
-        logger.debug(msg)
-        device_id = r_json["data"]["id"]
-        logger.info("Create new device ID %s" % str(device_id))
-
-    # Check if a feed exists for the device
-    logger.info("Get feed ID for '" + device_name + "'")
-    url = esdrRootUrl() + "api/v1/feeds?where=deviceId=" + str(device_id)
-    r = requests.get(url, headers=headers)
-    r_json = r.json()
-    feed_id = None
-    api_key = None
-    api_key_read_only = None
-    msg = "ESDR returns: %s when getting the feed ID" % json.dumps(r_json)
-    if r.status_code != 200:
-        logger.debug(msg)
-    else:
-        logger.debug(msg)
-        if r_json["data"]["totalCount"] < 1:
-            logger.info("No feed ID exists for device %s" % str(device_id))
-        else:
-            row = r_json["data"]["rows"][0]
-            feed_id = row["id"]
-            api_key = row["apiKey"]
-            api_key_read_only = row["apiKeyReadOnly"]
-            logger.info("Receive existing feed ID %s" % str(feed_id))
-
-    # Create a feed if no feed ID exists
-    if feed_id is None:
-        logger.info("Create a feed for '" + device_name + "'")
-        url = esdrRootUrl() + "api/v1/devices/" + str(device_id) + "/feeds"
-        feed_json = {
-            "name": device_name,
-            "exposure": options["exposure"] if "exposure" in options else "virtual",
-            "isPublic": options["isPublic"] if "isPublic" in options else 0,
-            "isMobile": options["isMobile"] if "isMobile" in options else 0,
-            "latitude": options["latitude"] if "latitude" in options else None,
-            "longitude": options["longitude"] if "longitude" in options else None
-        }
-        r = requests.post(url, data=json.dumps(feed_json), headers=headers)
-        r_json = r.json()
-        msg = "ESDR returns: %s when creating a feed" % json.dumps(r_json)
-        if r.status_code != 201:
-            logger.error(msg)
-            return None
-        logger.info(msg)
-        feed_id = r_json["data"]["id"]
-        api_key = r_json["data"]["apiKey"]
-        api_key_read_only = r_json["data"]["apiKeyReadOnly"]
-        logger.info("Create new feed ID " + str(feed_id))
-
-    # Upload Speck data to ESDR
-    logger.info("Upload sensor data for %s" % device_name)
-    url = esdrRootUrl() + "api/v1/feeds/" + str(feed_id)
-    r = requests.put(url, data=json.dumps(data_json), headers=headers)
-    r_json = r.json()
-    msg = "ESDR returns: %s when uploading data" % json.dumps(r_json)
-    if r.status_code != 200:
-        logger.error(msg)
-        return None
-    logger.debug(msg)
-
-    # Return a list of information for getting data from ESDR
-    logger.info("Data uploaded")
-    return [device_id, feed_id, api_key, api_key_read_only]
-
-
 def getEsdrData(source, **options):
     """
     Get data from ESDR
@@ -648,77 +437,10 @@ def getSmellReports(**options):
     return df
 
 
-def getGA(
-    in_path="client_secrets.json", # client secret json file
-    out_path="GA/", # the path to store CSV files
-    date_info=[{"startDate":"2017-12-11", "endDate":"2017-12-12"},
-        {"startDate":"2018-01-10", "endDate":"2018-01-11"}],
-    view_id="ga:131141811", # obtain this ID from Google Analytics dashboard
-    metrics=[{"expression": "ga:pageviews"}],
-    metrics_col_names=["Pageviews"], # pretty names for metrics
-    dimensions=[{"name": "ga:dimension1"},
-        {"name": "ga:dimension2"},
-        {"name": "ga:dimension4"},
-        {"name": "ga:dimension5"},
-        {"name": "ga:eventCategory"}],
-    dimensions_col_names=["User ID",
-        "Client ID",
-        "Hit Timestamp",
-        "Data Timestamp",
-        "Event Category"] # pretty names for dimensions
-    ):
-    """
-    Get Google Analytics data, need to obtain the client secret from Google API console first
-    see https://developers.google.com/analytics/devguides/config/mgmt/v3/authorization
-    """
-    print("Get Google Analytics...")
-
-    SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
-    KEY_FILE_LOCATION = in_path
-
-    # Build the service object
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(KEY_FILE_LOCATION, SCOPES)
-    analytics = build('analytics', 'v4', credentials=credentials)
-
-    # Check if the directory exists
-    checkAndCreateDir(out_path)
-
-    # Use the Analytics Service Object to query the Analytics Reporting API V4
-    for k in date_info:
-        info = {
-            "reportRequests": [
-                {
-                    "viewId": view_id,
-                    "dateRanges": [k],
-                    "metrics": metrics,
-                    "dimensions": dimensions,
-                    "includeEmptyRows": True,
-                    "pageSize": 10000
-                }
-            ]
-        }
-        r = analytics.reports().batchGet(body=info).execute()
-        # Parse rows and put them into a csv file
-        file_name = "tracker-from-" + k["startDate"] + "-to-" + k["endDate"] + ".csv"
-        with open(out_path + file_name, 'w') as out_file:
-            out_file.write(",".join(dimensions_col_names) + "," + ",".join(metrics_col_names) + "\n")
-            if "rows" not in r["reports"][0]["data"]:
-                print("Error: no rows")
-            else:
-                rows = r["reports"][0]["data"]["rows"]
-                print(str(len(rows)) + " rows from " + k["startDate"] + " to " + k["endDate"])
-                for p in rows:
-                    line = ",".join([",".join(p["dimensions"]), p["metrics"][0]["values"][0]])
-                    out_file.write(line + "\n")
-                print("Google Analytics file created at " + out_path + file_name)
-        # Pause for some time
-        time.sleep(1)
-
-
 def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
-    c_ls=[(0.5, 0.5, 0.5), (0.2275, 0.298, 0.7529), (0.702, 0.0118, 0.149), (0, 1, 0)], # color
-    c_alpha=[0.1, 0.1, 0.2, 0.1], # color opacity
-    c_bin=[0, 1], # color is mapped to index [Y<c_bin[0], Y==c_bin[0], Y==c_bin[1], Y>c_bin[1]]
+    c_ls=((0.5, 0.5, 0.5), (0.2275, 0.298, 0.7529), (0.702, 0.0118, 0.149), (0, 1, 0)), # color
+    c_alpha=(0.1, 0.1, 0.2, 0.1), # color opacity
+    c_bin=(0, 1), # color is mapped to index [Y<c_bin[0], Y==c_bin[0], Y==c_bin[1], Y>c_bin[1]]
     logger=None):
     """
     Plot a grid of scatter plot pairs in X, with point colors representing binary labels
@@ -758,161 +480,6 @@ def plotClusterPairGrid(X, Y, out_p, w, h, title, is_Y_continuous,
     fig.subplots_adjust(top=0.92)
     plt.suptitle(title, fontsize=title_font_size)
     fig.savefig(out_p)
-    fig.clf()
-    plt.close()
-
-
-def plotBar(x, y, h, w, title, out_p):
-    """
-    Plot bar charts
-    Note that x, y, title are all arrays
-    """
-    fig = plt.figure(figsize=(w*12, h*1.5))
-    for i in range(0, h*w):
-        #ax = plt.subplot(h, w, i+1)
-        plt.subplot(h, w, i+1)
-        plt.title(title[i], fontsize=14)
-        plt.bar(range(0,len(x[i])), y[i], 0.6, color=(0.4,0.4,0.4), align="center")
-        plt.xticks(range(0,len(x[i])), x[i])
-        #for j in range(0, len(y[i])): ax.text(j, y[i][j], int(y[i][j]), color=(0.2,0.2,0.2), ha="center", fontsize=10)
-
-    plt.tight_layout()
-    fig.savefig(out_p, dpi=150)
-    fig.clf()
-    plt.close()
-
-
-def dateIndexToMonthYear(index):
-    month_txt = np.array(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"])
-    return map("\n".join, zip(month_txt[index.month.values - 1], index.year.astype(str).values))
-
-
-def dateToEpochtime(d):
-    """This function converts a date object to epoch time"""
-    dt = datetime.combine(d, datetime.min.time())
-    return datetimeToEpochtime(dt)
-
-
-def groupTime(epochtime, unit):
-    """This function groups a numpy array containing epoch time by date"""
-    raw_time = pd.to_datetime(epochtime, unit=unit)
-
-    # Convert to US Eastern time
-    raw_time = raw_time.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
-    #raw_time = raw_time.tz_localize(pytz.timezone("US/Eastern"), ambiguous="infer")
-
-    # Group by date
-    raw_time_df = pd.DataFrame(raw_time)
-    raw_time_df["date"] = raw_time_df[0].apply(lambda x: x.date())
-    gb = raw_time_df.groupby("date").groups
-
-    # Format data
-    data = {"data": [], "row_names": [], "index": [], "epochtime": []}
-    sort_base = []
-    for key in gb.keys():
-        if key.year != 2018: continue
-        sort_base.append(key)
-        data["epochtime"].append(int(key.strftime('%s')))
-        data["row_names"].append(key.strftime("%d %b %Y (%a)"))
-        data["data"].append(epochtime[gb[key]].tolist())
-        data["index"].append(gb[key].tolist())
-
-    # Sort by epoch time
-    idx = np.array(sort_base).argsort()
-    data["epochtime"] = np.array(data["epochtime"])[idx].tolist()
-    data["row_names"] = np.array(data["row_names"])[idx].tolist()
-    data["data"] = np.array(data["data"])[idx].tolist()
-
-    return data
-
-
-def aggregateTime(epochtime, unit, resample_method, format_method, **options):
-    """This function aggregates a numpy array containing epoch time"""
-    raw_time = pd.to_datetime(epochtime, unit=unit)
-
-    # Convert to US Eastern time
-    raw_time = raw_time.tz_localize(pytz.utc, ambiguous="infer").tz_convert(pytz.timezone("US/Eastern"))
-    #raw_time = raw_time.tz_localize(pytz.timezone("US/Eastern"), ambiguous="infer")
-
-    if "only_count_unique" in options:
-        raw_time_series = pd.Series(options["only_count_unique"], index=raw_time)
-        aggr = raw_time_series.resample(resample_method).apply(lambda x: x.nunique())
-    else:
-        raw_time_series = pd.Series(np.ones(len(epochtime), dtype=np.int), index=raw_time)
-        aggr = raw_time_series.resample(resample_method).count()
-
-    # Reindex the bins to involve the entire day
-    d = raw_time[0].date()
-    all_day_idx = pd.date_range(d, periods=24, freq=resample_method, tz="US/Eastern")
-    aggr = aggr.reindex(all_day_idx, fill_value=0)
-
-    # Format data
-    keys = [d.strftime(format_method) for d in aggr.index]
-    vals = aggr.values
-
-    if "remove_zero_val" in options and options["remove_zero_val"] == True:
-        idx = np.nonzero(vals)[0]
-        keys = np.array(keys)[idx].tolist()
-        vals = vals[idx]
-
-    return {"data": map(list, zip(keys, vals.tolist())), "val_argmax": vals.argmax(), "val_max": vals.max()}
-
-
-def countWords(A):
-    """Count the word frequency of a word array"""
-    return Counter(A)
-
-
-def hasNumbers(str_in):
-    """Find if a string contains numbers"""
-    return bool(re.search(r'\d', str_in))
-
-
-def plotScatter(df, x, y, title, out_p):
-    ax = df.plot.scatter(x=x, y=y, figsize=(6, 6))
-    fig = ax.get_figure()
-    plt.title(title, fontsize=14)
-    plt.tight_layout()
-    fig.savefig(out_p, dpi=150)
-    fig.clf()
-    plt.close()
-
-
-def plotLineCharts(df_all, title_all, h, w, out_p):
-    """
-    Plot line charts
-    df_all and title_all are all arrays
-    """
-    fig = plt.figure(figsize=(w*12, h*2))
-    for i in range(0, h*w):
-        ax = plt.subplot(h, w, i+1)
-        plt.title(title_all[i], fontsize=14)
-        df_all[i].plot(ax=ax)
-        #for j in range(0, len(y[i])): ax.text(j, y[i][j], int(y[i][j]), color=(0.2,0.2,0.2), ha="center", fontsize=10)
-    plt.tight_layout()
-    fig.savefig(out_p, dpi=150)
-    fig.clf()
-    plt.close()
-
-
-def plotBoxCharts(df_all, title_all, h, w, out_p):
-    """
-    Plot box charts
-    df_all and title_all are all arrays
-    """
-    fig = plt.figure(figsize=(w*4, h*4))
-    medianprops = dict(linestyle="-", linewidth=2.5, color="firebrick")
-    meanpointprops = dict(marker="D", markeredgecolor="firebrick", markerfacecolor="firebrick", markersize=7)
-    for i in range(0, h*w):
-        ax = plt.subplot(h, w, i+1)
-        plt.title(title_all[i], fontsize=14)
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
-        ax.boxplot(df_all[i], sym="", widths=0.6, labels=[df.name for df in df_all[i]],
-            medianprops=medianprops, showmeans=True, meanprops=meanpointprops)
-
-    plt.tight_layout()
-    fig.savefig(out_p, dpi=150)
     fig.clf()
     plt.close()
 

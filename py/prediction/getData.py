@@ -1,3 +1,8 @@
+"""
+Get smell and sensor data for training the prediction model
+"""
+
+
 from util import log, datetimeToEpochtime, getEsdrData, getSmellReports, checkAndCreateDir
 
 

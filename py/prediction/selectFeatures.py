@@ -1,3 +1,8 @@
+"""
+Select features for the machine learning model
+"""
+
+
 import pandas as pd
 import numpy as np
 from util import log

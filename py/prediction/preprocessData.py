@@ -1,3 +1,8 @@
+"""
+Prepare data for the prediction model
+"""
+
+
 import pandas as pd
 from util import log, getAllFileNamesInFolder, checkAndCreateDir, epochtimeIdxToDatetime
 import re

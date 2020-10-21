@@ -1,3 +1,8 @@
+"""
+Run cross validation for the machine learning model
+"""
+
+
 import numpy as np
 import pandas as pd
 import matplotlib

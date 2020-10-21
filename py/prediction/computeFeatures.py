@@ -1,3 +1,8 @@
+"""
+Compute features for classification or regression
+"""
+
+
 import numpy as np
 import pandas as pd
 from util import log, checkAndCreateDir, isDatetimeObjTzAware

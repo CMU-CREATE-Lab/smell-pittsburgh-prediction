@@ -1,3 +1,9 @@
+"""
+The production code for predicting smell events and sending push notifications
+(sending push notifications requires the rake script in the smell-pittsburgh-rails repository)
+"""
+
+
 import sys
 from util import log, generateLogger, computeMetric, isFileHere
 import pandas as pd

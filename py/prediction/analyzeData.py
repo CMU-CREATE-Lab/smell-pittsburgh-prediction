@@ -1,3 +1,9 @@
+"""
+Analyze pollution patterns found by the machine learning model
+Visualize raw data
+"""
+
+
 import numpy as np
 import pandas as pd
 import matplotlib
