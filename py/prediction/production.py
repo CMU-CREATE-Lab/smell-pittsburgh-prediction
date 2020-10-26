@@ -115,12 +115,17 @@ def predict(f_hr=8, b_hr=3, thr=40):
     # if pred==3, event both predicted by the base estimator and detected by the crowd
     y_pred = model.predict(df_X, df_C)[0]
     log("Prediction for " + str(end_dt) + " is " + str(y_pred), logger)
+
+    # Send the predictive push notification
     if y_pred in (1, 3): pushType1(end_dt, logger)
+
+    # Send the crowd-based notification
+    # NOTE: comment out the next line when migrating its function to the rails server
     if y_pred in (2, 3): pushType2(end_dt, logger)
 
 
-# Type 1 push notification (predicted by the classifier)
 def pushType1(end_dt, logger):
+    """Type 1 push notification (predicted by the classifier)"""
     p = DATA_PATH
 
     # Read the push notification file
@@ -146,8 +151,8 @@ def pushType1(end_dt, logger):
     df_nst.to_csv(nst_p, index=False)
 
 
-# Type 2 push notification (verified by the crowd)
 def pushType2(end_dt, logger):
+    """Type 2 push notification (verified by the crowd)"""
     p = DATA_PATH
 
     # Read the crowd push notification file
