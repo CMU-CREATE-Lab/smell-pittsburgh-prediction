@@ -42,6 +42,7 @@ def main(argv):
 
 
 def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
+    """Train the machine learning model for predicting smell events"""
     p = DATA_PATH
 
     # Set logger
@@ -65,6 +66,7 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     #df_X, df_Y = selectFeatures(df_X, df_Y, logger=logger, out_p=p+"feat_selected.csv")
 
     # Train, save, and evaluate model
+    # NOTE: to know more about the model, see the "HybridCrowdClassifier.py" file
     model = trainModel({"X": df_X, "Y": df_Y, "C": df_C}, method=method, out_p=p+"model.pkl", logger=logger)
     metric = computeMetric(df_Y, model.predict(df_X, df_C), False)
     for m in metric:
@@ -72,6 +74,7 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
 
 
 def predict(f_hr=8, b_hr=3, thr=40):
+    """Predict smell events using the trained machine learning model"""
     p = DATA_PATH
 
     # Set logger
@@ -125,57 +128,73 @@ def predict(f_hr=8, b_hr=3, thr=40):
 
 
 def pushType1(end_dt, logger):
-    """Type 1 push notification (predicted by the classifier)"""
+    """
+    Send type 1 push notification (predicted by the classifier)
+
+    Input:
+        end_dt: the ending time for getting the ESDR data that is used for prediction (which is the current time) 
+    """
     p = DATA_PATH
 
     # Read the push notification file
     nst_p = p + "notification_sent_times.csv"
     if isFileHere(nst_p):
+        # If the file that stores the notification sending time exist,
+        # ...load the times and check if we already sent the notification at the same date before
         df_nst = pd.read_csv(nst_p, parse_dates=["DateTime"])
-        last_date = df_nst["DateTime"].dt.date.iloc[-1]
+        last_date = df_nst["DateTime"].dt.date.iloc[-1] # the last date that we send the notification
         current_date = end_dt.date()
-        if current_date == last_date:
+        if current_date == last_date: # check if the dates (only year, month, and day) match
             # We already sent push notifications to users today, do not send it again until next day
             log("Ignore this prediction because we already sent a push notification today", logger)
             return
     else:
+        # If the file did not exist, create a new pandas Dataframe to store the time when we send notifications
         df_nst = pd.DataFrame(data=[], columns=["DateTime"])
 
     # Send push notification to users
     if ENABLE_RAKE_CALL:
         os.system('cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/push.log 2>&1')
 
-    # Save result
+    # Create a CSV file that writes the time when the system send the push notification
     log("A prediction push notification was sent to users", logger)
-    df_nst = df_nst.append({"DateTime": end_dt}, ignore_index=True)
-    df_nst.to_csv(nst_p, index=False)
+    df_nst = df_nst.append({"DateTime": end_dt}, ignore_index=True) # append a row to the pandas Dataframe
+    df_nst.to_csv(nst_p, index=False) # re-write the Dataframe to a CSV file
 
 
 def pushType2(end_dt, logger):
-    """Type 2 push notification (verified by the crowd)"""
+    """
+    Send type 2 push notification (verified by the crowd)
+    
+    Input:
+        end_dt: the ending time for getting the ESDR data that is used for prediction (which is the current time) 
+    """
     p = DATA_PATH
 
     # Read the crowd push notification file
     cvnst_p = p + "crow_verified_notification_sent_times.csv"
     if isFileHere(cvnst_p):
+        # If the file that stores the notification sending time exist,
+        # ...load the times and check if we already sent the notification at the same date before
         df_cvnst = pd.read_csv(cvnst_p, parse_dates=["DateTime"])
-        last_date = df_cvnst["DateTime"].dt.date.iloc[-1]
+        last_date = df_cvnst["DateTime"].dt.date.iloc[-1] # the last date that we send the notification
         current_date = end_dt.date()
-        if current_date == last_date:
+        if current_date == last_date: # check if the dates (only year, month, and day) match
             # We already sent crowd-verified push notifications to users today, do not send it again until next day
             log("Ignore this crowd-verified event because we already sent a push notification today", logger)
             return
     else:
+        # If the file did not exist, create a new pandas Dataframe to store the time when we send notifications
         df_cvnst = pd.DataFrame(data=[], columns=["DateTime"])
 
     # Send crowd-verified push notification to users
     if ENABLE_RAKE_CALL:
         os.system('cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction_type2["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/crow_verified_push.log 2>&1')
 
-    # Send push notification to users
+    # Create a CSV file that writes the time when the system send the push notification
     log("A crowd-verified push notification was sent to users", logger)
-    df_cvnst = df_cvnst.append({"DateTime": end_dt}, ignore_index=True)
-    df_cvnst.to_csv(cvnst_p, index=False)
+    df_cvnst = df_cvnst.append({"DateTime": end_dt}, ignore_index=True) # append a row to the pandas Dataframe
+    df_cvnst.to_csv(cvnst_p, index=False) # re-write the Dataframe to a CSV file
 
 
 if __name__ == "__main__":

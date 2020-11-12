@@ -6,9 +6,19 @@ class HybridCrowdClassifier():
     A hybrid model that combines crowdsourcing and machine learning classifier
     """
     def __init__(self,
-            base_estimator=None, # if no estimator is specified, only use crowdsourcing
-            crowd_thr=20, # the threshold to determine an event detected by the crowd
+            base_estimator=None,
+            crowd_thr=20,
             logger=None):
+        """
+        Initialize the class
+
+        Input:
+            base_estimator: the base scikit-learn model for predicting smell events
+            ...if no estimator is specified, only use the crowd-based smell event
+            crowd_thr: the threshold to determine an event detected by the crowd
+            ...if the sum of total smell ratings for all reports in the previous hour is larger than crowd_thr,
+            ...the model will say that there is a crowd-based smell event
+        """
         self.base_estimator = base_estimator
         self.crowd_thr = crowd_thr
         self.logger = logger
