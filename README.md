@@ -82,6 +82,10 @@ python production.py train
 # Perform prediction
 python production.py predict
 ```
+If you want to disable the crowd-based smell event notifications, go to the "production.py" file and comment out the following line:
+```python
+if y_pred in (2, 3): pushType2(end_dt, logger)
+```
 Use [crontab]((https://help.ubuntu.com/community/CronHowto)) to call the above two commands periodically. The following example re-trains the model on every Sunday at 0:00. The prediction task is performed between 5:00 and 13:00 for each day at the 0 and 30 minutes clock (e.g., 5:00, and 5:30).
 ```sh
 crontab -e
