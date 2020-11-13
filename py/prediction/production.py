@@ -15,6 +15,7 @@ from trainModel import trainModel
 import joblib
 from datetime import timedelta, datetime
 import os
+import subprocess
 
 # The flag to determine the server type
 #SERVER = "staging"
@@ -42,7 +43,17 @@ def main(argv):
 
 
 def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
-    """Train the machine learning model for predicting smell events"""
+    """
+    Train the machine learning model for predicting smell events
+    
+    Input:
+        f_hr: the number of hours to look further and compute responses (Y),
+            ...which is the sum of smell ratings (that are larger than 3) over the future f_hr hours
+        b_hr: the number of hours to look back and compute features (X),
+            ...which are the sensor readings (on ESDR) over the past b_hr hours
+        thr: the threshold for binning the smell value into two classes (for classification)
+        method: the method used in the "trainModel.py" file
+    """
     p = DATA_PATH
 
     # Set logger
@@ -74,7 +85,11 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
 
 
 def predict(f_hr=8, b_hr=3, thr=40):
-    """Predict smell events using the trained machine learning model"""
+    """
+    Predict smell events using the trained machine learning model
+    
+    For the description of the input arguments, see the docstring in the train() function
+    """
     p = DATA_PATH
 
     # Set logger
@@ -132,7 +147,8 @@ def pushType1(end_dt, logger):
     Send type 1 push notification (predicted by the classifier)
 
     Input:
-        end_dt: the ending time for getting the ESDR data that is used for prediction (which is the current time) 
+        end_dt: the ending time for getting the ESDR data that is used for prediction (which is the current time)
+        logger: the python logger created by the generateLogger() function
     """
     p = DATA_PATH
 
@@ -154,7 +170,11 @@ def pushType1(end_dt, logger):
 
     # Send push notification to users
     if ENABLE_RAKE_CALL:
-        os.system('cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/push.log 2>&1')
+        # NOTE: Python by default uses the sh terminal but we want it to use bash,
+        # ...because "source" and "bundle" only works for bash on the Hal11 machine
+        # ...(on the sh terminal we will want to use "." instead of "source")
+        cmd = 'source /etc/profile ; cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /var/www/smell-pittsburgh-prediction/py/prediction/data_production/push.log 2>&1'
+        subprocess.call(["bash", "-c", cmd])
 
     # Create a CSV file that writes the time when the system send the push notification
     log("A prediction push notification was sent to users", logger)
@@ -168,6 +188,7 @@ def pushType2(end_dt, logger):
     
     Input:
         end_dt: the ending time for getting the ESDR data that is used for prediction (which is the current time) 
+        logger: the python logger created by the generateLogger() function
     """
     p = DATA_PATH
 
@@ -189,7 +210,11 @@ def pushType2(end_dt, logger):
 
     # Send crowd-verified push notification to users
     if ENABLE_RAKE_CALL:
-        os.system('cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction_type2["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /home/yenchiah/smell-pittsburgh-prediction-production/py/prediction/data_production/crow_verified_push.log 2>&1')
+        # NOTE: Python by default uses the sh terminal but we want it to use bash,
+        # ...because "source" and "bundle" only works for bash on the Hal11 machine
+        # ...(on the sh terminal we will want to use "." instead of "source")
+        cmd = 'source /etc/profile ; cd /var/www/rails-apps/smellpgh/' + SERVER + '/current/ ; bundle exec rake firebase_push_notification:send_prediction_type2["/topics/SmellReports"] RAILS_ENV=' + SERVER + ' >> /var/www/smell-pittsburgh-prediction/py/prediction/data_production/crow_verified_push.log 2>&1'
+        subprocess.call(["bash", "-c", cmd])
 
     # Create a CSV file that writes the time when the system send the push notification
     log("A crowd-verified push notification was sent to users", logger)

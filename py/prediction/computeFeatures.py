@@ -9,28 +9,37 @@ from util import log, checkAndCreateDir, isDatetimeObjTzAware
 import pytz
 
 
-def computeFeatures(
-    df_esdr=None, # the pandas dataframe that contains the predictors (preprocessed esdr data)
-    df_smell=None, # the pandas dataframe that contains the responses (preprocessed smell data)
-    in_p=None, # input path for raw esdr and smell data
-    out_p=None, # output path for features and labels
-    out_p_mean=None, # output path for the mean of features
-    out_p_std=None, # output path for the standard deviation of features
-    is_regr=False, # regression or classification
-    f_hr=8, # the number of hours to look further and compute responses (Y)
-    b_hr=3, # the number of hours to look back and compute features (X)
-    thr=40, # for binning the smell value into two classes (this is for classification)
-    add_roll=False, # add rolling features
-    add_diff=False, # add differential features
-    add_inter=False, # add variable interaction (X1*X2) terms in the features or not
-    add_sqa=False, # include the squared terms (X1^2)
-    in_p_mean=None, # the path of mean values in pandas dataframe for scaling features
-    in_p_std=None, # the path of std in pandas dataframe for scaling features
-    aggr_axis=True, # whether we want to sum all smell reports together for all zipcodes
-    logger=None):
+def computeFeatures(df_esdr=None, df_smell=None, in_p=None, out_p=None, out_p_mean=None,
+    out_p_std=None, is_regr=False, f_hr=8, b_hr=3, thr=40, add_roll=False, add_diff=False,
+    add_inter=False, add_sqa=False, in_p_mean=None, in_p_std=None, aggr_axis=True, logger=None):
     """
     Merge all data together and compute features
-    OUTPUT: pandas dataframe containing features
+    
+    Input:
+        df_esdr (pandas Dataframe): the preprocessed sensor data obtained from ESDR
+        df_smell (pandas Dataframe): the preprocessed smell data obtained from SmellPGH
+        in_p (str): input path for reading raw sensor and smell data
+        out_p (str): output path for writing features and labels
+        out_p_mean (str): output path for the mean of features (X)
+        out_p_std (str): output path for the standard deviation of features (X)
+        is_regr (bool): True means regression, and False means classification
+        f_hr (int): the number of hours to look further and compute responses (Y),
+            ...which is the sum of smell ratings (that are larger than 3) over the future f_hr hours
+        b_hr (int): the number of hours to look back and compute features (X),
+            ...which are the sensor readings (on ESDR) over the past b_hr hours
+        thr: the threshold for binning the smell value into two classes (for classification)
+        add_roll (bool): add rolling features
+        add_diff (bool): add differential features
+        add_inter (bool): add variable interaction (X1*X2) terms in the features or not
+        add_sqa (bool): include the squared terms (X1^2) in the features
+        in_p_mean (str): the path to read the mean values for scaling features (X)
+        in_p_std (str): the path to read the standard deviation values for scaling features (X)
+        aggr_axis (bool): whether we want to sum all smell reports together for all zipcodes
+        logger: the python logger created by the generateLogger() function
+    Output:
+        df_X (pandas Dataframe): the features (X)
+        df_Y (pandas Dataframe): the responses (Y)
+        df_C (pandas Dataframe): the crowdsourced information (C)
     """
     log("Compute features...", logger)
 
