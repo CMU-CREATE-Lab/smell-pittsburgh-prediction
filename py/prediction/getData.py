@@ -6,14 +6,19 @@ Get smell and sensor data for training the prediction model
 from util import log, datetimeToEpochtime, getEsdrData, getSmellReports, checkAndCreateDir
 
 
-def getData(
-    out_p=None, # output file path
-    start_dt=None, # starting date for the data
-    end_dt=None, # ending data for the data
-    logger=None):
+def getData(out_p=None, start_dt=None, end_dt=None, logger=None):
     """
-    Get data
-    OUTPUT: raw esdr and smell data
+    Get and save smell and ESDR data
+
+    Input:
+        out_p: the path for storing ESDR and smell data (optional)
+        start_dt (datetime.datetime object): starting date that you want to get the data
+        end_dt (datetime.datetime object): ending date that you want to get the data
+        logger: the python logger created by the generateLogger() function 
+    
+    Output:
+        df_esdr_array_raw (list of pandas.DataFrame): a list of raw ESDR data for each channel
+        df_smell_raw (pandas.DataFrame): raw smell data
     """
     log("Get data...", logger)
 
@@ -48,6 +53,8 @@ def getData(
         "Feed_3508_South_Allegheny_High_School_AirNow",
         "Feed_24_Glassport_High_Street_ACHD"
     ]
+    # IMPORTANT: if you add more data that changes the length of the esdr_source list,
+    # ...you need to also add a name to the corresponding index of the esdr_source_names list.
     esdr_source = [
         [
             {"feed": "1", "channel": "PM25B_UG_M3"},

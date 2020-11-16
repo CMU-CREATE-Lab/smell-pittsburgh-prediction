@@ -13,12 +13,14 @@ def computeFeatures(df_esdr=None, df_smell=None, in_p=None, out_p=None, out_p_me
     out_p_std=None, is_regr=False, f_hr=8, b_hr=3, thr=40, add_roll=False, add_diff=False,
     add_inter=False, add_sqa=False, in_p_mean=None, in_p_std=None, aggr_axis=True, logger=None):
     """
-    Merge all data together and compute features
+    Compute both features (X) and responses (Y) to fit a model F where Y=F(X)
     
     Input:
-        df_esdr (pandas Dataframe): the preprocessed sensor data obtained from ESDR
-        df_smell (pandas Dataframe): the preprocessed smell data obtained from SmellPGH
-        in_p (str): input path for reading raw sensor and smell data
+        df_esdr (pandas.Dataframe): the preprocessed sensor data obtained from ESDR
+            ...this is the ouput of the preprocessData() function in preprocessData.py
+        df_smell (pandas.Dataframe): the preprocessed smell data obtained from SmellPGH
+            ...this is the ouput of the preprocessData() function in preprocessData.py
+        in_p (str): input path for reading raw sensor and smell data (optional if df_esdr and df_smell are specified)
         out_p (str): output path for writing features and labels
         out_p_mean (str): output path for the mean of features (X)
         out_p_std (str): output path for the standard deviation of features (X)
@@ -28,6 +30,9 @@ def computeFeatures(df_esdr=None, df_smell=None, in_p=None, out_p=None, out_p_me
         b_hr (int): the number of hours to look back and compute features (X),
             ...which are the sensor readings (on ESDR) over the past b_hr hours
         thr: the threshold for binning the smell value into two classes (for classification)
+            ...for example, if f_hr=8 and thr=40,
+            ...this means that if within 8 hours the sum of smell ratings in all reports is larger than 40,
+            ...a smell event will be detected.
         add_roll (bool): add rolling features
         add_diff (bool): add differential features
         add_inter (bool): add variable interaction (X1*X2) terms in the features or not
@@ -36,10 +41,13 @@ def computeFeatures(df_esdr=None, df_smell=None, in_p=None, out_p=None, out_p_me
         in_p_std (str): the path to read the standard deviation values for scaling features (X)
         aggr_axis (bool): whether we want to sum all smell reports together for all zipcodes
         logger: the python logger created by the generateLogger() function
+
     Output:
-        df_X (pandas Dataframe): the features (X)
-        df_Y (pandas Dataframe): the responses (Y)
+        df_X (pandas Dataframe): the features (X), the ESDR sensor readings
+        df_Y (pandas Dataframe): the responses (Y), the aggregated smell ratings
         df_C (pandas Dataframe): the crowdsourced information (C)
+            ...this means in the past N hour the sum of smell ratings is larger than M
+            ...to find the parameters N and M, check HybridCrowdClassifier.py 
     """
     log("Compute features...", logger)
 

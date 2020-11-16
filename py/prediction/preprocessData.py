@@ -9,16 +9,20 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-def preprocessData(
-    df_esdr_array_raw=None, # raw esdr dataframes
-    df_smell_raw=None, # raw smell dataframe
-    in_p=None, # input file path
-    out_p=None, # output file path
-    logger=None):
+def preprocessData(df_esdr_array_raw=None, df_smell_raw=None, in_p=None, out_p=None, logger=None):
     """
     Preprocess data
-    INPUT: raw esdr and smell data
-    OUTPUT: preprocessed esdr and smell data
+    
+    Input:
+        df_esdr_array_raw: the output of the getData() function in getData.py
+        df_smell_raw: the output of the getData() function in getData.py
+        in_p: the input path to find the raw ESDR data (optional if df_esdr_array_raw and df_smell_raw are specified)
+        out_p: the ouput path to store the preprocessed data (optional)
+        logger: the python logger created by the generateLogger() function
+
+    Output:
+        df_esdr (pandas.DataFrame): preprocessed ESDR data
+        df_smell (pandas.DataFrame): preprocessed smell data
     """
     log("Preprocess data...", logger)
 
@@ -34,7 +38,7 @@ def preprocessData(
                 log("ERROR: no data, return None.", logger)
                 return None
 
-    # Merge esdr data
+    # Merge a list of DataFrame that contains ESDR data into a single one
     df_esdr = mergeEsdrData(df_esdr_array_raw)
 
     # Aggregate smell reports (datetime object in "DateTime" column is in UTC tzinfo)

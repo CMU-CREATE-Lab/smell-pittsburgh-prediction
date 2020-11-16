@@ -31,16 +31,22 @@ from HybridCrowdClassifier import HybridCrowdClassifier
 from sklearn.dummy import DummyClassifier
 
 
-def trainModel(
-    train, # the training set in pandas dataframe (contain train["X"] and train["Y"])
-    out_p=None, # the path for saving the model
-    method="ET", # the regression or classification method
-    is_regr=False, # is regression or not
-    logger=None):
+def trainModel(train, out_p=None, method="ET", is_regr=False, logger=None):
     """
-    Train a regression or classification model
-    To find a function F such that Y=F(X)
-    OUTPUT: model
+    Train a regression or classification model F such that Y=F(X)
+    
+    Input:
+        train (dictionary): the training data that looks like {"X": df_X, "Y": df_Y, "C": df_C}
+            ...train["X"] is the feature, output from the computeFeatures() function in computeFeatures.py
+            ...train["Y"] is the response, ouput from the computeFeatures() function in computeFeatures.py
+            ...train["C"] is the crowd information, output from the computeFeatures() function also
+        out_p (str): the path for saving the trained model (optional)
+        method (str): the method for training the model
+        is_regr (bool): regression or classification (see computeFeatures.py)
+        logger: the python logger created by the generateLogger() function
+
+    Output:
+        model: the trained machine learning model
     """
     log("Training model with " + str(train["X"].shape[1]) + " features...", logger)
 

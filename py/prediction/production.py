@@ -18,12 +18,12 @@ import os
 import subprocess
 
 # The flag to determine the server type
-#SERVER = "staging"
-SERVER = "production"
+SERVER = "staging"
+#SERVER = "production"
 
 # The flag for enabling the rake call to send push notifications
-ENABLE_RAKE_CALL = False
-#ENABLE_RAKE_CALL = True
+#ENABLE_RAKE_CALL = False
+ENABLE_RAKE_CALL = True
 
 # The path for storing push notification data
 DATA_PATH = "data_production/"
@@ -61,7 +61,7 @@ def train(f_hr=8, b_hr=3, thr=40, method="HCR"):
     log("--------------------------------------------------------------------------", logger)
     log("---------------------------------  Train  --------------------------------", logger)
 
-    # Get data
+    # Get and preprocess data
     end_dt = datetime.now() - timedelta(hours=24)
     start_dt = end_dt - timedelta(hours=8000)
     log("Get data from " + str(start_dt) + " to " + str(end_dt), logger)
