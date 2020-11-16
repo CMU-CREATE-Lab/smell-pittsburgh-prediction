@@ -69,12 +69,14 @@ if y_pred in (2, 3): pushType2(end_dt, logger)
 ```
 Use [crontab]((https://help.ubuntu.com/community/CronHowto)) to call the above two commands periodically. The following example re-trains the model on every Sunday at 0:00. The prediction task is performed between 5:00 and 13:00 for each day at the 0 and 30 minutes clock (e.g., 5:00, and 5:30).
 ```sh
-crontab -e
+sudo crontab -e
 
 # Add the following lines in the crontab file
-0 0 * * 0 export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /home/yenchiah/smell-pittsburgh-prediction/py/prediction; run-one python production.py train
-0 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /home/yenchiah/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
-30 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /home/yenchiah/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+0 0 * * 0 export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py train
+0 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+15 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+30 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+45 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
 ```
 
 # Visualization
