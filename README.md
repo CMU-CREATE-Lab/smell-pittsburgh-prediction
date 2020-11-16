@@ -78,7 +78,7 @@ sudo crontab -e
 30 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
 45 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
 ```
-Or we can simplify the crontab to:
+Or we can simplify the crontab as shown below. This means that we are running the command every 15 minutes. Check [this website](https://crontab.guru/every-15-minutes) for setting up the crontab.
 ```sh
 sudo crontab -e
 
