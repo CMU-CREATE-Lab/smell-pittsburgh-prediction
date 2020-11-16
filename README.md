@@ -1,27 +1,8 @@
 # smell-pittsburgh-prediction
 A tool for predicting and interpreting smell data obtained from [Smell Pittsburgh](https://smellpgh.org/). The code for the system can be found [here](https://github.com/CMU-CREATE-Lab/smell-pittsburgh-rails). The design and evaluation are documented in the paper, [Smell Pittsburgh: Community-Empowered Mobile Smell Reporting System](https://arxiv.org/pdf/1810.11143.pdf). If you find this useful, please consider citing:<br/>
 
-Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao Huang, and Illah Nourbakhsh. 2019. Smell Pittsburgh: community-empowered mobile smell reporting system. In Proceedings of the 24th International Conference on Intelligent User Interfaces (IUI 2019). ACM.
+Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2020. Smell Pittsburgh: Engaging Community Citizen Science for Air Quality. ACM Transactions on Interactive Intelligent Systems. 10, 4, Article 32. DOI:[https://doi.org/10.1145/3369397](https://doi.org/10.1145/3369397). Preprint:[https://arxiv.org/pdf/1912.11936.pdf](https://arxiv.org/pdf/1912.11936.pdf).
 
-```
-@inproceedings{hsu-2019-smellpgh,
- author = {Hsu, Yen-Chia and Cross, Jennifer and Dille, Paul and Tasota, Michael and Dias, Beatrice and Sargent, Randy and Huang, Ting-Hao (Kenneth) and Nourbakhsh, Illah},
- title = {Smell Pittsburgh: Community-empowered Mobile Smell Reporting System},
- booktitle = {Proceedings of the 24th International Conference on Intelligent User Interfaces},
- series = {IUI '19},
- year = {2019},
- isbn = {978-1-4503-6272-6},
- location = {Marina del Ray, California},
- pages = {65--79},
- numpages = {15},
- url = {http://doi.acm.org/10.1145/3301275.3302293},
- doi = {10.1145/3301275.3302293},
- acmid = {3302293},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {air quality, citizen science, community empowerment, machine learning, smell, sustainable HCI},
-} 
-```
 # Usage
 Install conda. This assumes that Ubuntu is installed. A detailed documentation is [here](https://conda.io/docs/user-guide/getting-started.html). First visit [here](https://conda.io/miniconda.html) to obtain the downloading path. The following script install conda for all users:
 ```sh
