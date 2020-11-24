@@ -72,11 +72,11 @@ Use [crontab]((https://help.ubuntu.com/community/CronHowto)) to call the above t
 sudo crontab -e
 
 # Add the following lines in the crontab file
-0 0 * * 0 export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py train
-0 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
-15 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
-30 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
-45 5-13 * * * export PATH='/opt/miniconda3/bin:$PATH'; . '/opt/miniconda3/etc/profile.d/conda.sh'; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+0 0 * * 0 export PATH="/opt/miniconda3/bin:$PATH"; . "/opt/miniconda3/etc/profile.d/conda.sh"; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py train
+0 5-13 * * * export PATH="/opt/miniconda3/bin:$PATH"; . "/opt/miniconda3/etc/profile.d/conda.sh"; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+15 5-13 * * * export PATH="/opt/miniconda3/bin:$PATH"; . "/opt/miniconda3/etc/profile.d/conda.sh"; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+30 5-13 * * * export PATH="/opt/miniconda3/bin:$PATH"; . "/opt/miniconda3/etc/profile.d/conda.sh"; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
+45 5-13 * * * export PATH="/opt/miniconda3/bin:$PATH"; . "/opt/miniconda3/etc/profile.d/conda.sh"; conda activate smell-pittsburgh-prediction; cd /var/www/smell-pittsburgh-prediction/py/prediction; run-one python production.py predict
 ```
 IMPORTANT: the above crontab commands only work in bash, not shell. Make sure that you add the following at the first line in the crontab:
 ```sh
