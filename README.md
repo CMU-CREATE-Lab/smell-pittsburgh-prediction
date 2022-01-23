@@ -95,7 +95,7 @@ sudo crontab -e
 The web/GeoHeatmap.html visualizes distribution of smell reports by zipcodes. You can open this by using a browser, such as Google Chrome.
 
 # Dataset
-A pre-downloaded dataset from 10/31/2016 to 9/30/2018 is included in this repository.
+There are two datasets in this repository. [Version one](/dataset/v1) is the dataset that we used in the paper. [Version two](/dataset/v2) is an updated dataset that covers a wider range of geographical regions and time range.
 
 To get recent data, change the end_dt (ending date time) variable in the main.py file and then run the following:
 ```sh
