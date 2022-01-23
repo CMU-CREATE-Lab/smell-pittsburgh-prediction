@@ -95,10 +95,10 @@ def getData(out_p=None, start_dt=None, end_dt=None, region_setting=0, logger=Non
 
     if region_setting == 0:
         # Get smell reports (for the Smell PGH paper, only contains a certain zipcodes)
-        df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time)
+        df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time, api_version=1)
     else:
         # Get smell reports (for general tasks, contains data from a wider geographical region)
-        df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time, allegheny_county=True)
+        df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time, allegheny_county=True, api_version=2)
 
     # Check directory and save file
     if out_p is not None:
