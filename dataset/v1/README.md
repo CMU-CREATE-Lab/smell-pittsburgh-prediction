@@ -1,6 +1,10 @@
-# smell-pittsburgh-dataset-v1
+# smell-pittsburgh-dataset-v2
 
-This is the first version of the Smell Pittsburgh dataset from 10/31/2016 (month/day/year) to 9/30/2018, including the following zipcodes in the Pittsburgh region: 15221, 15218, 15222, 15219, 15201, 15224, 15213, 15232, 15206, 15208, 15217, 15207, 15260, and 15104. This dataset is used for the Smell Pittsburgh paper below:
+This is the second version of the Smell Pittsburgh dataset from 10/31/2016 (month/day/year) to 9/30/2018, including the following zipcodes in the Pittsburgh region in Pennsylvania, USA:
+
+15221, 15218, 15222, 15219, 15201, 15224, 15213, 15232, 15206, 15208, 15217, 15207, 15260, 15104.
+
+This dataset is used for the Smell Pittsburgh paper below:
 
 Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2020. Smell Pittsburgh: Engaging Community Citizen Science for Air Quality. ACM Transactions on Interactive Intelligent Systems. 10, 4, Article 32. DOI:https://doi.org/10.1145/3369397. Preprint:https://arxiv.org/pdf/1912.11936.pdf.
 
