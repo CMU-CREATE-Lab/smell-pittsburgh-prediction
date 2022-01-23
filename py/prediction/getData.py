@@ -6,7 +6,7 @@ Get smell and sensor data for training the prediction model
 from util import log, datetimeToEpochtime, getEsdrData, getSmellReports, checkAndCreateDir
 
 
-def getData(out_p=None, start_dt=None, end_dt=None, logger=None):
+def getData(out_p=None, start_dt=None, end_dt=None, region_setting=0, logger=None):
     """
     Get and save smell and ESDR data
 
@@ -14,8 +14,9 @@ def getData(out_p=None, start_dt=None, end_dt=None, logger=None):
         out_p: the path for storing ESDR and smell data (optional)
         start_dt (datetime.datetime object): starting date that you want to get the data
         end_dt (datetime.datetime object): ending date that you want to get the data
-        logger: the python logger created by the generateLogger() function 
-    
+        region_setting: setting of the region that we want to get the smell reports
+        logger: the python logger created by the generateLogger() function
+
     Output:
         df_esdr_array_raw (list of pandas.DataFrame): a list of raw ESDR data for each channel
         df_smell_raw (pandas.DataFrame): raw smell data
@@ -92,8 +93,12 @@ def getData(out_p=None, start_dt=None, end_dt=None, logger=None):
     end_time = datetimeToEpochtime(end_dt) / 1000 # ESDR uses seconds
     df_esdr_array_raw = getEsdrData(esdr_source, start_time=start_time, end_time=end_time)
 
-    # Get smell reports
-    df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time)
+    if region_setting == 0:
+        # Get smell reports (for the Smell PGH paper, only contains a certain zipcodes)
+        df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time)
+    else:
+        # Get smell reports (for general tasks, contains data from a wider geographical region)
+        df_smell_raw = getSmellReports(start_time=start_time, end_time=end_time, allegheny_county=True)
 
     # Check directory and save file
     if out_p is not None:

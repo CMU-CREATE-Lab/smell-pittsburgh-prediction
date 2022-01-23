@@ -19,8 +19,17 @@ def main(argv):
     # NOTE: if is_regr is changed, you need to run the computeFeatures function again to generate new features
     is_regr = False # False for classification, True for regression
     smell_thr = 40 # threshold to define a smell event
+
+    # The starting and ending date for the data used in the Smell PGH paper
     start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
     end_dt = datetime(2018, 9, 30, 0, tzinfo=pytz.timezone("US/Eastern"))
+    region_setting = 0
+
+    # The starting and ending data for the later second release of the dataset
+    # (this version contains more zipcodes than the previous version)
+    #start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
+    #end_dt = datetime(2022, 1, 23, 0, tzinfo=pytz.timezone("US/Eastern"))
+    #region_setting = 1
 
     # Set mode
     get_data, preprocess_data, analyze_data, compute_features, cross_validation = False, False, False, False, False
@@ -48,7 +57,7 @@ def main(argv):
     # Get data
     # OUTPUT: raw esdr and raw smell data
     if get_data:
-        getData(out_p=[p+"esdr_raw/",p+"smell_raw.csv"], start_dt=start_dt, end_dt=end_dt)
+        getData(out_p=[p+"esdr_raw/",p+"smell_raw.csv"], start_dt=start_dt, end_dt=end_dt, region_setting=region_setting)
 
     # Preprocess data
     # INPUT: raw esdr and raw smell data
