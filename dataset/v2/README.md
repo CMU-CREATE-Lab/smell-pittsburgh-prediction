@@ -10,7 +10,17 @@ Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy S
 
 A similar previous version [v1 dataset](/dataset/v1) (with a smaller number of zipcodes and time range) was used for the data analysis in the above paper. This version v2 dataset has not been analyzed and remains an open challenge.
 
-Information about the metadata (e.g., latitude, longitude, feed ID, channel name) of the sensor monitoring stations used in this dataset can be found on the [ESDR data visualization page](https://environmentaldata.org/#time=1642345888.849,1642950688.849&cursor=1642730480.675&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.445982705178,-79.96401491796037&zoom=12). ESDR means the [Environmental Sensor Data Repository](https://esdr.cmucreatelab.org/), a service for hosting environmental data. The feed ID and the channel name in the [code for gettting the sensor data](/py/prediction/getData.py) corresponds to the metadata on the visualization page.
+Below are descriptions about what each column means in the file that contains smell reports (the "smell_raw.csv"):
+- EpochTime: the Epoch timestamp when the smell is experienced
+- skewed_latitude: the skewed latitude of the location where the smell is experienced 
+- skewed_longitude: the skewed longitude of the location where the smell is experienced
+- smell_value: the self-reported rating of the smell (described on the [Smell Pittsburgh website](https://smellpgh.org/how_it_works)) 
+- smell_description: the self-reported description of the smell (e.g., woodsmoke)
+- feelings_symptoms: the self-reported symptoms that may caused by the source of the smell (e.g., eye irritation)
+- additional_comments: the self-provided comment to the agency that receives the smell report
+- zipcode: the zipcode of the location where the smell is experienced
+
+Information about the metadata (e.g., latitude, longitude, feed ID, channel name) of the sensor monitoring stations used in this dataset (all files in the "esdr_raw" folder) can be found on the [ESDR data visualization page](https://environmentaldata.org/#time=1642345888.849,1642950688.849&cursor=1642730480.675&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.445982705178,-79.96401491796037&zoom=12). ESDR means the [Environmental Sensor Data Repository](https://esdr.cmucreatelab.org/), a service for hosting environmental data. The feed ID and the channel name in the [code for gettting the sensor data](/py/prediction/getData.py) corresponds to the metadata on the visualization page.
 
 ## Important
 - The Lawrenceville ACHD sensor (Feed ID 26) does not have PM2.5 data since the end of year 2020, which means that file "esdr_raw/Feed_26_Lawrenceville_ACHD.csv" has a lot of missing data on year 2021 and 2022.
