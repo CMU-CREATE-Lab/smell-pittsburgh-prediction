@@ -1,6 +1,6 @@
 # smell-pittsburgh-dataset-v1
 
-This is the second version of the Smell Pittsburgh dataset from 10/31/2016 (month/day/year) to 9/30/2018, including the following zipcodes in the Pittsburgh region in Pennsylvania, USA:
+This is the first version of the Smell Pittsburgh dataset from 10/31/2016 (month/day/year) to 9/30/2018, including the following zipcodes in the Pittsburgh region in Pennsylvania, USA:
 
 15221, 15218, 15222, 15219, 15201, 15224, 15213, 15232, 15206, 15208, 15217, 15207, 15260, 15104
 
