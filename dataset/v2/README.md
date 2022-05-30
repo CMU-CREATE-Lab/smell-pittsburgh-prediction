@@ -20,7 +20,97 @@ Below are descriptions about what each column means in the file that contains sm
 - additional_comments: the self-provided comment to the agency that receives the smell report
 - zipcode: the zipcode of the location where the smell is experienced
 
-Information about the metadata (e.g., latitude, longitude, feed ID, channel name) of the sensor monitoring stations used in this dataset (all files in the "esdr_raw" folder) can be found on the [ESDR data visualization page](https://environmentaldata.org/#time=1642345888.849,1642950688.849&cursor=1642730480.675&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.445982705178,-79.96401491796037&zoom=12). ESDR means the [Environmental Sensor Data Repository](https://esdr.cmucreatelab.org/), a service for hosting environmental data. The feed ID and the channel name in the [code for gettting the sensor data](/py/prediction/getData.py) corresponds to the metadata on the visualization page.
+Information about the metadata (e.g., latitude, longitude, feed ID, channel name) of the sensor monitoring stations used in this dataset (all files in the "esdr_raw" folder) can be found on the [ESDR data visualization page](https://environmentaldata.org/#time=1642345888.849,1642950688.849&cursor=1642730480.675&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.445982705178,-79.96401491796037&zoom=12). ESDR means the [Environmental Sensor Data Repository](https://esdr.cmucreatelab.org/), a service for hosting environmental data. The feed ID and the channel name in the [code for gettting the sensor data](/py/prediction/getData.py) corresponds to the metadata on the visualization page. More description about the sensor data is in the next section.
 
-## Important
+## Description of the air quality sensor data
+The files in the "esdr_raw" folder contains tables of air quality data from multiple monitoring stations. Every air quality monitoring station has a unique feed ID. Some stations are operated by the municipality (which is ACHD, the Allegany County Health Department), and some of them are operated by local citizens. Every feed has several channels, for example, H2S. To find the metadata of an air quality monitoring station, go to the following website to search using the feed ID.
+
+- Environmental Data Website: [https://environmentaldata.org/](https://environmentaldata.org/)
+
+The above-mentioned website is a service that collects and visualizes environmental sensor measurements. The following screenshot shows the search result of feed ID 28, which is a monitoring station south of Pittsburgh. This monitoring station is near a major pollution source, which is the Clairton Mill Works which belongs to the United States Steel Corporation. The raw data from the monitoring station is regularly published by the ACHD.
+
+![module-3-data.png](esdr-explain.png)
+
+The following list shows the URL with metadata for available air quality and weather variables in the dataset. The variable names (i.e., column names) are provided under the corresponding feed. Notice that some monitoring stations were replaced by others at some time point, so some variables in the dataset represent the combination of multiple channels or feeds, which is explained in the comments in the [Python script for getting data](/py/prediction/getData.py).
+
+- [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.OZONE_PPM,26.PM10B_UG_M3,26.SONICWD_DEG,26.SONICWS_MPH,26.SIGTHETA_DEG,26.PM25T_UG_M3,26.PM25B_UG_M3&time=1543765861.129,1654637511.389&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=26+Lawrenceville+ACHD)
+  - 3.feed_26.OZONE_PPM
+  - 3.feed_26.PM25B_UG_M3
+  - 3.feed_26.PM10B_UG_M3
+  - 3.feed_26.SONICWS_MPH
+  - 3.feed_26.SONICWD_DEG
+  - 3.feed_26.SIGTHETA_DEG
+- [Feed 28: Liberty ACHD](https://environmentaldata.org/#channels=28.H2S_PPM,28.SO2_PPM,28.SIGTHETA_DEG,28.SONICWD_DEG,28.SONICWS_MPH&time=1642138641.499,1647012906.580&cursor=1644284699.505&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=28+Liberty+ACHD)
+  - 3.feed_28.H2S_PPM
+  - 3.feed_28.SO2_PPM
+  - 3.feed_28.SIGTHETA_DEG
+  - 3.feed_28.SONICWD_DEG
+  - 3.feed_28.SONICWS_MPH
+- [Feed 23: Flag Plaza ACHD](https://environmentaldata.org/#channels=23.CO_PPM,23.CO_PPB,23.PM10_UG_M3&time=1458442353.079,1660415704.317&cursor=1568832646.266&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=23+Flag+Plaza+ACHD)
+  - 3.feed_23.CO_PPM
+  - 3.feed_23.PM10_UG_M3
+- Combination of the variables from [Feed 43: Parkway East ACHD](https://environmentaldata.org/#channels=43.CO_PPB,43.NO2_PPB,43.NOX_PPB,43.NO_PPB,43.PM25T_UG_M3,43.SONICWD_DEG,43.SIGTHETA_DEG,43.SONICWS_MPH&time=1379419289.041,1589225975.694&cursor=1463724202.605&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=43+Parkway+East+ACHD) and [Feed 11067: Parkway East Near Road ACHD](https://environmentaldata.org/#channels=11067.CO_PPB,11067.NO2_PPB,11067.NOX_PPB,11067.NO_PPB,11067.PM25T_UG_M3,11067.SIGTHETA_DEG,11067.SONICWD_DEG,11067.SONICWS_MPH&time=1637666979.527,1648021796.306&cursor=1646439228.154&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=11067+Parkway+East)
+  - 3.feed_11067.CO_PPB..3.feed_43.CO_PPB
+  - 3.feed_11067.NO2_PPB..3.feed_43.NO2_PPB
+  - 3.feed_11067.NOX_PPB..3.feed_43.NOX_PPB
+  - 3.feed_11067.NO_PPB..3.feed_43.NO_PPB
+  - 3.feed_11067.PM25T_UG_M3..3.feed_43.PM25T_UG_M3
+  - 3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG
+  - 3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG
+  - 3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH
+- [Feed 1: Avalon ACHD](https://environmentaldata.org/#channels=1.H2S_PPM,1.PM25B_UG_M3,1.PM25T_UG_M3,1.SO2_PPM,1.SONICWD_DEG,1.SONICWS_MPH,1.SIGTHETA_DEG&time=1349500933.050,1681643166.416&cursor=1626846421.437&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=1+Avalon+ACHD)
+  - 3.feed_1.PM25B_UG_M3..3.feed_1.PM25T_UG_M3
+  - 3.feed_1.SO2_PPM
+  - 3.feed_1.H2S_PPM
+  - 3.feed_1.SIGTHETA_DEG
+  - 3.feed_1.SONICWD_DEG
+  - 3.feed_1.SONICWS_MPH
+- [Feed 27: Lawrenceville 2 ACHD](https://environmentaldata.org/#channels=27.NO_PPB,27.NOY_PPB,27.CO_PPB,27.SO2_PPB&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=27+Lawrenceville+2+ACHD)
+  - 3.feed_27.NO_PPB
+  - 3.feed_27.NOY_PPB
+  - 3.feed_27.CO_PPB
+  - 3.feed_27.SO2_PPB
+- [Feed 29: Liberty 2 ACHD](https://environmentaldata.org/#channels=29.PM10_UG_M3,29.PM25T_UG_M3,29.PM25_UG_M3&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=29+Liberty+2+ACHD)
+  - 3.feed_29.PM10_UG_M3
+  - 3.feed_29.PM25_UG_M3
+- [Feed 3: North Braddock ACHD](https://environmentaldata.org/#channels=3.SO2_PPM,3.SONICWD_DEG,3.SONICWS_MPH,3.SIGTHETA_DEG,3.PM10B_UG_M3&time=1349500933.050,1681643166.416&cursor=1669204641.482&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3+North+Braddock+ACHD)
+  - 3.feed_3.SO2_PPM
+  - 3.feed_3.SONICWD_DEG
+  - 3.feed_3.SONICWS_MPH
+  - 3.feed_3.SIGTHETA_DEG
+  - 3.feed_3.PM10B_UG_M3
+- [Feed 3506: BAPC 301 39TH STREET BLDG AirNow](https://environmentaldata.org/#channels=3506.PM2_5,3506.OZONE&time=1349500933.050,1681643166.416&cursor=1573730558.207&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3506+BAPC+301+39TH+STREET+BLDG+AirNow)
+  - 3.feed_3506.PM2_5
+  - 3.feed_3506.OZONE
+- [Feed 5975: Parkway East AirNow](https://environmentaldata.org/#channels=5975.PM2_5&time=1349500933.050,1681643166.416&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=5975+Parkway+East+AirNow)
+  - 3.feed_5975.PM2_5
+- [Feed 3508: South Allegheny High School AirNow](https://environmentaldata.org/#channels=3508.PM2_5&time=1349500933.050,1681643166.416&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3508+South+Allegheny+High+School+AirNow)
+  - 3.feed_3508.PM2_5
+- [Feed 24: Glassport High Street ACHD](https://environmentaldata.org/#channels=24.PM10_UG_M3&time=1349500933.050,1681643166.416&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=24+Glassport+High+Street+ACHD)
+  - 3.feed_24.PM10_UG_M3
+
+Below are explanations about the suffix of the variable names in the above list:
+
+- SO2_PPM: sulfur dioxide in ppm (parts per million)
+- SO2_PPB: sulfur dioxide in ppb (parts per billion)
+- H2S_PPM: hydrogen sulfide in ppm
+- SIGTHETA_DEG: standard deviation of the wind direction
+- SONICWD_DEG: wind direction (the direction from which it originates) in degrees
+- SONICWS_MPH: wind speed in mph (miles per hour)
+- CO_PPM: carbon monoxide in ppm
+- CO_PPB: carbon monoxide in ppb
+- PM10_UG_M3: particulate matter (PM10) in micrograms per cubic meter
+- PM10B_UG_M3: same as PM10_UG_M3
+- PM25_UG_M3: fine particulate matter (PM2.5) in micrograms per cubic meter
+- PM25T_UG_M3: same as PM25_UG_M3
+- PM2_5: same as PM25_UG_M3
+- PM25B_UG_M3: same as PM25_UG_M3
+- NO_PPB: nitric oxide in ppb
+- NO2_PPB: nitrogen dioxide in ppb
+- NOX_PPB: sum of of NO and NO2 in ppb 
+- NOY_PPB: sum of all oxidized atmospheric odd-nitrogen species in ppb
+- OZONE_PPM: ozone (or trioxygen) in ppm
+- OZONE: same as OZONE_PPM
+
+## Important notes
 - The Lawrenceville ACHD sensor (Feed ID 26) does not have PM2.5 data since the end of year 2020, which means that file "esdr_raw/Feed_26_Lawrenceville_ACHD.csv" has a lot of missing data on year 2021 and 2022.
