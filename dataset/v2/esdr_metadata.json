@@ -2,70 +2,84 @@
   "id": 1,
   "name": "Avalon ACHD",
   "latitude": 40.499767,
-  "longitude": -80.071337
+  "longitude": -80.071337,
+  "zipcode": "15202"
 }, {
   "id": 3,
   "name": "North Braddock ACHD",
   "latitude": 40.402328,
-  "longitude": -79.860973
+  "longitude": -79.860973,
+  "zipcode": "15104"
 }, {
   "id": 23,
   "name": "Flag Plaza ACHD",
   "latitude": 40.443367,
-  "longitude": -79.990293
+  "longitude": -79.990293,
+  "zipcode": "15219"
 }, {
   "id": 24,
   "name": "Glassport High Street ACHD",
   "latitude": 40.326008,
-  "longitude": -79.881703
+  "longitude": -79.881703,
+  "zipcode": "15045"
 }, {
   "id": 26,
   "name": "Lawrenceville ACHD",
   "latitude": 40.46542,
-  "longitude": -79.960757
+  "longitude": -79.960757,
+  "zipcode": "15201"
 }, {
   "id": 27,
   "name": "Lawrenceville 2 ACHD",
   "latitude": 40.46542,
-  "longitude": -79.960757
+  "longitude": -79.960757,
+  "zipcode": "15201"
 }, {
   "id": 28,
   "name": "Liberty ACHD",
   "latitude": 40.323768,
-  "longitude": -79.868062
+  "longitude": -79.868062,
+  "zipcode": "15133"
 }, {
   "id": 29,
   "name": "Liberty 2 ACHD",
   "latitude": 40.323768,
-  "longitude": -79.868062
+  "longitude": -79.868062,
+  "zipcode": "15133"
 }, {
   "id": 43,
   "name": "Parkway East Near Road ACHD",
   "latitude": 40.43743055555555,
-  "longitude": -79.86357222222222
+  "longitude": -79.86357222222222,
+  "zipcode": "15221"
 }, {
   "id": 3506,
   "name": "BAPC 301 39TH STREET BLDG #7 AirNow",
   "latitude": 40.4656,
-  "longitude": -79.9611
+  "longitude": -79.9611,
+  "zipcode": "15201"
 }, {
   "id": 3508,
   "name": "South Allegheny High School AirNow",
   "latitude": 40.323898,
-  "longitude": -79.868301
+  "longitude": -79.868301,
+  "zipcode": "15133"
 }, {
   "id": 5975,
   "name": "Parkway East (Near Road) AirNow",
   "latitude": 40.437431,
-  "longitude": -79.863572
+  "longitude": -79.863572,
+  "zipcode": "15221"
 }, {
   "id": 11067,
   "name": "Parkway East ACHD",
   "latitude": 40.43743,
-  "longitude": -79.863572
+  "longitude": -79.863572,
+  "zipcode": "15221"
 }, {
   "id": 59665,
   "name": "Pittsburgh ACHD",
   "latitude": 40.4656,
-  "longitude": -79.9611
+  "longitude": -79.9611,
+  "zipcode": "15201"
 }]
