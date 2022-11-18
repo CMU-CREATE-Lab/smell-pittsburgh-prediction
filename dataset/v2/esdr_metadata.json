@@ -1,0 +1,71 @@
+[{
+  "id": 1,
+  "name": "Avalon ACHD",
+  "latitude": 40.499767,
+  "longitude": -80.071337
+}, {
+  "id": 3,
+  "name": "North Braddock ACHD",
+  "latitude": 40.402328,
+  "longitude": -79.860973
+}, {
+  "id": 23,
+  "name": "Flag Plaza ACHD",
+  "latitude": 40.443367,
+  "longitude": -79.990293
+}, {
+  "id": 24,
+  "name": "Glassport High Street ACHD",
+  "latitude": 40.326008,
+  "longitude": -79.881703
+}, {
+  "id": 26,
+  "name": "Lawrenceville ACHD",
+  "latitude": 40.46542,
+  "longitude": -79.960757
+}, {
+  "id": 27,
+  "name": "Lawrenceville 2 ACHD",
+  "latitude": 40.46542,
+  "longitude": -79.960757
+}, {
+  "id": 28,
+  "name": "Liberty ACHD",
+  "latitude": 40.323768,
+  "longitude": -79.868062
+}, {
+  "id": 29,
+  "name": "Liberty 2 ACHD",
+  "latitude": 40.323768,
+  "longitude": -79.868062
+}, {
+  "id": 43,
+  "name": "Parkway East Near Road ACHD",
+  "latitude": 40.43743055555555,
+  "longitude": -79.86357222222222
+}, {
+  "id": 3506,
+  "name": "BAPC 301 39TH STREET BLDG #7 AirNow",
+  "latitude": 40.4656,
+  "longitude": -79.9611
+}, {
+  "id": 3508,
+  "name": "South Allegheny High School AirNow",
+  "latitude": 40.323898,
+  "longitude": -79.868301
+}, {
+  "id": 5975,
+  "name": "Parkway East (Near Road) AirNow",
+  "latitude": 40.437431,
+  "longitude": -79.863572
+}, {
+  "id": 11067,
+  "name": "Parkway East ACHD",
+  "latitude": 40.43743,
+  "longitude": -79.863572
+}, {
+  "id": 59665,
+  "name": "Pittsburgh ACHD",
+  "latitude": 40.4656,
+  "longitude": -79.9611
+}]
