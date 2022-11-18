@@ -10,6 +10,10 @@ This dataset is released under the Creative Commons Zero (CC0) license. Please f
 
 Yen-Chia Hsu, Jennifer Cross, Paul Dille, Michael Tasota, Beatrice Dias, Randy Sargent, Ting-Hao (Kenneth) Huang, and Illah Nourbakhsh. 2020. Smell Pittsburgh: Engaging Community Citizen Science for Air Quality. ACM Transactions on Interactive Intelligent Systems. 10, 4, Article 32. DOI:https://doi.org/10.1145/3369397. Preprint:https://arxiv.org/pdf/1912.11936.pdf.
 
+One thing to keep in mind is that the above paper only uses a part of the zipcodes, listing below:
+
+15221, 15218, 15222, 15219, 15201, 15224, 15213, 15232, 15206, 15208, 15217, 15207, 15260, 15104
+
 A similar previous version [v1 dataset](/dataset/v1) (with a smaller number of zipcodes and time range) was used for the data analysis in the above paper. This version v2 dataset has not been analyzed and remains an open challenge.
 
 Below are descriptions about what each column means in the file that contains smell reports (the "smell_raw.csv"):

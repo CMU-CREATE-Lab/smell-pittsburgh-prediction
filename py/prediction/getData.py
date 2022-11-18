@@ -36,11 +36,13 @@ def getData(out_p=None, start_dt=None, end_dt=None, region_setting=0, logger=Non
     # Feed 5975: Parkway East AirNow
     # Feed 3508: South Allegheny High School AirNow
     # Feed 24: Glassport High Street ACHD
+    # Feed 11067: Parkway East Near Road ACHD
+    # Feed 59665: Pittsburgh ACHD
     esdr_source_names = [
         "Feed_1_Avalon_ACHD_PM",
         "Feed_1_Avalon_ACHD_others",
         "Feed_26_Lawrenceville_ACHD",
-        "Feed_26_Lawrenceville_ACHD_PM25",
+        "Feed_26_and_Feed_59665_Lawrenceville_ACHD_PM25",
         "Feed_27_Lawrenceville_2_ACHD",
         "Feed_28_Liberty_ACHD",
         "Feed_29_Liberty_2_ACHD_PM10",
@@ -65,7 +67,8 @@ def getData(out_p=None, start_dt=None, end_dt=None, region_setting=0, logger=Non
         [{"feed": "26", "channel": "OZONE_PPM,PM10B_UG_M3,SONICWS_MPH,SONICWD_DEG,SIGTHETA_DEG"}],
         [
             {"feed": "26", "channel": "PM25B_UG_M3"},
-            {"feed": "26", "channel": "PM25T_UG_M3"}
+            {"feed": "26", "channel": "PM25T_UG_M3"},
+            {"feed": "59665", "channel": "PM25_640_UG_M3"}
         ],
         [{"feed": "27", "channel": "NO_PPB,NOY_PPB,CO_PPB,SO2_PPB"}],
         [{"feed": "28", "channel": "H2S_PPM,SO2_PPM,SIGTHETA_DEG,SONICWD_DEG,SONICWS_MPH"}],
