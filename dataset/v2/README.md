@@ -110,6 +110,7 @@ Below are explanations about the suffix of the variable names in the above list:
 - PM10B_UG_M3: same as PM10_UG_M3
 - PM25_UG_M3: fine particulate matter (PM2.5) in micrograms per cubic meter
 - PM25T_UG_M3: same as PM25_UG_M3
+- PM25_640_UG_M3: same as PM25_UG_M3
 - PM2_5: same as PM25_UG_M3
 - PM25B_UG_M3: same as PM25_UG_M3
 - NO_PPB: nitric oxide in ppb
