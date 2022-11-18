@@ -49,7 +49,7 @@ cd smell-pittsburgh-prediction/py/prediction/
 python main.py pipeline
 
 # For each step in the pipeline
-python main.py data # get data
+python main.py data # get data (you do not need to run this if you have the dataset ready, as mentioned below in the Dataset section)
 python main.py preprocess # preprocess data
 python main.py feature # extract features
 python main.py validation # perform cross validation
@@ -95,8 +95,14 @@ sudo crontab -e
 The web/GeoHeatmap.html visualizes distribution of smell reports by zipcodes. You can open this by using a browser, such as Google Chrome.
 
 # Dataset
-There are two datasets in this repository. [Version one](/dataset/v1) is the dataset that we used in the paper. [Version two](/dataset/v2) is an updated dataset that covers a wider range of geographical regions and time range.
-
+There are two datasets in this repository. [Version one](/dataset/v1) is the dataset that we used in the paper. [Version two](/dataset/v2) is an updated dataset that covers a wider range of geographical regions and time range. To copy the data, use the following command:
+```sh
+cd smell-pittsburgh-prediction/py/prediction
+mkdir data_main
+cd data_main
+cp -R ../../../dataset/v2/esdr_raw/ .
+cp ../../../dataset/v2/smell_raw.csv .
+```
 To get recent data, change the end_dt (ending date time) variable in the main.py file and then run the following:
 ```sh
 python main.py data
