@@ -39,13 +39,14 @@ The above-mentioned website is a service that collects and visualizes environmen
 
 The following list shows the URL with metadata for available air quality and weather variables in the dataset. The variable names (i.e., column names) are provided under the corresponding feed. Notice that some monitoring stations were replaced by others at some time point, so some variables in the dataset represent the combination of multiple channels or feeds, which is explained in the comments in the [Python script for getting data](/py/prediction/getData.py).
 
-- [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.OZONE_PPM,26.PM10B_UG_M3,26.SONICWD_DEG,26.SONICWS_MPH,26.SIGTHETA_DEG,26.PM25T_UG_M3,26.PM25B_UG_M3&time=1543765861.129,1654637511.389&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=26+Lawrenceville+ACHD)
+- [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.OZONE_PPM,26.PM10B_UG_M3,26.SONICWD_DEG,26.SONICWS_MPH,26.SIGTHETA_DEG&time=1543765861.129,1654637511.389&cursor=1631224560.721&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=26+Lawrenceville+ACHD)
   - 3.feed_26.OZONE_PPM
-  - 3.feed_26.PM25B_UG_M3
   - 3.feed_26.PM10B_UG_M3
   - 3.feed_26.SONICWS_MPH
   - 3.feed_26.SONICWD_DEG
   - 3.feed_26.SIGTHETA_DEG
+- Combination of the variables from [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.PM25T_UG_M3,26.PM25B_UG_M3&time=1528914977.244,1676029685.660&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.444856858961735,-79.91911821671611&zoom=12&search=26+Lawrenceville+ACHD) and [Feed 59665: Pittsburgh ACHD](https://environmentaldata.org/#channels=59665.PM25_640_UG_M3&time=1528914977.244,1676029685.660&cursor=1555772430.824&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.456071859273884,-79.92718630143291&zoom=12&search=59665+Pittsburgh+ACHD)
+  - 3.feed_26.PM25B_UG_M3..3.feed_26.PM25T_UG_M3..3.feed_59665.PM25_640_UG_M3
 - [Feed 28: Liberty ACHD](https://environmentaldata.org/#channels=28.H2S_PPM,28.SO2_PPM,28.SIGTHETA_DEG,28.SONICWD_DEG,28.SONICWS_MPH&time=1642138641.499,1647012906.580&cursor=1644284699.505&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=28+Liberty+ACHD)
   - 3.feed_28.H2S_PPM
   - 3.feed_28.SO2_PPM
@@ -117,6 +118,3 @@ Below are explanations about the suffix of the variable names in the above list:
 - NOY_PPB: sum of all oxidized atmospheric odd-nitrogen species in ppb
 - OZONE_PPM: ozone (or trioxygen) in ppm
 - OZONE: same as OZONE_PPM
-
-## Important notes
-- The Lawrenceville ACHD sensor (Feed ID 26) does not have PM2.5 data since the end of year 2020, which means that file "esdr_raw/Feed_26_Lawrenceville_ACHD.csv" has a lot of missing data on year 2021 and 2022.
