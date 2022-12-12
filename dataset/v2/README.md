@@ -65,13 +65,14 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG
   - 3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG
   - 3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH
-- [Feed 1: Avalon ACHD](https://environmentaldata.org/#channels=1.H2S_PPM,1.PM25B_UG_M3,1.PM25T_UG_M3,1.SO2_PPM,1.SONICWD_DEG,1.SONICWS_MPH,1.SIGTHETA_DEG&time=1349500933.050,1681643166.416&cursor=1626846421.437&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=1+Avalon+ACHD)
+- [Feed 1: Avalon ACHD](https://environmentaldata.org/#channels=1.H2S_PPM,1.PM25B_UG_M3,1.PM25T_UG_M3,1.SO2_PPM,1.SONICWD_DEG,1.SONICWS_MPH,1.SIGTHETA_DEG,1.PM25_640_UG_M3&time=1439101026.565,1668945079.757&cursor=1624322766.978&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.39669628676639,-79.95354346332883&zoom=11&search=1+Avalon+ACHD)
   - 3.feed_1.PM25B_UG_M3..3.feed_1.PM25T_UG_M3
   - 3.feed_1.SO2_PPM
   - 3.feed_1.H2S_PPM
   - 3.feed_1.SIGTHETA_DEG
   - 3.feed_1.SONICWD_DEG
   - 3.feed_1.SONICWS_MPH
+  - (Important: this feed has a lot of missing data since 2020, except PM25)
 - [Feed 27: Lawrenceville 2 ACHD](https://environmentaldata.org/#channels=27.NO_PPB,27.NOY_PPB,27.CO_PPB,27.SO2_PPB&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=27+Lawrenceville+2+ACHD)
   - 3.feed_27.NO_PPB
   - 3.feed_27.NOY_PPB
