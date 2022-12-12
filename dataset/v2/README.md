@@ -81,7 +81,7 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_27.SO2_PPB
 - [Feed 29: Liberty 2 ACHD](https://environmentaldata.org/#channels=29.PM10_UG_M3,29.PM25T_UG_M3,29.PM25_UG_M3&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=29+Liberty+2+ACHD)
   - 3.feed_29.PM10_UG_M3
-  - 3.feed_29.PM25_UG_M3
+  - 3.feed_29.PM25_UG_M3..3.feed_29.PM25T_UG_M3
 - [Feed 3: North Braddock ACHD](https://environmentaldata.org/#channels=3.SO2_PPM,3.SONICWD_DEG,3.SONICWS_MPH,3.SIGTHETA_DEG,3.PM10B_UG_M3,3.PM10_640_UG_M3&time=1340224481.028,1672366714.394&cursor=1617613021.973&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3+North+Braddock+ACHD)
   - 3.feed_3.SO2_PPM
   - 3.feed_3.SONICWD_DEG
