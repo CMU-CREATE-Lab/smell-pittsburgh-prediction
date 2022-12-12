@@ -54,8 +54,9 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_28.SONICWD_DEG
   - 3.feed_28.SONICWS_MPH
 - [Feed 23: Flag Plaza ACHD](https://environmentaldata.org/#channels=23.CO_PPM,23.CO_PPB,23.PM10_UG_M3&time=1458442353.079,1660415704.317&cursor=1568832646.266&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=23+Flag+Plaza+ACHD)
-  - 3.feed_23.CO_PPM
+  - 3.feed_23.CO_PPM..3.feed_23.CO_PPB
   - 3.feed_23.PM10_UG_M3
+  - (Important: the CO reading in this feed has a lot of missing data since 2020)
 - Combination of the variables from [Feed 43: Parkway East ACHD](https://environmentaldata.org/#channels=43.CO_PPB,43.NO2_PPB,43.NOX_PPB,43.NO_PPB,43.PM25T_UG_M3,43.SONICWD_DEG,43.SIGTHETA_DEG,43.SONICWS_MPH&time=1379419289.041,1589225975.694&cursor=1463724202.605&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=43+Parkway+East+ACHD) and [Feed 11067: Parkway East Near Road ACHD](https://environmentaldata.org/#channels=11067.CO_PPB,11067.NO2_PPB,11067.NOX_PPB,11067.NO_PPB,11067.PM25T_UG_M3,11067.SIGTHETA_DEG,11067.SONICWD_DEG,11067.SONICWS_MPH&time=1637666979.527,1648021796.306&cursor=1646439228.154&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=11067+Parkway+East)
   - 3.feed_11067.CO_PPB..3.feed_43.CO_PPB
   - 3.feed_11067.NO2_PPB..3.feed_43.NO2_PPB
