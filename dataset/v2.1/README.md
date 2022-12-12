@@ -35,7 +35,7 @@ The files in the "esdr_raw" folder contains tables of air quality data from mult
 
 The above-mentioned website is a service that collects and visualizes environmental sensor measurements. The following screenshot shows the search result of feed ID 28, which is a monitoring station south of Pittsburgh. This monitoring station is near a major pollution source, which is the Clairton Mill Works which belongs to the United States Steel Corporation. The raw data from the monitoring station is regularly published by the ACHD.
 
-![module-3-data.png](esdr-explain.png)
+![esdr-explain.png](/dataset/v2/esdr-explain.png)
 
 The following list shows the URL with metadata for available air quality and weather variables in the dataset. The variable names (i.e., column names) are provided under the corresponding feed. Notice that some monitoring stations were replaced by others at some time point, so some variables in the dataset represent the combination of multiple channels or feeds, which is explained in the comments in the [Python script for getting data](/py/prediction/getData.py). Here is a [link to the locations of all the sensor stations](https://esdr.cmucreatelab.org/api/v1/feeds?fields=id,name,latitude,longitude&whereOr=id=26,id=59665,id=28,id=23,id=43,id=11067,id=1,id=27,id=29,id=3,id=3506,id=5975,id=3508,id=24) that are listed below. An archived location metadata can be found in the [esdr_metadata.json](/dataset/v2/esdr_metadata.json) file.
 
