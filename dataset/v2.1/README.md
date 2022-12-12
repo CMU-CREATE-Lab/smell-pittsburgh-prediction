@@ -1,4 +1,4 @@
-# smell-pittsburgh-dataset-v2
+# smell-pittsburgh-dataset-v2.1
 
 Smell Pittsburgh is a web-based application that crowdsources smell reports so we all can better track how odors from pollutants travel through the air across the Pittsburgh region. More information is on the [Smell Pittsburgh website](https://smellpgh.org).
 
@@ -39,14 +39,14 @@ The above-mentioned website is a service that collects and visualizes environmen
 
 The following list shows the URL with metadata for available air quality and weather variables in the dataset. The variable names (i.e., column names) are provided under the corresponding feed. Notice that some monitoring stations were replaced by others at some time point, so some variables in the dataset represent the combination of multiple channels or feeds, which is explained in the comments in the [Python script for getting data](/py/prediction/getData.py). Here is a [link to the locations of all the sensor stations](https://esdr.cmucreatelab.org/api/v1/feeds?fields=id,name,latitude,longitude&whereOr=id=26,id=59665,id=28,id=23,id=43,id=11067,id=1,id=27,id=29,id=3,id=3506,id=5975,id=3508,id=24) that are listed below. An archived location metadata can be found in the [esdr_metadata.json](/dataset/v2/esdr_metadata.json) file.
 
-- [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.OZONE_PPM,26.PM10B_UG_M3,26.SONICWD_DEG,26.SONICWS_MPH,26.SIGTHETA_DEG&time=1543765861.129,1654637511.389&cursor=1631224560.721&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=26+Lawrenceville+ACHD)
+- [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.OZONE_PPM,26.SONICWD_DEG,26.SONICWS_MPH,26.SIGTHETA_DEG&time=1543765861.129,1654637511.389&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=26+Lawrenceville+ACHD)
   - 3.feed_26.OZONE_PPM
-  - 3.feed_26.PM10B_UG_M3
   - 3.feed_26.SONICWS_MPH
   - 3.feed_26.SONICWD_DEG
   - 3.feed_26.SIGTHETA_DEG
-- Combination of the variables from [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.PM25T_UG_M3,26.PM25B_UG_M3&time=1528914977.244,1676029685.660&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.444856858961735,-79.91911821671611&zoom=12&search=26+Lawrenceville+ACHD) and [Feed 59665: Pittsburgh ACHD](https://environmentaldata.org/#channels=59665.PM25_640_UG_M3&time=1528914977.244,1676029685.660&cursor=1555772430.824&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.456071859273884,-79.92718630143291&zoom=12&search=59665+Pittsburgh+ACHD)
+- Combination of the variables from [Feed 26: Lawrenceville ACHD](https://environmentaldata.org/#channels=26.PM25T_UG_M3,26.PM25B_UG_M3,26.PM10B_UG_M3&time=1528914977.244,1676029685.660&cursor=1629830856.927&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.444856858961735,-79.91911821671611&zoom=12&search=26+Lawrenceville+ACHD) and [Feed 59665: Pittsburgh ACHD](https://environmentaldata.org/#channels=59665.PM25_640_UG_M3,59665.PM10_640_UG_M3&time=1528914977.244,1676029685.660&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.456071859273884,-79.92718630143291&zoom=12&search=59665+Pittsburgh+ACHD)
   - 3.feed_26.PM25B_UG_M3..3.feed_26.PM25T_UG_M3..3.feed_59665.PM25_640_UG_M3
+  - 3.feed_26.PM10B_UG_M3..3.feed_26.PM10_640_UG_M3
 - [Feed 28: Liberty ACHD](https://environmentaldata.org/#channels=28.H2S_PPM,28.SO2_PPM,28.SIGTHETA_DEG,28.SONICWD_DEG,28.SONICWS_MPH&time=1642138641.499,1647012906.580&cursor=1644284699.505&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=28+Liberty+ACHD)
   - 3.feed_28.H2S_PPM
   - 3.feed_28.SO2_PPM
@@ -54,8 +54,9 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_28.SONICWD_DEG
   - 3.feed_28.SONICWS_MPH
 - [Feed 23: Flag Plaza ACHD](https://environmentaldata.org/#channels=23.CO_PPM,23.CO_PPB,23.PM10_UG_M3&time=1458442353.079,1660415704.317&cursor=1568832646.266&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=23+Flag+Plaza+ACHD)
-  - 3.feed_23.CO_PPM
+  - 3.feed_23.CO_PPM..3.feed_23.CO_PPB
   - 3.feed_23.PM10_UG_M3
+  - (Important: the CO reading in this feed has a lot of missing data since 2020)
 - Combination of the variables from [Feed 43: Parkway East ACHD](https://environmentaldata.org/#channels=43.CO_PPB,43.NO2_PPB,43.NOX_PPB,43.NO_PPB,43.PM25T_UG_M3,43.SONICWD_DEG,43.SIGTHETA_DEG,43.SONICWS_MPH&time=1379419289.041,1589225975.694&cursor=1463724202.605&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=43+Parkway+East+ACHD) and [Feed 11067: Parkway East Near Road ACHD](https://environmentaldata.org/#channels=11067.CO_PPB,11067.NO2_PPB,11067.NOX_PPB,11067.NO_PPB,11067.PM25T_UG_M3,11067.SIGTHETA_DEG,11067.SONICWD_DEG,11067.SONICWS_MPH&time=1637666979.527,1648021796.306&cursor=1646439228.154&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=11067+Parkway+East)
   - 3.feed_11067.CO_PPB..3.feed_43.CO_PPB
   - 3.feed_11067.NO2_PPB..3.feed_43.NO2_PPB
@@ -65,13 +66,14 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_11067.SIGTHETA_DEG..3.feed_43.SIGTHETA_DEG
   - 3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG
   - 3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH
-- [Feed 1: Avalon ACHD](https://environmentaldata.org/#channels=1.H2S_PPM,1.PM25B_UG_M3,1.PM25T_UG_M3,1.SO2_PPM,1.SONICWD_DEG,1.SONICWS_MPH,1.SIGTHETA_DEG&time=1349500933.050,1681643166.416&cursor=1626846421.437&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=1+Avalon+ACHD)
-  - 3.feed_1.PM25B_UG_M3..3.feed_1.PM25T_UG_M3
+- [Feed 1: Avalon ACHD](https://environmentaldata.org/#channels=1.H2S_PPM,1.PM25B_UG_M3,1.PM25T_UG_M3,1.SO2_PPM,1.SONICWD_DEG,1.SONICWS_MPH,1.SIGTHETA_DEG,1.PM25_640_UG_M3&time=1439101026.565,1668945079.757&cursor=1624322766.978&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.39669628676639,-79.95354346332883&zoom=11&search=1+Avalon+ACHD)
+  - 3.feed_1.PM25B_UG_M3..3.feed_1.PM25T_UG_M3..3.feed_1.PM25_640_UG_M3
   - 3.feed_1.SO2_PPM
   - 3.feed_1.H2S_PPM
   - 3.feed_1.SIGTHETA_DEG
   - 3.feed_1.SONICWD_DEG
   - 3.feed_1.SONICWS_MPH
+  - (Important: this feed has a lot of missing data since 2020, except PM25)
 - [Feed 27: Lawrenceville 2 ACHD](https://environmentaldata.org/#channels=27.NO_PPB,27.NOY_PPB,27.CO_PPB,27.SO2_PPB&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=27+Lawrenceville+2+ACHD)
   - 3.feed_27.NO_PPB
   - 3.feed_27.NOY_PPB
@@ -79,13 +81,13 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_27.SO2_PPB
 - [Feed 29: Liberty 2 ACHD](https://environmentaldata.org/#channels=29.PM10_UG_M3,29.PM25T_UG_M3,29.PM25_UG_M3&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=29+Liberty+2+ACHD)
   - 3.feed_29.PM10_UG_M3
-  - 3.feed_29.PM25_UG_M3
-- [Feed 3: North Braddock ACHD](https://environmentaldata.org/#channels=3.SO2_PPM,3.SONICWD_DEG,3.SONICWS_MPH,3.SIGTHETA_DEG,3.PM10B_UG_M3&time=1349500933.050,1681643166.416&cursor=1669204641.482&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3+North+Braddock+ACHD)
+  - 3.feed_29.PM25_UG_M3..3.feed_29.PM25T_UG_M3
+- [Feed 3: North Braddock ACHD](https://environmentaldata.org/#channels=3.SO2_PPM,3.SONICWD_DEG,3.SONICWS_MPH,3.SIGTHETA_DEG,3.PM10B_UG_M3,3.PM10_640_UG_M3&time=1340224481.028,1672366714.394&cursor=1617613021.973&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3+North+Braddock+ACHD)
   - 3.feed_3.SO2_PPM
   - 3.feed_3.SONICWD_DEG
   - 3.feed_3.SONICWS_MPH
   - 3.feed_3.SIGTHETA_DEG
-  - 3.feed_3.PM10B_UG_M3
+  - 3.feed_3.PM10B_UG_M3..3.feed_3.PM10_640_UG_M3
 - [Feed 3506: BAPC 301 39TH STREET BLDG AirNow](https://environmentaldata.org/#channels=3506.PM2_5,3506.OZONE&time=1349500933.050,1681643166.416&cursor=1573730558.207&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3506+BAPC+301+39TH+STREET+BLDG+AirNow)
   - 3.feed_3506.PM2_5
   - 3.feed_3506.OZONE
