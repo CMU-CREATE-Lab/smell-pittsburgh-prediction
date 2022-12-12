@@ -66,7 +66,7 @@ The following list shows the URL with metadata for available air quality and wea
   - 3.feed_11067.SONICWD_DEG..3.feed_43.SONICWD_DEG
   - 3.feed_11067.SONICWS_MPH..3.feed_43.SONICWS_MPH
 - [Feed 1: Avalon ACHD](https://environmentaldata.org/#channels=1.H2S_PPM,1.PM25B_UG_M3,1.PM25T_UG_M3,1.SO2_PPM,1.SONICWD_DEG,1.SONICWS_MPH,1.SIGTHETA_DEG,1.PM25_640_UG_M3&time=1439101026.565,1668945079.757&cursor=1624322766.978&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.39669628676639,-79.95354346332883&zoom=11&search=1+Avalon+ACHD)
-  - 3.feed_1.PM25B_UG_M3..3.feed_1.PM25T_UG_M3
+  - 3.feed_1.PM25B_UG_M3..3.feed_1.PM25T_UG_M3..3.feed_1.PM25_640_UG_M3
   - 3.feed_1.SO2_PPM
   - 3.feed_1.H2S_PPM
   - 3.feed_1.SIGTHETA_DEG
@@ -81,12 +81,12 @@ The following list shows the URL with metadata for available air quality and wea
 - [Feed 29: Liberty 2 ACHD](https://environmentaldata.org/#channels=29.PM10_UG_M3,29.PM25T_UG_M3,29.PM25_UG_M3&time=1349500933.050,1681643166.416&cursor=1370680043.072&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=29+Liberty+2+ACHD)
   - 3.feed_29.PM10_UG_M3
   - 3.feed_29.PM25_UG_M3
-- [Feed 3: North Braddock ACHD](https://environmentaldata.org/#channels=3.SO2_PPM,3.SONICWD_DEG,3.SONICWS_MPH,3.SIGTHETA_DEG,3.PM10B_UG_M3&time=1349500933.050,1681643166.416&cursor=1669204641.482&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3+North+Braddock+ACHD)
+- [Feed 3: North Braddock ACHD](https://environmentaldata.org/#channels=3.SO2_PPM,3.SONICWD_DEG,3.SONICWS_MPH,3.SIGTHETA_DEG,3.PM10B_UG_M3,3.PM10_640_UG_M3&time=1340224481.028,1672366714.394&cursor=1617613021.973&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3+North+Braddock+ACHD)
   - 3.feed_3.SO2_PPM
   - 3.feed_3.SONICWD_DEG
   - 3.feed_3.SONICWS_MPH
   - 3.feed_3.SIGTHETA_DEG
-  - 3.feed_3.PM10B_UG_M3
+  - 3.feed_3.PM10B_UG_M3..3.feed_3.PM10_640_UG_M3
 - [Feed 3506: BAPC 301 39TH STREET BLDG AirNow](https://environmentaldata.org/#channels=3506.PM2_5,3506.OZONE&time=1349500933.050,1681643166.416&cursor=1573730558.207&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=3506+BAPC+301+39TH+STREET+BLDG+AirNow)
   - 3.feed_3506.PM2_5
   - 3.feed_3506.OZONE
