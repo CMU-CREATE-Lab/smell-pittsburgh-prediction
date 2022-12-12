@@ -1,4 +1,4 @@
-# smell-pittsburgh-dataset-v2
+# smell-pittsburgh-dataset-v2.1
 
 Smell Pittsburgh is a web-based application that crowdsources smell reports so we all can better track how odors from pollutants travel through the air across the Pittsburgh region. More information is on the [Smell Pittsburgh website](https://smellpgh.org).
 
