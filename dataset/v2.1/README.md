@@ -98,7 +98,7 @@ The following list shows the URL with metadata for available air quality and wea
 - [Feed 24: Glassport High Street ACHD](https://environmentaldata.org/#channels=24.PM10_UG_M3&time=1349500933.050,1681643166.416&plotHeight=5.000&plotAreaHeight=40.000&showFilters=true&showSettings=true&showResults=true&center=40.40529301325395,-79.93830235610686&zoom=11&search=24+Glassport+High+Street+ACHD)
   - 3.feed_24.PM10_UG_M3
 
-Below are explanations about the [suffix of the variable names](../v2/Acronyms_for_the_Daily_Summary_Report.pdf) in the above list:
+Below are explanations about the [suffix of the variable names](../v2/Acronyms_for_the_Daily_Summary_Report.pdf) in the above list. There is also an [online documentation of the air quality data](https://tools.wprdc.org/pages/air-quality-docs.html).
 
 - SO2_PPM: sulfur dioxide in ppm (parts per million)
 - SO2_PPB: sulfur dioxide in ppb (parts per billion)
