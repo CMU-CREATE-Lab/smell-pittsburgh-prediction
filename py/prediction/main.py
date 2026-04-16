@@ -10,6 +10,15 @@ import pytz
 
 
 def main(argv):
+    """
+    Usage: python main.py [mode]
+    Example: python main.py data
+    Example: python main.py preprocess
+    Example: python main.py feature
+    Example: python main.py validation
+    Example: python main.py analyze
+    Example: python main.py pipeline
+    """
     p = "data_main/"
     mode = None
     if len(argv) >= 2:
@@ -28,7 +37,7 @@ def main(argv):
     # The starting and ending data for the later second release of the dataset
     # (this version contains more zipcodes than the previous version)
     start_dt = datetime(2016, 10, 31, 0, tzinfo=pytz.timezone("US/Eastern"))
-    end_dt = datetime(2022, 12, 11, 0, tzinfo=pytz.timezone("US/Eastern"))
+    end_dt = datetime(2026, 4, 16, 0, tzinfo=pytz.timezone("US/Eastern"))
     region_setting = 1
 
     # Set mode

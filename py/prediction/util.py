@@ -437,7 +437,7 @@ def getSmellReportsV2(**options):
     df.set_index("observed_at", inplace=True)
     df.index.names = ["EpochTime"]
     df.rename(columns={"latitude": "skewed_latitude", "longitude": "skewed_longitude"}, inplace=True)
-    df.drop(["zip_code_id"], axis=1, inplace=True)
+    df.drop(columns=[c for c in ["zip_code_id"] if c in df.columns], inplace=True)
 
     # Return
     return df
